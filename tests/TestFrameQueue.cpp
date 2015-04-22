@@ -1,0 +1,287 @@
+#include "StdAfx.h"
+#ifdef WITH_TESTS
+#include "FrameQueue.h"
+
+namespace
+{
+
+int32_t s_trackedObjectsAlive = 0;
+
+struct TrackedObject
+{
+	TrackedObject()
+	{
+		++s_trackedObjectsAlive;
+	}
+	TrackedObject( const TrackedObject& )
+	{
+		++s_trackedObjectsAlive;
+	}
+	~TrackedObject()
+	{
+		--s_trackedObjectsAlive;
+	}
+};
+
+class KillThreadOnExit
+{
+public:
+	KillThreadOnExit( CcpThread&& thread )
+		:m_thread( std::forward<CcpThread>( thread ) )
+	{
+	}
+
+	~KillThreadOnExit()
+	{
+		if( m_thread.joinable() )
+		{
+			CcpKillThread( m_thread.native_handle() );
+			m_thread.detach();
+		}
+	}
+private:
+	KillThreadOnExit( const KillThreadOnExit& );
+	CcpThread m_thread;
+};
+
+template <typename Callable>
+class ThreadBlocksHelper
+{
+public:
+	ThreadBlocksHelper( Callable& callable )
+		:m_callable( callable ),
+		m_semaphore( 0, 1 )
+	{
+		m_blocked = 1;
+		m_thread = CcpThread( &ThreadBlocksHelper::ThreadFunc, this );
+	}
+
+	~ThreadBlocksHelper()
+	{
+		if( m_blocked )
+		{
+			CcpKillThread( m_thread.native_handle() );
+		}
+		m_thread.detach();
+	}
+
+	bool Wait( uint32_t timeoutMs )
+	{
+		return !m_semaphore.TimedWait( timeoutMs );
+	}
+private:
+	void ThreadFunc()
+	{
+		m_callable();
+		m_semaphore.Signal();
+		m_blocked = 0;
+	}
+	Callable& m_callable;
+	CcpSemaphore m_semaphore;
+	CcpThread m_thread;
+	CcpAtomic<uint32_t> m_blocked;
+};
+
+template <typename Callable>
+bool ThreadBlocks( Callable& callable, uint32_t timeoutInMs = 500 )
+{
+	ThreadBlocksHelper<Callable> helper( callable );
+	return helper.Wait( timeoutInMs );
+}
+
+}
+
+TEST( FrameQueue, CanCreateQueue )
+{
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	EXPECT_EQ( 0, queue.Size() );
+}
+
+TEST( FrameQueue, PickingFromEmptyQueueReturnsNull )
+{
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	EXPECT_EQ( nullptr, queue.Peek() );
+}
+
+TEST( FrameQueue, PickingLastItemFromEmptyQueueReturnsNull )
+{
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	EXPECT_EQ( nullptr, queue.PeekLast() );
+}
+
+TEST( FrameQueue, PushingItemIntoQueueIncreasesSize )
+{
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	queue.Push( CCP_NEW( "test value" ) int( 11 ) );
+	EXPECT_EQ( 1, queue.Size() );
+	queue.Push( CCP_NEW( "test value" ) int( 22 ) );
+	EXPECT_EQ( 2, queue.Size() );
+}
+
+TEST( FrameQueue, PickingItemInQueueReturnsFirstPushed )
+{
+	auto item1 = CCP_NEW( "test value" ) int( 11 );
+	auto item2 = CCP_NEW( "test value" ) int( 11 );
+
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	queue.Push( item1 );
+	queue.Push( item2 );
+	EXPECT_EQ( item1, queue.Peek() );
+}
+
+TEST( FrameQueue, PickLastReturnsFirstPushed )
+{
+	auto item1 = CCP_NEW( "test value" ) int( 11 );
+	auto item2 = CCP_NEW( "test value" ) int( 11 );
+
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	queue.Push( item1 );
+	queue.Push( item2 );
+	EXPECT_EQ( item2, queue.PeekLast() );
+}
+
+TEST( FrameQueue, QueueOwnsObjects )
+{
+	s_trackedObjectsAlive = 0;
+	auto item1 = CCP_NEW( "test value" ) TrackedObject;
+	EXPECT_EQ( 1, s_trackedObjectsAlive );
+	{
+		auto queue = FrameQueue<TrackedObject, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+		queue.Push( item1 );
+	}
+	EXPECT_EQ( 0, s_trackedObjectsAlive );
+}
+
+TEST( FrameQueue, PopRemovesItemFromQueue )
+{
+	auto queue = FrameQueue<TrackedObject, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	queue.Push( CCP_NEW( "test value" ) TrackedObject );
+	queue.Pop();
+	EXPECT_EQ( 0, queue.Size() );
+}
+
+TEST( FrameQueue, PopReturnsManagedPointer )
+{
+	s_trackedObjectsAlive = 0;
+	auto queue = FrameQueue<TrackedObject, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	queue.Push( CCP_NEW( "test value" ) TrackedObject );
+	queue.Pop();
+	EXPECT_EQ( 0, s_trackedObjectsAlive );
+}
+
+TEST( FrameQueue, PopReturnsFirstPushedItem )
+{
+	auto item1 = CCP_NEW( "test value" ) int( 11 );
+	auto item2 = CCP_NEW( "test value" ) int( 11 );
+
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	queue.Push( item1 );
+	queue.Push( item2 );
+	EXPECT_EQ( item1, queue.Pop().get() );
+}
+
+TEST( FrameQueue, PushBlocksWhenCapacityIsReached )
+{
+	auto item1 = CCP_NEW( "test value" ) int( 11 );
+	auto item2 = CCP_NEW( "test value" ) int( 11 );
+
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 1 ) );
+	queue.Push( item1 );
+	EXPECT_TRUE( ThreadBlocks( [&]() {
+		queue.Push( item2 );
+	} ) );
+}
+
+TEST( FrameQueue, PopBlocksWhenQueueIsEmpty )
+{
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 1 ) );
+	EXPECT_TRUE( ThreadBlocks( [&]() {
+		queue.Pop();
+	} ) );
+}
+
+TEST( FrameQueue, PopUnblocksWhenQueueBecomesNonEmpty )
+{
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 1 ) );
+	CcpAtomic<uint32_t> step( 0 );
+	KillThreadOnExit t( CcpThread( [&] () {
+		queue.Pop();
+		step = 1;
+	} ) );
+	CcpThreadSleep( 10 );
+	EXPECT_NE( 1, step );
+	queue.Push( CCP_NEW( "test value" ) int( 1 ) );
+	CcpThreadSleep( 10 );
+	EXPECT_EQ( 1, step );
+}
+
+TEST( FrameQueue, PushAtCapacityUnblocksWhenItemIsPopped )
+{
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 1 ) );
+	queue.Push( CCP_NEW( "test value" ) int( 1 ) );
+	CcpAtomic<uint32_t> step( 0 );
+	KillThreadOnExit t( CcpThread( [&] () {
+		queue.Push( CCP_NEW( "test value" ) int( 1 ) );
+		step = 1;
+	} ) );
+	CcpThreadSleep( 10 );
+	EXPECT_NE( 1, step );
+	queue.Pop();
+	CcpThreadSleep( 10 );
+	EXPECT_EQ( 1, step );
+}
+
+TEST( FrameQueue, QueueReportsNotFullWhenItIsNot )
+{
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 2 ) );
+	EXPECT_FALSE( queue.IsFull() );
+	queue.Push( CCP_NEW( "test value" ) int( 1 ) );
+	EXPECT_FALSE( queue.IsFull() );
+}
+
+TEST( FrameQueue, QueueReportsFullWhenItIsFull )
+{
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 2 ) );
+	queue.Push( CCP_NEW( "test value" ) int( 1 ) );
+	queue.Push( CCP_NEW( "test value" ) int( 1 ) );
+	EXPECT_TRUE( queue.IsFull() );
+}
+
+TEST( FrameQueue, IncompleteQueueReportsAsNotComplete )
+{
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 2 ) );
+	EXPECT_FALSE( queue.IsComplete() );
+}
+
+TEST( FrameQueue, CompleteQueueReportsAsComplete )
+{
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 2 ) );
+	queue.SetComplete();
+	EXPECT_TRUE( queue.IsComplete() );
+}
+
+TEST( FrameQueue, PoppingFromEmptyCompleteQueueReturnsNull )
+{
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 2 ) );
+	queue.SetComplete();
+	int temp;
+	int* result = &temp;
+	EXPECT_FALSE( ThreadBlocks( [&]() {
+		result = queue.Pop().get();
+	} ) );
+	EXPECT_EQ( nullptr, result );
+}
+
+TEST( FrameQueue, PushingIntoFullCompleteQueueIsIgnored )
+{
+	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 1 ) );
+	queue.Push( CCP_NEW( "test value" ) int( 1 )  );
+	queue.SetComplete();
+	auto newValue = CCP_NEW( "test value" ) int( 1 );
+	EXPECT_FALSE( ThreadBlocks( [&]() {
+		queue.Push( newValue );
+	} ) );
+	EXPECT_EQ( 1, queue.Size() );
+}
+
+#endif

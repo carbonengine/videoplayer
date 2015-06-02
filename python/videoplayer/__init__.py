@@ -16,7 +16,7 @@ def create_textures(player):
 
 
 def _create_tex_param(name, tex):
-    p = _trinity.TriTexture2DParameter()
+    p = _trinity.TriTextureParameter()
     p.name = name
     p.SetResource(tex)
     return p

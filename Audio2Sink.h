@@ -40,8 +40,11 @@ public:
 
 	virtual void OnTick( Be::Time realTime, Be::Time simTime, void* cookie );
 private:
+#ifdef _WIN32
 	typedef unsigned int (__stdcall * SetAudioStream)( float* const data, unsigned int const dataSize, int const input );
-
+#else
+    typedef unsigned int (*SetAudioStream)( float* const data, unsigned int const dataSize, int const input );
+#endif
 	void SubmitThread();
 
 	SetAudioStream m_setAudioStream;

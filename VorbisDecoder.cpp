@@ -133,7 +133,10 @@ uint32_t VorbisDecoder::GetCorruptFrameCount() const
 
 void VorbisDecoder::WaitUntilDone()
 {
-	m_decodeThread.join();
+    if( m_decodeThread.joinable() )
+    {
+        m_decodeThread.join();
+    }
 }
 
 void VorbisDecoder::DecodeThread()

@@ -17,7 +17,9 @@ TEST( VideoController, ControllerHasNoErrorsOnCreation )
 	VideoController controller( &stream, nullptr );
 	VideoController::Errors errors;
 	controller.GetErrors( errors );
-	EXPECT_EQ( PARSER_ERROR_OK, errors.parserError );
+    // sometimes the parser may be able to start reading our invalid stream, so
+    // we can't test parser state here
+	//EXPECT_EQ( PARSER_ERROR_OK, errors.parserError );
 	EXPECT_EQ( DECODER_ERROR_OK, errors.audioDecoderError );
 	EXPECT_EQ( DECODER_ERROR_OK, errors.videoDecoderError );
 }
@@ -33,7 +35,7 @@ TEST( VideoController, ControllerStopsOnInvalidStream )
 		{
 			break;
 		}
-		Sleep( 1 );
+		CcpThreadSleep( 1 );
 	}
 	EXPECT_EQ( VideoController::DONE, controller.GetState() );
 }
@@ -49,7 +51,7 @@ TEST( VideoController, ControllerReportsErrorsOnInvalidStream )
 		{
 			break;
 		}
-		Sleep( 1 );
+		CcpThreadSleep( 1 );
 	}
 	EXPECT_EQ( VideoController::DONE, controller.GetState() );
 	VideoController::Errors errors;

@@ -58,11 +58,11 @@ public:
 
 	~ThreadBlocksHelper()
 	{
-		if( m_blocked )
-		{
-			CcpKillThread( m_thread.native_handle() );
-		}
-		m_thread.detach();
+        if( m_blocked )
+        {
+            CcpKillThread( m_thread.native_handle() );
+        }
+        m_thread.detach();
 	}
 
 	bool Wait( uint32_t timeoutMs )
@@ -83,7 +83,7 @@ private:
 };
 
 template <typename Callable>
-bool ThreadBlocks( Callable& callable, uint32_t timeoutInMs = 500 )
+bool ThreadBlocks( Callable callable, uint32_t timeoutInMs = 500 )
 {
 	ThreadBlocksHelper<Callable> helper( callable );
 	return helper.Wait( timeoutInMs );
@@ -93,25 +93,25 @@ bool ThreadBlocks( Callable& callable, uint32_t timeoutInMs = 500 )
 
 TEST( FrameQueue, CanCreateQueue )
 {
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 123 ) );
 	EXPECT_EQ( 0, queue.Size() );
 }
 
 TEST( FrameQueue, PickingFromEmptyQueueReturnsNull )
 {
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 123 ) );
 	EXPECT_EQ( nullptr, queue.Peek() );
 }
 
 TEST( FrameQueue, PickingLastItemFromEmptyQueueReturnsNull )
 {
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 123 ) );
 	EXPECT_EQ( nullptr, queue.PeekLast() );
 }
 
 TEST( FrameQueue, PushingItemIntoQueueIncreasesSize )
 {
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 123 ) );
 	queue.Push( CCP_NEW( "test value" ) int( 11 ) );
 	EXPECT_EQ( 1, queue.Size() );
 	queue.Push( CCP_NEW( "test value" ) int( 22 ) );
@@ -123,7 +123,7 @@ TEST( FrameQueue, PickingItemInQueueReturnsFirstPushed )
 	auto item1 = CCP_NEW( "test value" ) int( 11 );
 	auto item2 = CCP_NEW( "test value" ) int( 11 );
 
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 123 ) );
 	queue.Push( item1 );
 	queue.Push( item2 );
 	EXPECT_EQ( item1, queue.Peek() );
@@ -134,7 +134,7 @@ TEST( FrameQueue, PickLastReturnsFirstPushed )
 	auto item1 = CCP_NEW( "test value" ) int( 11 );
 	auto item2 = CCP_NEW( "test value" ) int( 11 );
 
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 123 ) );
 	queue.Push( item1 );
 	queue.Push( item2 );
 	EXPECT_EQ( item2, queue.PeekLast() );
@@ -146,7 +146,7 @@ TEST( FrameQueue, QueueOwnsObjects )
 	auto item1 = CCP_NEW( "test value" ) TrackedObject;
 	EXPECT_EQ( 1, s_trackedObjectsAlive );
 	{
-		auto queue = FrameQueue<TrackedObject, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+		FrameQueue<TrackedObject, MaxCountFullPolicy> queue( MaxCountFullPolicy( 123 ) );
 		queue.Push( item1 );
 	}
 	EXPECT_EQ( 0, s_trackedObjectsAlive );
@@ -154,7 +154,7 @@ TEST( FrameQueue, QueueOwnsObjects )
 
 TEST( FrameQueue, PopRemovesItemFromQueue )
 {
-	auto queue = FrameQueue<TrackedObject, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	FrameQueue<TrackedObject, MaxCountFullPolicy> queue( MaxCountFullPolicy( 123 ) );
 	queue.Push( CCP_NEW( "test value" ) TrackedObject );
 	queue.Pop();
 	EXPECT_EQ( 0, queue.Size() );
@@ -163,7 +163,7 @@ TEST( FrameQueue, PopRemovesItemFromQueue )
 TEST( FrameQueue, PopReturnsManagedPointer )
 {
 	s_trackedObjectsAlive = 0;
-	auto queue = FrameQueue<TrackedObject, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	FrameQueue<TrackedObject, MaxCountFullPolicy> queue( MaxCountFullPolicy( 123 ) );
 	queue.Push( CCP_NEW( "test value" ) TrackedObject );
 	queue.Pop();
 	EXPECT_EQ( 0, s_trackedObjectsAlive );
@@ -174,7 +174,7 @@ TEST( FrameQueue, PopReturnsFirstPushedItem )
 	auto item1 = CCP_NEW( "test value" ) int( 11 );
 	auto item2 = CCP_NEW( "test value" ) int( 11 );
 
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 123 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 123 ) );
 	queue.Push( item1 );
 	queue.Push( item2 );
 	EXPECT_EQ( item1, queue.Pop().get() );
@@ -185,7 +185,7 @@ TEST( FrameQueue, PushBlocksWhenCapacityIsReached )
 	auto item1 = CCP_NEW( "test value" ) int( 11 );
 	auto item2 = CCP_NEW( "test value" ) int( 11 );
 
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 1 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 1 ) );
 	queue.Push( item1 );
 	EXPECT_TRUE( ThreadBlocks( [&]() {
 		queue.Push( item2 );
@@ -194,7 +194,7 @@ TEST( FrameQueue, PushBlocksWhenCapacityIsReached )
 
 TEST( FrameQueue, PopBlocksWhenQueueIsEmpty )
 {
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 1 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 1 ) );
 	EXPECT_TRUE( ThreadBlocks( [&]() {
 		queue.Pop();
 	} ) );
@@ -202,7 +202,7 @@ TEST( FrameQueue, PopBlocksWhenQueueIsEmpty )
 
 TEST( FrameQueue, PopUnblocksWhenQueueBecomesNonEmpty )
 {
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 1 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 1 ) );
 	CcpAtomic<uint32_t> step( 0 );
 	KillThreadOnExit t( CcpThread( [&] () {
 		queue.Pop();
@@ -217,7 +217,7 @@ TEST( FrameQueue, PopUnblocksWhenQueueBecomesNonEmpty )
 
 TEST( FrameQueue, PushAtCapacityUnblocksWhenItemIsPopped )
 {
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 1 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 1 ) );
 	queue.Push( CCP_NEW( "test value" ) int( 1 ) );
 	CcpAtomic<uint32_t> step( 0 );
 	KillThreadOnExit t( CcpThread( [&] () {
@@ -233,7 +233,7 @@ TEST( FrameQueue, PushAtCapacityUnblocksWhenItemIsPopped )
 
 TEST( FrameQueue, QueueReportsNotFullWhenItIsNot )
 {
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 2 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 2 ) );
 	EXPECT_FALSE( queue.IsFull() );
 	queue.Push( CCP_NEW( "test value" ) int( 1 ) );
 	EXPECT_FALSE( queue.IsFull() );
@@ -241,7 +241,7 @@ TEST( FrameQueue, QueueReportsNotFullWhenItIsNot )
 
 TEST( FrameQueue, QueueReportsFullWhenItIsFull )
 {
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 2 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 2 ) );
 	queue.Push( CCP_NEW( "test value" ) int( 1 ) );
 	queue.Push( CCP_NEW( "test value" ) int( 1 ) );
 	EXPECT_TRUE( queue.IsFull() );
@@ -249,20 +249,20 @@ TEST( FrameQueue, QueueReportsFullWhenItIsFull )
 
 TEST( FrameQueue, IncompleteQueueReportsAsNotComplete )
 {
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 2 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 2 ) );
 	EXPECT_FALSE( queue.IsComplete() );
 }
 
 TEST( FrameQueue, CompleteQueueReportsAsComplete )
 {
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 2 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 2 ) );
 	queue.SetComplete();
 	EXPECT_TRUE( queue.IsComplete() );
 }
 
 TEST( FrameQueue, PoppingFromEmptyCompleteQueueReturnsNull )
 {
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 2 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 2 ) );
 	queue.SetComplete();
 	int temp;
 	int* result = &temp;
@@ -274,7 +274,7 @@ TEST( FrameQueue, PoppingFromEmptyCompleteQueueReturnsNull )
 
 TEST( FrameQueue, PushingIntoFullCompleteQueueIsIgnored )
 {
-	auto queue = FrameQueue<int, MaxCountFullPolicy>( MaxCountFullPolicy( 1 ) );
+	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 1 ) );
 	queue.Push( CCP_NEW( "test value" ) int( 1 )  );
 	queue.SetComplete();
 	auto newValue = CCP_NEW( "test value" ) int( 1 );

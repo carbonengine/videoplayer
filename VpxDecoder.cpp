@@ -125,7 +125,10 @@ uint32_t VpxDecoder::GetDroppedFrameCount() const
 
 void VpxDecoder::WaitUntilDone()
 {
-	m_decodeThread.join();
+    if( m_decodeThread.joinable() )
+    {
+        m_decodeThread.join();
+    }
 }
 
 void VpxDecoder::DecodeThread()
@@ -158,7 +161,7 @@ void VpxDecoder::DecodeThread()
 				continue;
 			}
 
-			vpx_codec_err_t e = vpx_codec_decode( &m_videoCodec, data, length, nullptr, 0 );
+			vpx_codec_err_t e = vpx_codec_decode( &m_videoCodec, data, unsigned( length ), nullptr, 0 );
 			if( e ) 
 			{
 				++m_corruptFrames;

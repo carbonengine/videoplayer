@@ -167,3 +167,39 @@ Configurations:
     General:
       TargetName: VideoPlayerTest
   
+  
+  Release_27|Mac64:
+    BaseConfigurations:
+    - Release
+    - Python27
+    - WithBlue27
+    General:
+      TargetName: _videoplayer
+      ConfigurationType: DynamicLibrary
+      OutDir: ../../autobuild/VideoPlayer/python_27/$(Platform)/$(PlatformToolset)/
+      IntDir: ../temp/VideoPlayer/python_27/$(Platform)/$(Configuration)/$(PlatformToolset)/
+      TargetExt: .pyd
+  
+  Release|Mac64:
+    BaseConfigurations:
+    - Release
+    - ExeFile
+    - WithBlue
+    General:
+      TargetName: _videoplayer
+      ConfigurationType: DynamicLibrary
+      OutDir: ../../autobuild/VideoPlayer/exefile/$(Platform)/$(PlatformToolset)/
+      IntDir: ../temp/VideoPlayer/exefile/$(Platform)/$(Configuration)/$(PlatformToolset)/
+      TargetExt: .dll
+  
+  Dev_Test|Mac64:
+    Imports:
+    - ../BlueExposure/uses_BlueExposure.yaml
+    BaseConfigurations:
+    - Dev
+    - Test
+    - Python27
+    - WithoutBlue
+    General:
+      TargetName: VideoPlayerTest
+  

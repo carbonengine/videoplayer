@@ -137,10 +137,10 @@ void VideoController::Update()
 		m_state = INITIAL_BUFFERING;
 		m_bufferingTimer.Start();
 	case INITIAL_BUFFERING:
-		if( m_audioDecoder && !m_audioDecoder->GetDecodedQueue().IsFull() || 
-			m_videoDecoder && !m_videoDecoder->GetDecodedQueue().IsFull() || 
-			!( m_parser->GetAudioQueue() && m_parser->GetAudioQueue()->IsFull() || 
-			m_parser->GetVideoQueue() && m_parser->GetVideoQueue()->IsFull() ) )
+		if( ( m_audioDecoder && !m_audioDecoder->GetDecodedQueue().IsFull() ) ||
+			( m_videoDecoder && !m_videoDecoder->GetDecodedQueue().IsFull() ) ||
+			!( ( m_parser->GetAudioQueue() && m_parser->GetAudioQueue()->IsFull() ) ||
+			( m_parser->GetVideoQueue() && m_parser->GetVideoQueue()->IsFull() ) ) )
 		{
 			return;
 		}
@@ -252,8 +252,8 @@ void VideoController::RemoveExpiredFrames()
 
 bool VideoController::NeedsBuffering() const
 {
-	return m_videoDecoder && !m_videoDecoder->GetDecodedQueue().IsComplete() && m_videoDecoder->GetDecodedQueue().Size() == 0 || 
-		m_audioDecoder && !m_audioDecoder->GetDecodedQueue().IsComplete() && m_audioDecoder->GetDecodedQueue().Size() < 10;
+	return ( m_videoDecoder && !m_videoDecoder->GetDecodedQueue().IsComplete() && m_videoDecoder->GetDecodedQueue().Size() == 0 ) ||
+		( m_audioDecoder && !m_audioDecoder->GetDecodedQueue().IsComplete() && m_audioDecoder->GetDecodedQueue().Size() < 10 );
 }
 
 bool VideoController::IsDone() const

@@ -3,15 +3,10 @@ from _videoplayer import *
 import trinity as _trinity
 
 
-def create_textures(player):
-    info = player.get_video_info()
-    width = info['width']
-    height = info['height']
-    half_width = width / 2
-    half_height = height / 2
-    player.y_channel = _trinity.TriTextureRes(width, height, 1, _trinity.PIXEL_FORMAT.R8_UNORM)
-    player.cu_channel = _trinity.TriTextureRes(half_width, half_height, 1, _trinity.PIXEL_FORMAT.R8_UNORM)
-    player.cv_channel = _trinity.TriTextureRes(half_width, half_height, 1, _trinity.PIXEL_FORMAT.R8_UNORM)
+def create_textures(player, y_size, uv_size):
+    player.y_channel = _trinity.TriTextureRes(y_size[0], y_size[1], 1, _trinity.PIXEL_FORMAT.R8_UNORM)
+    player.cu_channel = _trinity.TriTextureRes(uv_size[0], uv_size[1], 1, _trinity.PIXEL_FORMAT.R8_UNORM)
+    player.cv_channel = _trinity.TriTextureRes(uv_size[0], uv_size[1], 1, _trinity.PIXEL_FORMAT.R8_UNORM)
     player.clear_textures()
 
 

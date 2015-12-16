@@ -50,24 +50,13 @@ class VideoRenderJob(object):
         self.audio_emitter, channel = audio.GetAudioBus()
         self.video = videoplayer.VideoPlayer(stream, videoplayer.Audio2Sink(audio2.GetDirectSoundPtr(), channel))
         self.video.on_state_change = _log_state_change
+        self.video.on_create_textures = self._on_video_info_ready
         self.video.on_error = _log_error
         self.rt = None
 
         def texture_destroyed():
             self._destroy()
 
-        def cb():
-            # noinspection PyBroadException
-            try:
-                try:
-                    self.video.get_video_info()
-                except RuntimeError:
-                    return
-                self.on_video_info_ready()
-            except:
-                logging.exception('Exception in video callback')
-
-        self.steps.append(trinity.TriStepPythonCB(cb))
         trinity.renderJobs.recurring.append(self)
 
         texture = trinity.TriTextureRes()
@@ -75,10 +64,10 @@ class VideoRenderJob(object):
         self.weak_texture.callback = texture_destroyed
         return texture
 
-    def on_video_info_ready(self):
+    def _on_video_info_ready(self, y_size, uv_size):
         self.steps.removeAt(-1)
 
-        videoplayer.create_textures(self.video)
+        videoplayer.create_textures(self.video, y_size, uv_size)
         self.rt = videoplayer.set_up_decode_render_job(self.video, self, self.generate_mips)
 
         def update_texture():

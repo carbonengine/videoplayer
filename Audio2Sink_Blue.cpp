@@ -25,5 +25,10 @@ const Be::ClassInfo* Audio2Sink::ExposeToBlue()
 			"Arguments:\n"
 			"audio_function - The magic thing you get from audio2.GetDirectSoundPtr()\n"
 			"channel - Audio channel index" );
+		MAP_ATTRIBUTE(
+			"volume",
+			m_volume,
+			"Audio volume (from 0 to 1)",
+			Be::READWRITE );
 	EXPOSURE_END()
 }

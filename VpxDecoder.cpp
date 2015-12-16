@@ -178,50 +178,21 @@ void VpxDecoder::DecodeThread()
 			while( auto img = vpx_codec_get_frame( &m_videoCodec, &iter ) )
 			{
 				auto frame = CCP_NEW( "VpxDecoder/frame" ) VideoFrame;
-				frame->width = img->d_w;
-				frame->height = img->d_h;
+				frame->yWidth = img->d_w;
+				frame->yHeight = img->d_h;
+				frame->uvWidth = img->d_w >> img->x_chroma_shift;
+				frame->uvHeight = img->d_h >> img->y_chroma_shift;
 				frame->timeStamp = packetTimeStamp;
-				frame->y.reset( CCP_NEW( "VpxDecoder/frame/y" ) uint8_t[frame->width * frame->height] );
-				CopyImagePlane( frame->y.get(), img->planes[0], img->stride[0], frame->width, frame->height );
-				frame->u.reset( CCP_NEW( "VpxDecoder/frame/u" ) uint8_t[frame->width * frame->height / 4] );
-				CopyImagePlane( frame->u.get(), img->planes[1], img->stride[1], frame->width / 2, frame->height / 2 );
-				frame->v.reset( CCP_NEW( "VpxDecoder/frame/v" ) uint8_t[frame->width * frame->height / 4] );
-				CopyImagePlane( frame->v.get(), img->planes[2], img->stride[2], frame->width / 2, frame->height / 2 );
+				frame->y.reset( CCP_NEW( "VpxDecoder/frame/y" ) uint8_t[frame->yWidth * frame->yHeight] );
+				CopyImagePlane( frame->y.get(), img->planes[0], img->stride[0], frame->yWidth, frame->yHeight );
+				frame->u.reset( CCP_NEW( "VpxDecoder/frame/u" ) uint8_t[frame->uvWidth * frame->uvHeight] );
+				CopyImagePlane( frame->u.get(), img->planes[1], img->stride[1], frame->uvWidth, frame->uvHeight );
+				frame->v.reset( CCP_NEW( "VpxDecoder/frame/v" ) uint8_t[frame->uvWidth * frame->uvHeight] );
+				CopyImagePlane( frame->v.get(), img->planes[2], img->stride[2], frame->uvWidth, frame->uvHeight );
 				m_decompressedQueue.Push( frame );
 				++m_processedFrames;
 			}
 		}
 	}
 	vpx_codec_destroy( &m_videoCodec );
-}
-
-
-void YuvFrameToBgrx( const VideoFrame& frame, uint8_t* pixels ) 
-{
-	const int w = frame.width;
-	const int h = frame.height;
-
-	auto py = frame.y.get();
-	auto pu = frame.u.get();
-	auto pv = frame.v.get();
-	auto rgb = pixels;
-	for( int j = 0; j < h; ++j )
-	{
-		for( int i = 0; i < w; ++i ) 
-		{
-			int y = py[i] - 16;
-			int u = pu[i/2] - 128;
-			int v = pv[i/2] - 128;
-			rgb[2] = Clamp( ScaleYuv( RCoeff( y, u, v ) ) );
-			rgb[1] = Clamp( ScaleYuv( GCoeff( y, u, v ) ) );
-			rgb[0] = Clamp( ScaleYuv( BCoeff( y, u, v ) ) );
-			rgb += 4;
-		}
-		py += frame.width;
-		if( j & 1 )
-		{
-			pu += frame.width / 2;
-			pv += frame.width / 2;
-		}
-	}
 }

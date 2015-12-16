@@ -26,7 +26,7 @@
 class VideoController
 {
 public:
-	VideoController( ICcpStream* stream, IAudioSink* audioSink );
+	VideoController( ICcpStream* stream, IAudioSink* audioSink, unsigned audioTrack = 0 );
 	~VideoController();
 
 	enum State

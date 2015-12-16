@@ -45,9 +45,11 @@ const Be::ClassInfo* VideoPlayer::ExposeToBlue()
 		MAP_METHOD_AND_WRAP_OPTIONAL_ARGS( 
 			"__init__", 
 			Create, 
-			1,
+			2,
 			"Initializes video player.\n\n"
-			":param stream: opened input stream to the video (needs to be a blue stream)" );
+			":param stream: opened input stream to the video (needs to be a blue stream)\n"
+			":param audio_sink: audio sink object (no audio output if omitted)\n" 
+			":param audio_stream: audio track index (0 if omitted)\n" );
 		MAP_PROPERTY_READONLY( 
 			"state", 
 			GetState, 
@@ -94,6 +96,23 @@ const Be::ClassInfo* VideoPlayer::ExposeToBlue()
 			"Cv channel texture. Needs to be a valid trinity.TriTextureRes texture\n"
 			"with the size matching video size (half of the video size)", 
 			Be::READWRITE | Be::NOTIFY );
+		MAP_PROPERTY_READONLY(
+			"media_time",
+			GetMediaTime,
+			"Media playback time in nanoseconds" );
+		MAP_PROPERTY_READONLY(
+			"duration",
+			GetDuration,
+			"Total media duration in nanoseconds" );
+		MAP_PROPERTY_READONLY(
+			"downloaded_media_time",
+			GetDownloadedMediaTime,
+			"Media time downloaded from input stream in nanoseconds" );
+		MAP_ATTRIBUTE(
+			"audio_sink",
+			m_audioSink,
+			"Audio sink object",
+			Be::READ );
 
 		MAP_ATTRIBUTE( 
 			"on_state_change", 
@@ -106,6 +125,12 @@ const Be::ClassInfo* VideoPlayer::ExposeToBlue()
 			m_onError, 
 			"Callback function that is called whenever error occurs during asyncronous playback.\n"
 			"The function is called with single parameter which is the player instance", 
+			Be::READWRITE );
+		MAP_ATTRIBUTE( 
+			"on_create_textures", 
+			m_onCreateTextures, 
+			"Callback function that is called when video player needs to change output texture sizes.\n"
+			"The function is called with arguments player_instance, (y_width, y_height), (uv_width, uv_height)", 
 			Be::READWRITE );
 	EXPOSURE_END()
 }

@@ -50,6 +50,4 @@ private:
 	uint32_t m_droppedFrames;
 };
 
-void YuvFrameToBgrx( const VideoFrame& frame, uint8_t* pixels );
-
 #endif

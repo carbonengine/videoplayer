@@ -21,12 +21,12 @@ uint64_t DROP_FRAME_THRESHOLD = 50000000;
 }
 
 
-VideoController::VideoController( ICcpStream* stream, IAudioSink* audioSink )
+VideoController::VideoController( ICcpStream* stream, IAudioSink* audioSink, unsigned audioTrack )
 	:m_state( UNINITIALIZED ),
 	m_paused( false ),
 	m_audioSink( audioSink )
 {
-	m_parser.reset( CreateVideoContainerParser( stream, audioSink ? STREAM_AUDIO_VIDEO : STREAM_VIDEO ) );
+	m_parser.reset( CreateVideoContainerParser( stream, audioSink ? STREAM_AUDIO_VIDEO : STREAM_VIDEO, audioTrack ) );
 	m_state = PARSING_METADATA;
 }
 

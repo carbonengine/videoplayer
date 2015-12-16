@@ -8,6 +8,9 @@
 #include "StdAfx.h"
 #include "Audio2Sink.h"
 
+// samples per millisecond
+static const uint32_t WWISE_RATE = 48;
+
 Audio2Sink::Audio2Sink()
 	:m_setAudioStream( nullptr ),
 	m_outputChannel( 0 ),
@@ -16,7 +19,12 @@ Audio2Sink::Audio2Sink()
 	m_length( 0 ),
 	m_stopRequested( false ),
 	m_finishedSubmitting( false ),
-	m_bufferReady( 2 )
+	m_bufferReady( 2 ),
+	m_volume( 1.f ),
+	m_submittedSamples( 0 ),
+	m_paused( 0 ),
+	m_startSampleCount( -1 ),
+	m_started( false )
 {
 	m_bufferSizes[0] = 0;
 	m_bufferSizes[1] = 0;
@@ -33,9 +41,10 @@ Audio2Sink::~Audio2Sink()
 	Close();
 }
 
-void Audio2Sink::Create( intptr_t audioFunction, int32_t outputChannel )
+void Audio2Sink::Create( intptr_t audioFunction, intptr_t audioPositionFunction, int32_t outputChannel )
 {
 	m_setAudioStream = reinterpret_cast<SetAudioStream>( audioFunction );
+	m_getAudioStreamPosition = reinterpret_cast<GetAudioStreamPosition>( audioPositionFunction );
 	m_outputChannel = outputChannel;
 }
 
@@ -60,17 +69,34 @@ void Audio2Sink::Close()
 
 void Audio2Sink::Pause()
 {
-	m_timer.Pause();
+	++m_paused;
 }
 
 void Audio2Sink::Resume()
 {
-	m_timer.Resume();
+	--m_paused;
 }
 
 uint64_t Audio2Sink::GetTime()
 {
-	return m_timer.GetTime();
+	if( !m_started )
+	{
+		return 0;
+	}
+	auto sampleCount = uint64_t( ( *m_getAudioStreamPosition )( m_outputChannel ) );
+	if( sampleCount < m_startSampleCount )
+	{
+		sampleCount += unsigned int( -1 );
+	}
+	sampleCount -= m_startSampleCount;
+	if( m_finishedSubmitting && sampleCount >= m_submittedSamples )
+	{
+		if( !m_timer.IsRunning() )
+		{
+			m_timer.Start();
+		}
+	}
+	return sampleCount / 2 * 1000000 / WWISE_RATE + m_timer.GetTime();
 }
 
 bool Audio2Sink::IsDone()
@@ -83,7 +109,7 @@ bool Audio2Sink::IsDone()
 	{
 		return false;
 	}
-	auto t = m_timer.GetTime();
+	auto t = GetTime();
 	auto length = m_length * 100000000 / m_audioMetadata->rate;
 	return t > length;
 }
@@ -95,12 +121,17 @@ void Audio2Sink::OnTick( Be::Time realTime, Be::Time simTime, void* cookie )
 		auto available = ( *m_setAudioStream )( nullptr, 0, m_outputChannel );
 		if( available >= m_bufferSizes[m_bufferReady] )
 		{
-			if( !m_timer.IsRunning() )
+			if( !m_paused )
 			{
-				m_timer.Start();
+				if( !m_started )
+				{
+					m_started = true;
+					m_startSampleCount = ( *m_getAudioStreamPosition )( m_outputChannel );
+				}
+				m_submittedSamples += m_bufferSizes[m_bufferReady] / 2;
+				( *m_setAudioStream )( m_buffers[m_bufferReady], m_bufferSizes[m_bufferReady], m_outputChannel );
+				m_bufferReady = 3;
 			}
-			( *m_setAudioStream )( m_buffers[m_bufferReady], m_bufferSizes[m_bufferReady], m_outputChannel );
-			m_bufferReady = 3;
 		}
 	}
 }
@@ -108,7 +139,6 @@ void Audio2Sink::OnTick( Be::Time realTime, Be::Time simTime, void* cookie )
 void Audio2Sink::SubmitThread()
 {
 	float buffer[16384];
-	float volume = 1.f;
 	bool firstFrame = true;
 	uint32_t currentBuffer = 0;
 
@@ -122,19 +152,40 @@ void Audio2Sink::SubmitThread()
 			break;
 		}
 
-		if( packet->channels == 1 )
+		if( m_volume == 0 )
 		{
-			for( unsigned i = 0; i < packet->samples; ++i )
+			if( packet->channels == 1 )
 			{
-				buffer[i * 2] =  ( (float) packet->data[i] ) * volume / 0x8000;
-				buffer[i * 2 + 1] =  buffer[i * 2];
+				for( unsigned i = 0; i < packet->samples; ++i )
+				{
+					buffer[i * 2] =  0;
+					buffer[i * 2 + 1] =  0;
+				}
+			}
+			else
+			{
+				for( unsigned i = 0; i < packet->samples * packet->channels; ++i )
+				{
+					buffer[i] =  0;
+				}
 			}
 		}
 		else
 		{
-			for( unsigned i = 0; i < packet->samples * packet->channels; ++i )
+			if( packet->channels == 1 )
 			{
-				buffer[i] =  ( (float) packet->data[i] ) * volume / 0x8000;
+				for( unsigned i = 0; i < packet->samples; ++i )
+				{
+					buffer[i * 2] =  ( (float) packet->data[i] ) * m_volume / 0x8000;
+					buffer[i * 2 + 1] =  buffer[i * 2];
+				}
+			}
+			else
+			{
+				for( unsigned i = 0; i < packet->samples * packet->channels; ++i )
+				{
+					buffer[i] =  ( (float) packet->data[i] ) * m_volume / 0x8000;
+				}
 			}
 		}
 

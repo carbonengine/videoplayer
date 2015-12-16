@@ -107,16 +107,31 @@ bool VideoPlayer::OnModified( Be::Var* value )
 	return true;
 }
 
-Be::BlueStdResult VideoPlayer::Create( IBlueStream* stream, IAudioSinkExposed* audioSink )
+Be::BlueStdResult VideoPlayer::Create( IBlueStream* stream, IAudioSinkExposed* audioSink, unsigned audioTrack )
 {
 	if( !stream )
 	{
 		return Be::BlueStdResult( Be::BLUE_STD_RESULT_VALUE_ERROR, "need a valid stream" );
 	}
-	m_video.reset( CCP_NEW( "VideoPlayer.m_video" ) VideoController( stream, audioSink ) );
+	m_video.reset( CCP_NEW( "VideoPlayer.m_video" ) VideoController( stream, audioSink, audioTrack ) );
 	m_stream = stream;
 	m_audioSink = audioSink;
 	return Be::BlueStdResult( Be::BLUE_STD_RESULT_OK );
+}
+
+uint64_t VideoPlayer::GetMediaTime() const
+{
+	return m_video ? m_video->GetMediaTime() : 0u;
+}
+
+uint64_t VideoPlayer::GetDuration() const
+{
+	return m_video ? m_video->GetParser().GetDuration() : 0u;
+}
+
+uint64_t VideoPlayer::GetDownloadedMediaTime() const
+{
+	return m_video ? m_video->GetParser().GetDownloadedMediaTime() : 0u;
 }
 
 VideoPlayerResult VideoPlayer::Update()
@@ -154,19 +169,37 @@ VideoPlayerResult VideoPlayer::Update()
 		auto frame = m_video->GetVideoFrame();
 		if( frame && m_lastUpdatedTimeStamp != frame->timeStamp )
 		{
-			if( m_yChannel && m_yChannel->GetWidth() == frame->width && m_yChannel->GetHeight() == frame->height )
+			if( ( m_yChannel && ( m_yChannel->GetWidth() != frame->yWidth || m_yChannel->GetHeight() != frame->yHeight ) ) ||
+				( m_uChannel && ( m_uChannel->GetWidth() != frame->uvWidth || m_uChannel->GetHeight() != frame->uvHeight ) ) ||
+				( m_vChannel && ( m_vChannel->GetWidth() != frame->uvWidth || m_vChannel->GetHeight() != frame->uvHeight ) ) )
 			{
-				m_yChannel->UpdateSubresource( 0, 0, frame->width, frame->height, frame->y.get(), frame->width );
+				if( m_onCreateTextures )
+				{
+					m_onCreateTextures.CallVoid( this, std::make_pair( frame->yWidth, frame->yHeight ), std::make_pair( frame->uvWidth, frame->uvHeight ) );
+				}
 			}
-			if( m_uChannel && m_uChannel->GetWidth() == frame->width / 2 && m_uChannel->GetHeight() == frame->height / 2 )
+
+			if( m_yChannel && m_yChannel->GetWidth() == frame->yWidth && m_yChannel->GetHeight() == frame->yHeight )
 			{
-				m_uChannel->UpdateSubresource( 0, 0, frame->width / 2, frame->height / 2, frame->u.get(), frame->width / 2 );
+				m_yChannel->UpdateSubresource( 0, 0, frame->yWidth, frame->yHeight, frame->y.get(), frame->yWidth );
 			}
-			if( m_vChannel && m_vChannel->GetWidth() == frame->width / 2 && m_vChannel->GetHeight() == frame->height / 2 )
+			if( m_uChannel && m_uChannel->GetWidth() == frame->uvWidth && m_uChannel->GetHeight() == frame->uvHeight )
 			{
-				m_vChannel->UpdateSubresource( 0, 0, frame->width / 2, frame->height / 2, frame->v.get(), frame->width / 2 );
+				m_uChannel->UpdateSubresource( 0, 0, frame->uvWidth, frame->uvHeight, frame->u.get(), frame->uvWidth );
+			}
+			if( m_vChannel && m_vChannel->GetWidth() == frame->uvWidth && m_vChannel->GetHeight() == frame->uvHeight )
+			{
+				m_vChannel->UpdateSubresource( 0, 0, frame->uvWidth, frame->uvHeight, frame->v.get(), frame->uvWidth );
 			}
 			m_lastUpdatedTimeStamp = frame->timeStamp;
+		}
+	}
+	else if( m_onCreateTextures )
+	{
+		auto frame = m_video->GetVideoFrame();
+		if( frame )
+		{
+			m_onCreateTextures.CallVoid( this, std::make_pair( frame->yWidth, frame->yHeight ), std::make_pair( frame->uvWidth, frame->uvHeight ) );
 		}
 	}
 	return errors;

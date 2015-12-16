@@ -18,6 +18,8 @@ struct IVideoContainerParser
 	virtual const VideoMetadata& GetVideoMetadata() const = 0;
 	virtual const AudioMetadata& GetAudioMetadata() const = 0;
 	virtual void CompleteQueues() = 0;
+	virtual uint64_t GetDuration() const = 0;
+	virtual uint64_t GetDownloadedMediaTime() const = 0;
 
 	virtual EncodedAudioFrameQueue* GetAudioQueue() = 0;
 	virtual EncodedVideoFrameQueue* GetVideoQueue() = 0;
@@ -28,6 +30,6 @@ struct IVideoContainerParser
 // Description:
 //   Creates a parser from the given stream.
 // --------------------------------------------------------------------------------------
-IVideoContainerParser* CreateVideoContainerParser( ICcpStream* videoStream, StreamType outputStreams );
+IVideoContainerParser* CreateVideoContainerParser( ICcpStream* videoStream, StreamType outputStreams, unsigned audioTrack = 0 );
 
 #endif

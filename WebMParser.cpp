@@ -135,16 +135,20 @@ bool NestEggFrame::GetFrame( size_t index, uint8_t*& data, size_t& length )
 
 
 
-WebMParser::WebMParser( ICcpStream* videoStream, StreamType outputStreams )
+WebMParser::WebMParser( ICcpStream* videoStream, StreamType outputStreams, unsigned audioTrack )
 	:m_nestEgg( nullptr ),
 	m_videoStream( videoStream ),
 	m_metadataAvailable( false ),
 	m_metadataMutex( "WebMParser", "m_metadataMutex" ),
+	m_downloadedMediaTimeMutex( "WebMParser", "m_downloadedMediaTimeMutex", 100 ),
 	m_videoTrack( -1 ),
 	m_audioTrack( -1 ),
+	m_requestedAudioTrack( audioTrack ),
 	m_stopRequested( false ),
 	m_parserError( PARSER_ERROR_OK ),
-	m_outputStreams( outputStreams )
+	m_outputStreams( outputStreams ),
+	m_duration( 0 ),
+	m_downloadedMediaTime( 0 )
 {
 	if( m_outputStreams & STREAM_VIDEO )
 	{
@@ -188,6 +192,17 @@ void WebMParser::CompleteQueues()
 	}
 }
 
+uint64_t WebMParser::GetDuration() const
+{
+	return m_duration;
+}
+
+uint64_t WebMParser::GetDownloadedMediaTime() const
+{
+	CcpAutoMutex lock( m_downloadedMediaTimeMutex );
+	return m_downloadedMediaTime;
+}
+
 bool WebMParser::IsMetadataAvailable() const
 {
 	return m_metadataAvailable;
@@ -216,18 +231,27 @@ ParserError WebMParser::GetError() const
 	return m_parserError;
 }
 
-unsigned WebMParser::FindTrack( int trackType )
+unsigned WebMParser::FindTrack( int trackType, int trackIndex )
 {
 	unsigned trackCount = 0;
 	nestegg_track_count( m_nestEgg, &trackCount );
+	unsigned fallbackTrack = -1;
+	unsigned foundTrack = 0;
 	for( unsigned i = 0; i < trackCount; ++i )
 	{
 		if( nestegg_track_type( m_nestEgg, i ) == trackType )
 		{
-			return i;
+			if( foundTrack == 0 )
+			{
+				fallbackTrack = i;
+			}
+			if( foundTrack++ == trackIndex )
+			{
+				return i;
+			}
 		}
 	}
-	return -1;
+	return fallbackTrack;
 }
 
 void WebMParser::ReadThread()
@@ -253,9 +277,12 @@ void WebMParser::ReadThread()
 		return;
 	}
 
+	m_duration = 0;
+	nestegg_duration( m_nestEgg, &m_duration );
+
 	m_videoTrack = FindTrack( NESTEGG_TRACK_VIDEO );
 	PopulateVideoMetadata( m_nestEgg, m_videoTrack, m_videoMetadata );
-	m_audioTrack = FindTrack( NESTEGG_TRACK_AUDIO );
+	m_audioTrack = FindTrack( NESTEGG_TRACK_AUDIO, m_requestedAudioTrack );
 	PopulateAudioMetadata( m_nestEgg, m_audioTrack, m_audioMetadata );
 
 	if( m_audioTrack == -1 && m_videoQueue )
@@ -286,12 +313,18 @@ void WebMParser::ReadThread()
 
 		unsigned int track = 0;
 		nestegg_packet_track( packet, &track );
+		uint64_t packetTime = 0;
 
 		if( nestegg_track_type( m_nestEgg, track ) == NESTEGG_TRACK_VIDEO ) 
 		{
 			if( track == m_videoTrack && m_videoQueue )
 			{
 				m_videoQueue->Push( CCP_NEW( "WebMParser/video frame" ) NestEggFrame( packet ) );
+				if( nestegg_packet_tstamp( packet, &packetTime ) == 0 )
+				{
+					CcpAutoMutex lock( m_downloadedMediaTimeMutex );
+					m_downloadedMediaTime = packetTime;
+				}
 			}
 			else
 			{
@@ -303,6 +336,11 @@ void WebMParser::ReadThread()
 			if( track == m_audioTrack && m_audioQueue )
 			{
 				m_audioQueue->Push( CCP_NEW( "WebMParser/audio frame" ) NestEggFrame( packet ) );
+				if( nestegg_packet_tstamp( packet, &packetTime ) == 0 )
+				{
+					CcpAutoMutex lock( m_downloadedMediaTimeMutex );
+					m_downloadedMediaTime = packetTime;
+				}
 			}
 			else
 			{

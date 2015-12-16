@@ -47,7 +47,7 @@ private:
 class WebMParser: public IVideoContainerParser
 {
 public:
-	WebMParser( ICcpStream* videoStream, StreamType outputStreams );
+	WebMParser( ICcpStream* videoStream, StreamType outputStreams, unsigned audioTrack = 0 );
 	~WebMParser();
 
 	bool IsMetadataAvailable() const;
@@ -55,6 +55,8 @@ public:
 	const VideoMetadata& GetVideoMetadata() const;
 	const AudioMetadata& GetAudioMetadata() const;
 	void CompleteQueues();
+	uint64_t GetDuration() const;
+	uint64_t GetDownloadedMediaTime() const;
 
 	EncodedAudioFrameQueue* GetAudioQueue();
 	EncodedVideoFrameQueue* GetVideoQueue();
@@ -62,13 +64,14 @@ public:
 private:
 
 	void ReadThread();
-	unsigned FindTrack( int trackType );
+	unsigned FindTrack( int trackType, int trackIndex = 0 );
 
 	VideoMetadata m_videoMetadata;
 	AudioMetadata m_audioMetadata;
 	bool m_metadataAvailable;
 	mutable CcpMutex m_metadataMutex;
 	mutable CcpSemaphore m_threadStarted;
+	mutable CcpMutex m_downloadedMediaTimeMutex;
 
 	std::unique_ptr<EncodedAudioFrameQueue, TrackableDelete<EncodedAudioFrameQueue>> m_audioQueue;
 	std::unique_ptr<EncodedVideoFrameQueue, TrackableDelete<EncodedVideoFrameQueue>> m_videoQueue;
@@ -77,11 +80,14 @@ private:
 
 	unsigned m_videoTrack;
 	unsigned m_audioTrack;
+	unsigned m_requestedAudioTrack;
 
 	bool m_stopRequested;
 	CcpThread m_parseThread;
 	ParserError m_parserError;
 	StreamType m_outputStreams;
+	uint64_t m_duration;
+	uint64_t m_downloadedMediaTime;
 };
 
 #endif

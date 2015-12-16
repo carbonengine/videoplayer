@@ -44,6 +44,7 @@ public:
 			if( m_complete )
 			{
 				m_mutex.Release();
+				Deleter()( packet );
 				break;
 			}
 			if( !m_fullPolicy.IsFull( *this ) )

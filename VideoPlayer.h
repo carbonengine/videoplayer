@@ -30,12 +30,15 @@ public:
 	VideoPlayer(  IRoot* lockobj = nullptr );
 	~VideoPlayer();
 
-	Be::BlueStdResult Create( IBlueStream* stream, IAudioSinkExposed* audioSink );
+	Be::BlueStdResult Create( IBlueStream* stream, IAudioSinkExposed* audioSink, unsigned audioTrack );
 	VideoPlayerResult Update();
 	VideoController::State GetState() const;
 	void Pause();
 	void Resume();
 	bool IsPaused() const;
+	uint64_t GetMediaTime() const;
+	uint64_t GetDuration() const;
+	uint64_t GetDownloadedMediaTime() const;
 
 	VideoPlayerResult GetVideoInfo( std::map<std::string, uint32_t>& metadata );
 	VideoPlayerResult Validate();
@@ -57,6 +60,7 @@ private:
 	VideoPlayerResult m_lastError;
 	BlueScriptCallback m_onStateChange;
 	BlueScriptCallback m_onError;
+	BlueScriptCallback m_onCreateTextures;
 };
 
 TYPEDEF_BLUECLASS( VideoPlayer );

@@ -11,7 +11,7 @@ class VideoIndex(object):
             try:
                 # noinspection PyUnresolvedReferences
                 self._language_id = str(prefs.languageID)
-            except NameError:
+            except (NameError, AttributeError):
                 self._language_id = 'EN'
         else:
             self._language_id = language_id

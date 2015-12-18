@@ -107,16 +107,16 @@ bool VideoPlayer::OnModified( Be::Var* value )
 	return true;
 }
 
-Be::BlueStdResult VideoPlayer::Create( IBlueStream* stream, IAudioSinkExposed* audioSink, unsigned audioTrack )
+BlueStdResult VideoPlayer::Create( IBlueStream* stream, IAudioSinkExposed* audioSink, unsigned audioTrack )
 {
 	if( !stream )
 	{
-		return Be::BlueStdResult( Be::BLUE_STD_RESULT_VALUE_ERROR, "need a valid stream" );
+		return BlueStdResult( BLUE_STD_RESULT_VALUE_ERROR, "need a valid stream" );
 	}
 	m_video.reset( CCP_NEW( "VideoPlayer.m_video" ) VideoController( stream, audioSink, audioTrack ) );
 	m_stream = stream;
 	m_audioSink = audioSink;
-	return Be::BlueStdResult( Be::BLUE_STD_RESULT_OK );
+	return BlueStdResult( BLUE_STD_RESULT_OK );
 }
 
 uint64_t VideoPlayer::GetMediaTime() const
@@ -174,9 +174,9 @@ VideoPlayerResult VideoPlayer::Update()
 				( m_vChannel && ( m_vChannel->GetWidth() != frame->uvWidth || m_vChannel->GetHeight() != frame->uvHeight ) ) )
 			{
 				if( m_onCreateTextures )
-				{
+			{
 					m_onCreateTextures.CallVoid( this, std::make_pair( frame->yWidth, frame->yHeight ), std::make_pair( frame->uvWidth, frame->uvHeight ) );
-				}
+			}
 			}
 
 			if( m_yChannel && m_yChannel->GetWidth() == frame->yWidth && m_yChannel->GetHeight() == frame->yHeight )

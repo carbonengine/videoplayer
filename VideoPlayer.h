@@ -30,7 +30,7 @@ public:
 	VideoPlayer(  IRoot* lockobj = nullptr );
 	~VideoPlayer();
 
-	Be::BlueStdResult Create( IBlueStream* stream, IAudioSinkExposed* audioSink, unsigned audioTrack );
+	BlueStdResult Create( IBlueStream* stream, IAudioSinkExposed* audioSink, unsigned audioTrack );
 	VideoPlayerResult Update();
 	VideoController::State GetState() const;
 	void Pause();

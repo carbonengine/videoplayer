@@ -226,7 +226,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				GCC_OPTIMIZATION_LEVEL = s;
 				ONLY_ACTIVE_ARCH = YES;
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -265,14 +265,19 @@
 					NDEBUG,
 					"CCP_STACKLESS=1",
 					"BLUE_WITH_PYTHON=1",
+					"PyMODINIT_FUNC=\"__attribute((visibility(\\\"default\\\"))) extern \\\"C\\\" void\"",
 					"CCP_STACKLESS=1",
 					"BLUE_WITH_PYTHON=1",
+					"PyMODINIT_FUNC=\"__attribute((visibility(\\\"default\\\"))) extern \\\"C\\\" void\"",
 					"CCP_STACKLESS=1",
 					"BLUE_WITH_PYTHON=1",
+					"PyMODINIT_FUNC=\"__attribute((visibility(\\\"default\\\"))) extern \\\"C\\\" void\"",
 					"CCP_STACKLESS=1",
 					"BLUE_WITH_PYTHON=1",
+					"PyMODINIT_FUNC=\"__attribute((visibility(\\\"default\\\"))) extern \\\"C\\\" void\"",
 					"CCP_STACKLESS=1",
 					"BLUE_WITH_PYTHON=1",
+					"PyMODINIT_FUNC=\"__attribute((visibility(\\\"default\\\"))) extern \\\"C\\\" void\"",
 					"$(inherited)",
 					);
 				COPY_PHASE_STRIP = NO;
@@ -492,7 +497,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				ONLY_ACTIVE_ARCH = YES;
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -534,12 +539,16 @@
 					NDEBUG,
 					WITH_TESTS,
 					"GTEST_USE_OWN_TR1_TUPLE=1",
+					"PyMODINIT_FUNC=\"__attribute((visibility(\\\"default\\\"))) extern \\\"C\\\" void\"",
 					"BLUE_WITH_PYTHON=1",
+					"PyMODINIT_FUNC=\"__attribute((visibility(\\\"default\\\"))) extern \\\"C\\\" void\"",
 					BLUEBUILD_STATIC,
 					BLUEBUILD_STATIC,
 					"GTEST_USE_OWN_TR1_TUPLE=1",
 					"BLUE_WITH_PYTHON=1",
+					"PyMODINIT_FUNC=\"__attribute((visibility(\\\"default\\\"))) extern \\\"C\\\" void\"",
 					"BLUE_WITH_PYTHON=1",
+					"PyMODINIT_FUNC=\"__attribute((visibility(\\\"default\\\"))) extern \\\"C\\\" void\"",
 					BLUEBUILD_STATIC,
 					BLUEBUILD_STATIC,
 					BLUEBUILD_STATIC,
@@ -807,7 +816,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				GCC_OPTIMIZATION_LEVEL = s;
 				ONLY_ACTIVE_ARCH = YES;
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -840,10 +849,15 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NDEBUG,
 					"BLUE_WITH_PYTHON=1",
+					"PyMODINIT_FUNC=\"__attribute((visibility(\\\"default\\\"))) extern \\\"C\\\" void\"",
 					"BLUE_WITH_PYTHON=1",
+					"PyMODINIT_FUNC=\"__attribute((visibility(\\\"default\\\"))) extern \\\"C\\\" void\"",
 					"BLUE_WITH_PYTHON=1",
+					"PyMODINIT_FUNC=\"__attribute((visibility(\\\"default\\\"))) extern \\\"C\\\" void\"",
 					"BLUE_WITH_PYTHON=1",
+					"PyMODINIT_FUNC=\"__attribute((visibility(\\\"default\\\"))) extern \\\"C\\\" void\"",
 					"BLUE_WITH_PYTHON=1",
+					"PyMODINIT_FUNC=\"__attribute((visibility(\\\"default\\\"))) extern \\\"C\\\" void\"",
 					"$(inherited)",
 					);
 				COPY_PHASE_STRIP = NO;

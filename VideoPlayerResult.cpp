@@ -35,7 +35,9 @@ Result<VideoController::Errors>::operator bool() const
 	return m_message == nullptr && m_result;
 }
 
-const char* GetErrorMessage( const Result<VideoController::Errors>& result )
+}
+
+const char* BeGetErrorMessage( const Be::Result<VideoController::Errors>& result )
 {
 	if( result.m_message )
 	{
@@ -71,6 +73,4 @@ const char* GetErrorMessage( const Result<VideoController::Errors>& result )
 		return "unexpected error";
 	}
 	return "";
-}
-
 }

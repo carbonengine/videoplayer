@@ -11,9 +11,6 @@
 
 BLUE_DEFINE_EXCEPTION( VideoPlayerError, BlueStdRuntimeError );
 
-namespace Be
-{
-
 // --------------------------------------------------------------------------------------
 // Description:
 //   Returns Python exception class for the given ALResult code.
@@ -25,5 +22,3 @@ namespace Be
 BLUE_BEGIN_GET_EXCEPTION( VideoPlayerResult )
 	return BLUE_GET_EXCEPTION( VideoPlayerError );
 BLUE_END_GET_EXCEPTION()
-
-}

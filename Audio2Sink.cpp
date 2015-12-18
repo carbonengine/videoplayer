@@ -86,7 +86,7 @@ uint64_t Audio2Sink::GetTime()
 	auto sampleCount = uint64_t( ( *m_getAudioStreamPosition )( m_outputChannel ) );
 	if( sampleCount < m_startSampleCount )
 	{
-		sampleCount += unsigned int( -1 );
+		sampleCount += unsigned( -1 );
 	}
 	sampleCount -= m_startSampleCount;
 	if( m_finishedSubmitting && sampleCount >= m_submittedSamples )

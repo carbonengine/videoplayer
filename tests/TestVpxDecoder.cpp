@@ -117,8 +117,8 @@ TEST( VpxDecoder, DecodedFrameHasCorrectSize )
 	Wait( [&] { decoder.WaitUntilDone(); }, 3000 );
 	ASSERT_EQ( 1, decoder.GetDecodedQueue().Size() );
 	auto frame = decoder.GetDecodedQueue().Pop();
-	EXPECT_EQ( s_validFrameMetadata.width, frame->width );
-	EXPECT_EQ( s_validFrameMetadata.height, frame->height );
+	EXPECT_EQ( s_validFrameMetadata.width, frame->yWidth );
+	EXPECT_EQ( s_validFrameMetadata.height, frame->yHeight );
 }
 
 TEST( VpxDecoder, DecoderDropsLaggingFrame )

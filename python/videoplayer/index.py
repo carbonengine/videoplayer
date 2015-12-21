@@ -18,10 +18,12 @@ class VideoIndex(object):
         self._url = unicode(url)
         if self._url.lower().startswith(u'http'):
             self._base_url = u'/'.join(self._url.split(u'/')[0:-1])
+            if not self._base_url.endswith(u'/'):
+                self._base_url += u'/'
         else:
             self._base_url = unicode(os.path.dirname(self._url))
-        if not self._base_url.endswith(u'/'):
-            self._base_url += u'/'
+            if not self._base_url.endswith(os.path.sep):
+                self._base_url += unicode(os.path.sep)
         self._data = None
         self._videos = {}
         uthread2.start_tasklet(self._load_index)

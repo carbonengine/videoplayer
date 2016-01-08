@@ -47,7 +47,7 @@ class VideoRenderJob(object):
         else:
             raise ValueError()
         audio = sm.GetService('audio')
-        self.audio_emitter, channel = audio.GetAudioBus()
+        self.audio_emitter, channel = audio.GetAudioBus(rate=48000)
         self.video = videoplayer.VideoPlayer(stream, videoplayer.Audio2Sink(audio2.GetDirectSoundPtr(), channel))
         self.video.on_state_change = _log_state_change
         self.video.on_create_textures = self._on_video_info_ready

@@ -39,10 +39,7 @@ class VideoRenderJob(object):
             stream = blue.BlueNetworkStream(video_remote)
         else:
             raise ValueError()
-        audio = sm.GetService('audio')
-        self.audio_emitter, channel = audio.GetAudioBus(rate=48000)
-        self.video = videoplayer.VideoPlayer(stream, videoplayer.Audio2Sink(audio2.GetDirectSoundPtr(),
-                                                                            audio2.GetStreamPositionPtr(), channel))
+        self.video = videoplayer.VideoPlayer(stream, None)
         self.video.on_state_change = self._on_state_change
         self.video.on_create_textures = self._on_video_info_ready
         self.video.on_error = self._on_error
@@ -62,7 +59,7 @@ class VideoRenderJob(object):
         return texture
 
     def _on_state_change(self, player):
-        logging.log('Video player state changed to %s', videoplayer.State.GetNameFromValue(player.state))
+        logging.info('Video player state changed to %s', videoplayer.State.GetNameFromValue(player.state))
         for each in _state_change_handlers:
             each(player, self.constructor_params, self.weak_texture.object)
 

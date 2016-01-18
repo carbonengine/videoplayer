@@ -8,23 +8,15 @@ import audio2
 import videoplayer
 import decometaclass
 
+_error_handlers = set()
+_state_change_handlers = set()
+
 
 def _create_tex_param(name, tex):
     p = trinity.TriTexture2DParameter()
     p.name = name
     p.SetResource(tex)
     return p
-
-
-def _log_state_change(player):
-    logging.log('Video player state changed to %s', videoplayer.State.GetNameFromValue(player.state))
-
-
-def _log_error(player):
-    try:
-        player.validate()
-    except RuntimeError as e:
-        logging.exception('Video player error')
 
 
 class VideoRenderJob(object):
@@ -37,6 +29,7 @@ class VideoRenderJob(object):
         self.weak_texture = None
         self.generate_mips = False
         self.audio_emitter = None
+        self.constructor_params = {}
 
     def init(self, video_local=None, video_remote=None, generate_mips=0, **kwargs):
         self.generate_mips = bool(generate_mips)
@@ -48,11 +41,15 @@ class VideoRenderJob(object):
             raise ValueError()
         audio = sm.GetService('audio')
         self.audio_emitter, channel = audio.GetAudioBus(rate=48000)
-        self.video = videoplayer.VideoPlayer(stream, videoplayer.Audio2Sink(audio2.GetDirectSoundPtr(), channel))
-        self.video.on_state_change = _log_state_change
+        self.video = videoplayer.VideoPlayer(stream, videoplayer.Audio2Sink(audio2.GetDirectSoundPtr(),
+                                                                            audio2.GetStreamPositionPtr(), channel))
+        self.video.on_state_change = self._on_state_change
         self.video.on_create_textures = self._on_video_info_ready
-        self.video.on_error = _log_error
+        self.video.on_error = self._on_error
         self.rt = None
+        self.constructor_params = dict(kwargs)
+        self.constructor_params.update({'video_local': video_local, 'video_remote': video_remote,
+                                        'generate_mips': generate_mips})
 
         def texture_destroyed():
             self._destroy()
@@ -64,7 +61,21 @@ class VideoRenderJob(object):
         self.weak_texture.callback = texture_destroyed
         return texture
 
-    def _on_video_info_ready(self, y_size, uv_size):
+    def _on_state_change(self, player):
+        logging.log('Video player state changed to %s', videoplayer.State.GetNameFromValue(player.state))
+        for each in _state_change_handlers:
+            each(player, self.constructor_params, self.weak_texture.object)
+
+    def _on_error(self, player):
+        try:
+            player.validate()
+        except RuntimeError as e:
+            logging.exception('Video player error')
+            for each in _error_handlers:
+                each(player, e, self.constructor_params, self.weak_texture.object)
+
+
+    def _on_video_info_ready(self, player, y_size, uv_size):
         self.steps.removeAt(-1)
 
         videoplayer.create_textures(self.video, y_size, uv_size)
@@ -104,3 +115,21 @@ def play_video(param_string):
 
 def register_resource_constructor(name='video'):
     blue.resMan.RegisterResourceConstructor(name, play_video)
+
+
+def register_error_handler(error_handler):
+    _error_handlers.add(error_handler)
+
+
+def unregister_error_handler(error_handler):
+    _error_handlers.remove(error_handler)
+
+
+def register_state_change_handler(state_change_handler):
+    _state_change_handlers.add(state_change_handler)
+
+
+def unregister_state_change_handler(state_change_handler):
+    _state_change_handlers.remove(state_change_handler)
+
+

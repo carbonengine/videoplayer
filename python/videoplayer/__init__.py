@@ -17,16 +17,17 @@ def _create_tex_param(name, tex):
     return p
 
 
-def set_up_decode_render_job(player, rj, generate_mips=True):
+def set_up_decode_render_job(player, rj, generate_mips=True, rt=None):
     effect = _trinity.Tr2Effect()
     effect.effectFilePath = 'res:/graphics/effect/managed/space/system/decodeycucv.fx'
     effect.resources.append(_create_tex_param('YSource', player.y_channel))
     effect.resources.append(_create_tex_param('CuSource', player.cu_channel))
     effect.resources.append(_create_tex_param('CvSource', player.cv_channel))
 
-    mip_count = 0 if generate_mips else 1
-    rt = _trinity.Tr2RenderTarget(player.y_channel.width, player.y_channel.height, mip_count,
-                                 _trinity.PIXEL_FORMAT.B8G8R8A8_UNORM)
+    if rt is None:
+        mip_count = 0 if generate_mips else 1
+        rt = _trinity.Tr2RenderTarget(player.y_channel.width, player.y_channel.height, mip_count,
+                                      _trinity.PIXEL_FORMAT.B8G8R8A8_UNORM)
 
     rj.steps.append(_trinity.TriStepPushRenderTarget(rt))
     rj.steps.append(_trinity.TriStepPushDepthStencil(None))

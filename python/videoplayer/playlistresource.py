@@ -30,10 +30,10 @@ class _VideoPlaylistRenderJob(object):
         self.audio_emitter = None
         self.constructor_params = {}
         self.playlist = None
-        self.hide_on_low_quality = False
+        self.low_quality_texture_path = None
 
-    def init(self, width, height, playlist, hide_on_low_quality=False, **kwargs):
-        self.hide_on_low_quality = hide_on_low_quality
+    def init(self, width, height, playlist, low_quality_texture_path=None, **kwargs):
+        self.low_quality_texture_path = low_quality_texture_path
         self.generate_mips = kwargs.pop('generate_mips', False)
         self.constructor_params = kwargs
         self.rt = trinity.Tr2RenderTarget(width, height, 0 if self.generate_mips else 1,
@@ -46,21 +46,38 @@ class _VideoPlaylistRenderJob(object):
         self.weak_texture = blue.BluePythonWeakRef(texture)
         self.weak_texture.callback = texture_destroyed
 
-        if not self.hide_on_low_quality or not _is_low_quality():
+        if not self.low_quality_texture_path or not _is_low_quality():
             self.play_next()
-            trinity.renderJobs.recurring.append(self)
+        else:
+            self._create_low_quality_render_job()
+        trinity.renderJobs.recurring.append(self)
 
         return texture
 
+    def _create_low_quality_render_job(self):
+        texture = blue.resMan.GetResource(self.low_quality_texture_path)
+        self.steps.removeAt(-1)
+        self.steps.append(trinity.TriStepPushRenderTarget(self.rt))
+        self.steps.append(trinity.TriStepPushDepthStencil(None))
+        self.steps.append(trinity.TriStepSetStdRndStates(trinity.RM_FULLSCREEN))
+        self.steps.append(trinity.TriStepClear((1, 1, 0, 1)))
+        self.steps.append(trinity.TriStepRenderTexture(texture))
+        self.steps.append(trinity.TriStepPopDepthStencil())
+        self.steps.append(trinity.TriStepPopRenderTarget())
+        if self.generate_mips:
+            self.steps.append(trinity.TriStepGenerateMipMaps(self.rt))
+
+        def update_texture():
+            self.weak_texture.object.SetFromRenderTarget(self.rt)
+
+        self.steps.append(trinity.TriStepPythonCB(update_texture))
+
     def DoPrepareResources(self):
-        if self.hide_on_low_quality:
+        if self.low_quality_texture_path:
             if _is_low_quality():
                 if self.video:
                     self.video = None
-                    try:
-                        trinity.renderJobs.recurring.remove(self)
-                    except RuntimeError:
-                        pass
+                    self._create_low_quality_render_job()
             else:
                 if not self.video:
                     if self not in trinity.renderJobs.recurring:
@@ -132,7 +149,7 @@ def _url_to_dict(param_string):
     return params
 
 
-def register_resource_constructor(name, width, height, playlist, hide_on_low_quality=False):
+def register_resource_constructor(name, width, height, playlist, low_quality_texture_path=None):
     """
     Registers a dynamic resource handler to play videos from a playlist
 
@@ -141,14 +158,14 @@ def register_resource_constructor(name, width, height, playlist, hide_on_low_qua
     :param height: height of the resulting texture in pixels
     :param playlist: function returning a generator yielding paths to videos, called with dynamic resource keyword
         arguments
-    :param hide_on_low_quality: if True, the videos are disabled on SM_LO
+    :param low_quality_texture_path: fallback texture path to display with SM_LO, use None to have no fallback
     """
 
     def play(param_string):
         # noinspection PyBroadException
         try:
             rj = _VideoPlaylistRenderJob()
-            return rj.init(width, height, playlist, hide_on_low_quality, **_url_to_dict(param_string))
+            return rj.init(width, height, playlist, low_quality_texture_path, **_url_to_dict(param_string))
         except:
             logging.exception('Exception in video playlist resource constructor')
     blue.resMan.RegisterResourceConstructor(name, play)

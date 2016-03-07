@@ -15,6 +15,8 @@ class VideoIndex(object):
                 self._language_id = 'EN'
         else:
             self._language_id = language_id
+        if self._language_id == 'ZH':
+            self._language_id = 'CN'
         self._url = unicode(url)
         if self._url.lower().startswith(u'http'):
             self._base_url = u'/'.join(self._url.split(u'/')[0:-1])

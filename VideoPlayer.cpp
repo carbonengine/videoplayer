@@ -169,14 +169,14 @@ VideoPlayerResult VideoPlayer::Update()
 		auto frame = m_video->GetVideoFrame();
 		if( frame && m_lastUpdatedTimeStamp != frame->timeStamp )
 		{
-			if( ( m_yChannel && ( m_yChannel->GetWidth() != frame->yWidth || m_yChannel->GetHeight() != frame->yHeight ) ) ||
-				( m_uChannel && ( m_uChannel->GetWidth() != frame->uvWidth || m_uChannel->GetHeight() != frame->uvHeight ) ) ||
-				( m_vChannel && ( m_vChannel->GetWidth() != frame->uvWidth || m_vChannel->GetHeight() != frame->uvHeight ) ) )
+			if( ( m_yChannel && ( !m_yChannel->IsValid() || m_yChannel->GetWidth() != frame->yWidth || m_yChannel->GetHeight() != frame->yHeight ) ) ||
+				( m_uChannel && ( !m_yChannel->IsValid() || m_uChannel->GetWidth() != frame->uvWidth || m_uChannel->GetHeight() != frame->uvHeight ) ) ||
+				( m_vChannel && ( !m_yChannel->IsValid() || m_vChannel->GetWidth() != frame->uvWidth || m_vChannel->GetHeight() != frame->uvHeight ) ) )
 			{
 				if( m_onCreateTextures )
-			{
+				{
 					m_onCreateTextures.CallVoid( this, std::make_pair( frame->yWidth, frame->yHeight ), std::make_pair( frame->uvWidth, frame->uvHeight ) );
-			}
+				}
 			}
 
 			if( m_yChannel && m_yChannel->GetWidth() == frame->yWidth && m_yChannel->GetHeight() == frame->yHeight )
@@ -277,7 +277,7 @@ void ClearTexture( ITriTextureRes* texture, uint8_t fillColor )
 
 void VideoPlayer::ClearTextures()
 {
-	ClearTexture( m_yChannel, 0 );
+	ClearTexture( m_yChannel, 16 );
 	ClearTexture( m_uChannel, 128 );
 	ClearTexture( m_vChannel, 128 );
 }

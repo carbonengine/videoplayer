@@ -60,7 +60,7 @@ class _VideoPlaylistRenderJob(object):
         self.steps.append(trinity.TriStepPushRenderTarget(self.rt))
         self.steps.append(trinity.TriStepPushDepthStencil(None))
         self.steps.append(trinity.TriStepSetStdRndStates(trinity.RM_FULLSCREEN))
-        self.steps.append(trinity.TriStepClear((1, 1, 0, 1)))
+        self.steps.append(trinity.TriStepClear((0, 0, 0, 0)))
         self.steps.append(trinity.TriStepRenderTexture(texture))
         self.steps.append(trinity.TriStepPopDepthStencil())
         self.steps.append(trinity.TriStepPopRenderTarget())

@@ -32,7 +32,7 @@ def set_up_decode_render_job(player, rj, generate_mips=True, rt=None):
     rj.steps.append(_trinity.TriStepPushRenderTarget(rt))
     rj.steps.append(_trinity.TriStepPushDepthStencil(None))
     rj.steps.append(_trinity.TriStepSetStdRndStates(_trinity.RM_FULLSCREEN))
-    rj.steps.append(_trinity.TriStepClear((1, 1, 0, 1)))
+    rj.steps.append(_trinity.TriStepClear((0, 0, 0, 0)))
     rj.steps.append(_trinity.TriStepRenderEffect(effect))
     rj.steps.append(_trinity.TriStepPopDepthStencil())
     rj.steps.append(_trinity.TriStepPopRenderTarget())

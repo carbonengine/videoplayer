@@ -30,6 +30,7 @@ class VideoRenderJob(object):
         self.generate_mips = False
         self.audio_emitter = None
         self.constructor_params = {}
+        self.name = 'VideoRenderJob'
 
     def init(self, video_local=None, video_remote=None, generate_mips=0, **kwargs):
         self.generate_mips = bool(generate_mips)
@@ -85,9 +86,16 @@ class VideoRenderJob(object):
 
     def _destroy(self):
         trinity.renderJobs.recurring.remove(self)
+        self.steps.removeAt(-1)
+        if self.video:
+            self.video.on_state_change = None
+            self.video.on_create_textures = None
+            self.video.on_error = None
         self.video = None
         self.audio_emitter = None
         self.rt = None
+        if self.weak_texture is not None:
+            self.weak_texture.callback = None
 
 
 def _url_to_dict(param_string):

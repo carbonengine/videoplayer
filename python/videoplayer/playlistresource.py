@@ -31,8 +31,11 @@ class _VideoPlaylistRenderJob(object):
         self.constructor_params = {}
         self.playlist = None
         self.low_quality_texture_path = None
+        self.destroyed = False
+        self.name = 'VideoPlaylistRenderJob'
 
     def init(self, width, height, playlist, low_quality_texture_path=None, **kwargs):
+        self.destroyed = False
         self.low_quality_texture_path = low_quality_texture_path
         self.generate_mips = kwargs.pop('generate_mips', False)
         self.constructor_params = kwargs
@@ -73,6 +76,8 @@ class _VideoPlaylistRenderJob(object):
         self.steps.append(trinity.TriStepPythonCB(update_texture))
 
     def DoPrepareResources(self):
+        if self.destroyed:
+            return
         if self.low_quality_texture_path:
             if _is_low_quality():
                 if self.video:
@@ -85,6 +90,8 @@ class _VideoPlaylistRenderJob(object):
                     self.play_next()
 
     def play_next(self):
+        if self.destroyed:
+            return
         try:
             item = self.playlist.next()
         except StopIteration:
@@ -102,6 +109,8 @@ class _VideoPlaylistRenderJob(object):
         self.video.on_error = self._on_error
 
     def _on_state_change(self, player):
+        if self.destroyed:
+            return
         logging.info('Video player state changed to %s', videoplayer.State.GetNameFromValue(player.state))
         for each in _state_change_handlers:
             each(player, self.constructor_params, self.weak_texture.object)
@@ -133,9 +142,17 @@ class _VideoPlaylistRenderJob(object):
             trinity.renderJobs.recurring.remove(self)
         except RuntimeError:
             pass
+        self.steps.removeAt(-1)
+        if self.video:
+            self.video.on_state_change = None
+            self.video.on_create_textures = None
+            self.video.on_error = None
         self.video = None
         self.audio_emitter = None
         self.rt = None
+        self.destroyed = True
+        if self.weak_texture is not None:
+            self.weak_texture.callback = None
 
 
 def _url_to_dict(param_string):

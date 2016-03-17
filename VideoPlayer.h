@@ -30,7 +30,7 @@ public:
 	VideoPlayer(  IRoot* lockobj = nullptr );
 	~VideoPlayer();
 
-	BlueStdResult Create( IBlueStream* stream, IAudioSinkExposed* audioSink, unsigned audioTrack );
+	BlueStdResult Create( IBlueStream* stream, IAudioSinkExposed* audioSink, unsigned audioTrack, bool looped = false );
 	VideoPlayerResult Update();
 	VideoController::State GetState() const;
 	void Pause();
@@ -62,6 +62,7 @@ private:
 	BlueScriptCallback m_onStateChange;
 	BlueScriptCallback m_onError;
 	BlueScriptCallback m_onCreateTextures;
+	bool m_looped;
 };
 
 TYPEDEF_BLUECLASS( VideoPlayer );

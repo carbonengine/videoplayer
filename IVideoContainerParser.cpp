@@ -6,7 +6,7 @@ IVideoContainerParser::~IVideoContainerParser()
 {
 }
 
-IVideoContainerParser* CreateVideoContainerParser( ICcpStream* videoStream, StreamType outputStreams, unsigned audioTrack )
+IVideoContainerParser* CreateVideoContainerParser( ICcpStream* videoStream, StreamType outputStreams, unsigned audioTrack, bool looped )
 {
-	return CCP_NEW( "CreateVideoContainerParser/WebMParser" ) WebMParser( videoStream, outputStreams, audioTrack );
+	return CCP_NEW( "CreateVideoContainerParser/WebMParser" ) WebMParser( videoStream, outputStreams, audioTrack, looped );
 }

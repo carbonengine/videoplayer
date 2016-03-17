@@ -105,14 +105,16 @@ void PopulateAudioMetadata( nestegg* nestEgg, unsigned trackIndex, AudioMetadata
 
 
 
-NestEggFrame::NestEggFrame( nestegg_packet* packet )
-	:m_packet( packet )
+NestEggFrame::NestEggFrame( nestegg_packet* packet, WebMParser* parser, uint64_t timeOffset )
+	:m_packet( packet ),
+	m_parser( parser ),
+	m_timeOffset( timeOffset )
 {
 }
 
 NestEggFrame::~NestEggFrame()
 {
-	nestegg_free_packet( m_packet );
+	m_parser->ReleasePacket( m_packet );
 }
 
 size_t NestEggFrame::GetFrameCount()
@@ -126,7 +128,7 @@ uint64_t NestEggFrame::GetTimeStamp()
 {
 	uint64_t t;
 	nestegg_packet_tstamp( m_packet, &t );
-	return t;
+	return t + m_timeOffset;
 }
 
 bool NestEggFrame::GetFrame( size_t index, uint8_t*& data, size_t& length )
@@ -141,7 +143,7 @@ bool NestEggFrame::GetAlphaFrame( uint8_t*& data, size_t& length )
 
 
 
-WebMParser::WebMParser( ICcpStream* videoStream, StreamType outputStreams, unsigned audioTrack )
+WebMParser::WebMParser( ICcpStream* videoStream, StreamType outputStreams, unsigned audioTrack, bool looped )
 	:m_nestEgg( nullptr ),
 	m_videoStream( videoStream ),
 	m_metadataAvailable( false ),
@@ -151,10 +153,12 @@ WebMParser::WebMParser( ICcpStream* videoStream, StreamType outputStreams, unsig
 	m_audioTrack( -1 ),
 	m_requestedAudioTrack( audioTrack ),
 	m_stopRequested( false ),
+	m_looped( looped ),
 	m_parserError( PARSER_ERROR_OK ),
 	m_outputStreams( outputStreams ),
 	m_duration( 0 ),
-	m_downloadedMediaTime( 0 )
+	m_downloadedMediaTime( 0 ),
+	m_packets( "WebMParser::m_packets" )
 {
 	if( m_outputStreams & STREAM_VIDEO )
 	{
@@ -172,8 +176,15 @@ WebMParser::WebMParser( ICcpStream* videoStream, StreamType outputStreams, unsig
 
 WebMParser::~WebMParser()
 {
+	m_stopRequested = true;
 	CompleteQueues();
 	m_parseThread.join();
+	m_audioQueue.reset();
+	m_videoQueue.reset();
+	for( auto it = m_packets.begin(); it != m_packets.end(); ++it )
+	{
+		nestegg_free_packet( *it );
+	}
 }
 
 EncodedAudioFrameQueue* WebMParser::GetAudioQueue()
@@ -237,6 +248,14 @@ ParserError WebMParser::GetError() const
 	return m_parserError;
 }
 
+void WebMParser::ReleasePacket( nestegg_packet* packet )
+{
+	if( !m_looped )
+	{
+		nestegg_free_packet( packet );
+	}
+}
+
 unsigned WebMParser::FindTrack( int trackType, int trackIndex )
 {
 	unsigned trackCount = 0;
@@ -291,7 +310,7 @@ void WebMParser::ReadThread()
 	m_audioTrack = FindTrack( NESTEGG_TRACK_AUDIO, m_requestedAudioTrack );
 	PopulateAudioMetadata( m_nestEgg, m_audioTrack, m_audioMetadata );
 
-	if( m_audioTrack == -1 && m_videoQueue )
+	if( m_audioTrack == -1 && m_videoQueue && !m_looped )
 	{
 		m_videoQueue->GetFullPolicy().SetMaxCount( std::numeric_limits<size_t>::max() );
 	}
@@ -299,8 +318,10 @@ void WebMParser::ReadThread()
 	m_metadataMutex.Release();
 	m_metadataAvailable = true;
 
+	uint64_t timeOffset = 0;
+
 	nestegg_packet* packet = 0;
-	while( true )
+	while( !m_stopRequested )
 	{
 		auto r = nestegg_read_packet( m_nestEgg, &packet );
 		if( r == 1 && packet == 0 )
@@ -325,7 +346,8 @@ void WebMParser::ReadThread()
 		{
 			if( track == m_videoTrack && m_videoQueue )
 			{
-				m_videoQueue->Push( CCP_NEW( "WebMParser/video frame" ) NestEggFrame( packet ) );
+				m_videoQueue->Push( CCP_NEW( "WebMParser/video frame" ) NestEggFrame( packet, this, timeOffset ) );
+				m_packets.push_back( packet );
 				if( nestegg_packet_tstamp( packet, &packetTime ) == 0 )
 				{
 					CcpAutoMutex lock( m_downloadedMediaTimeMutex );
@@ -341,7 +363,8 @@ void WebMParser::ReadThread()
 		{
 			if( track == m_audioTrack && m_audioQueue )
 			{
-				m_audioQueue->Push( CCP_NEW( "WebMParser/audio frame" ) NestEggFrame( packet ) );
+				m_audioQueue->Push( CCP_NEW( "WebMParser/audio frame" ) NestEggFrame( packet, this, timeOffset ) );
+				m_packets.push_back( packet );
 				if( nestegg_packet_tstamp( packet, &packetTime ) == 0 )
 				{
 					CcpAutoMutex lock( m_downloadedMediaTimeMutex );
@@ -354,6 +377,34 @@ void WebMParser::ReadThread()
 			}
 		}
 	}
+	timeOffset += m_duration;
+	while( m_looped && !m_stopRequested )
+	{
+		for( auto it = m_packets.begin(); it != m_packets.end() && !m_stopRequested; ++it )
+		{
+			auto packet = *it;
+			unsigned int track = 0;
+			nestegg_packet_track( packet, &track );
+
+			if( nestegg_track_type( m_nestEgg, track ) == NESTEGG_TRACK_VIDEO ) 
+			{
+				if( track == m_videoTrack && m_videoQueue )
+				{
+					m_videoQueue->Push( CCP_NEW( "WebMParser/video frame" ) NestEggFrame( packet, this, timeOffset ) );
+				}
+			}
+			else
+			{
+				if( track == m_audioTrack && m_audioQueue )
+				{
+					m_audioQueue->Push( CCP_NEW( "WebMParser/audio frame" ) NestEggFrame( packet, this, timeOffset ) );
+				}
+			}
+		}
+		timeOffset += m_duration;
+	}
+
+
 	if( m_videoQueue )
 	{
 		m_videoQueue->SetComplete();

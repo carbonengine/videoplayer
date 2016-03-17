@@ -45,11 +45,12 @@ const Be::ClassInfo* VideoPlayer::ExposeToBlue()
 		MAP_METHOD_AND_WRAP_OPTIONAL_ARGS( 
 			"__init__", 
 			Create, 
-			2,
+			3,
 			"Initializes video player.\n\n"
 			":param stream: opened input stream to the video (needs to be a blue stream)\n"
 			":param audio_sink: audio sink object (no audio output if omitted)\n" 
-			":param audio_stream: audio track index (0 if omitted)\n" );
+			":param audio_stream: audio track index (0 if omitted)\n" 
+			":param looped: if the playback is looped (False by default)\n" );
 		MAP_PROPERTY_READONLY( 
 			"state", 
 			GetState, 

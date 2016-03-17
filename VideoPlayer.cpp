@@ -83,7 +83,8 @@ private:
 
 VideoPlayer::VideoPlayer(  IRoot* lockobj )
 	:m_lastUpdatedTimeStamp( std::numeric_limits<uint64_t>::max() ),
-	m_lastState( VideoController::State( -1 ) )
+	m_lastState( VideoController::State( -1 ) ),
+	m_looped( false )
 {
 #ifndef WITH_TESTS
 	BeOS->RegisterForTicks( this, nullptr );
@@ -107,15 +108,16 @@ bool VideoPlayer::OnModified( Be::Var* value )
 	return true;
 }
 
-BlueStdResult VideoPlayer::Create( IBlueStream* stream, IAudioSinkExposed* audioSink, unsigned audioTrack )
+BlueStdResult VideoPlayer::Create( IBlueStream* stream, IAudioSinkExposed* audioSink, unsigned audioTrack, bool looped )
 {
 	if( !stream )
 	{
 		return BlueStdResult( BLUE_STD_RESULT_VALUE_ERROR, "need a valid stream" );
 	}
-	m_video.reset( CCP_NEW( "VideoPlayer.m_video" ) VideoController( stream, audioSink, audioTrack ) );
+	m_video.reset( CCP_NEW( "VideoPlayer.m_video" ) VideoController( stream, audioSink, audioTrack, looped ) );
 	m_stream = stream;
 	m_audioSink = audioSink;
+	m_looped = looped;
 	return BlueStdResult( BLUE_STD_RESULT_OK );
 }
 

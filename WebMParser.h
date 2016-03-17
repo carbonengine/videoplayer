@@ -17,6 +17,8 @@
 struct nestegg;
 struct nestegg_packet;
 
+class WebMParser;
+
 
 // --------------------------------------------------------------------------------------
 // Description:
@@ -27,7 +29,7 @@ struct nestegg_packet;
 class NestEggFrame: public IEncodedFrame
 {
 public:
-	explicit NestEggFrame( nestegg_packet* packet );
+	explicit NestEggFrame( nestegg_packet* packet, WebMParser* parser, uint64_t timeOffset );
 	~NestEggFrame();
 
 	virtual size_t GetFrameCount();
@@ -36,6 +38,8 @@ public:
 	virtual bool GetAlphaFrame( uint8_t*& data, size_t& length );
 private:
 	nestegg_packet* m_packet;
+	WebMParser* m_parser;
+	uint64_t m_timeOffset;
 };
 
 
@@ -48,7 +52,7 @@ private:
 class WebMParser: public IVideoContainerParser
 {
 public:
-	WebMParser( ICcpStream* videoStream, StreamType outputStreams, unsigned audioTrack = 0 );
+	WebMParser( ICcpStream* videoStream, StreamType outputStreams, unsigned audioTrack = 0, bool looped = false );
 	~WebMParser();
 
 	bool IsMetadataAvailable() const;
@@ -62,8 +66,9 @@ public:
 	EncodedAudioFrameQueue* GetAudioQueue();
 	EncodedVideoFrameQueue* GetVideoQueue();
 	ParserError GetError() const;
-private:
 
+	void ReleasePacket( nestegg_packet* packet );
+private:
 	void ReadThread();
 	unsigned FindTrack( int trackType, int trackIndex = 0 );
 
@@ -84,11 +89,15 @@ private:
 	unsigned m_requestedAudioTrack;
 
 	bool m_stopRequested;
+	bool m_looped;
 	CcpThread m_parseThread;
 	ParserError m_parserError;
 	StreamType m_outputStreams;
 	uint64_t m_duration;
 	uint64_t m_downloadedMediaTime;
+
+	// all read packets, used for looped videos
+	TrackableStdVector<nestegg_packet*> m_packets;
 };
 
 #endif

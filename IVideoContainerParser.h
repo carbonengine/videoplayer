@@ -30,6 +30,6 @@ struct IVideoContainerParser
 // Description:
 //   Creates a parser from the given stream.
 // --------------------------------------------------------------------------------------
-IVideoContainerParser* CreateVideoContainerParser( ICcpStream* videoStream, StreamType outputStreams, unsigned audioTrack = 0 );
+IVideoContainerParser* CreateVideoContainerParser( ICcpStream* videoStream, StreamType outputStreams, unsigned audioTrack = 0, bool looped = false );
 
 #endif

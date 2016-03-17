@@ -26,7 +26,7 @@
 class VideoController
 {
 public:
-	VideoController( ICcpStream* stream, IAudioSink* audioSink, unsigned audioTrack = 0 );
+	VideoController( ICcpStream* stream, IAudioSink* audioSink, unsigned audioTrack = 0, bool looped = false );
 	~VideoController();
 
 	enum State
@@ -94,6 +94,8 @@ private:
 	Timer m_mediaTime;
 	// if the playback is paused
 	bool m_paused;
+	// if the playback is looped
+	bool m_looped;
 };
 
 #endif

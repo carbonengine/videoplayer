@@ -347,7 +347,10 @@ void WebMParser::ReadThread()
 			if( track == m_videoTrack && m_videoQueue )
 			{
 				m_videoQueue->Push( CCP_NEW( "WebMParser/video frame" ) NestEggFrame( packet, this, timeOffset ) );
-				m_packets.push_back( packet );
+				if( m_looped )
+				{
+					m_packets.push_back( packet );
+				}
 				if( nestegg_packet_tstamp( packet, &packetTime ) == 0 )
 				{
 					CcpAutoMutex lock( m_downloadedMediaTimeMutex );
@@ -364,7 +367,10 @@ void WebMParser::ReadThread()
 			if( track == m_audioTrack && m_audioQueue )
 			{
 				m_audioQueue->Push( CCP_NEW( "WebMParser/audio frame" ) NestEggFrame( packet, this, timeOffset ) );
-				m_packets.push_back( packet );
+				if( m_looped )
+				{
+					m_packets.push_back( packet );
+				}
 				if( nestegg_packet_tstamp( packet, &packetTime ) == 0 )
 				{
 					CcpAutoMutex lock( m_downloadedMediaTimeMutex );

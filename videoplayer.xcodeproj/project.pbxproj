@@ -49,18 +49,18 @@
 			fileRef = 00000004000031cfc05e2f34;
 			};
 		00000064000031cfc05e2f34 = {
-			name = libgtest.a;
+			name = libnestegg.a;
 			fileEncoding = 4;
 			lastKnownFileType = archive.ar;
-			path = "../../../../../../sdk/googletest/1.6.0/lib/MacOsXx86_64/libgtest.a";
+			path = "../../../../../../sdk/libnestegg/2015.03.23_modified/lib/MacOsXx86_64/clang4.2/libnestegg.a";
 			isa = PBXFileReference;
 			sourceTree = "<group>";
 			};
 		00000066000031cfc05e2f34 = {
-			name = libvpx.a;
+			name = libgtest.a;
 			fileEncoding = 4;
 			lastKnownFileType = archive.ar;
-			path = "../../../../../../sdk/libvpx/2015.03.20/lib/MacOsXx86_64/clang4.2/libvpx.a";
+			path = "../../../../../../sdk/googletest/1.6.0/lib/MacOsXx86_64/libgtest.a";
 			isa = PBXFileReference;
 			sourceTree = "<group>";
 			};
@@ -114,7 +114,7 @@
 			files = (
 				0000005B000031cfc05e2f34,
 				00000061000031cfc05e2f34,
-				00000065000031cfc05e2f34,
+				00000063000031cfc05e2f34,
 				00000067000031cfc05e2f34,
 				00000069000031cfc05e2f34,
 				0000006B000031cfc05e2f34,
@@ -207,7 +207,7 @@
 					"../../../../../../sdk/telemetry/2.1A3/include",
 					.,
 					"../../../carbon/src",
-					"../../../../../../sdk/libnestegg/2015.03.23/include",
+					"../../../../../../sdk/libnestegg/2015.03.23_modified/include",
 					"../../../../../../sdk/libvpx/2015.03.20/include",
 					"../../../../../../sdk/vorbis/1.3.2-1.3.5/include",
 					..,
@@ -252,7 +252,7 @@
 					"../../../carbon/bin/stackless/MacOsX$(ARCHS)",
 					"../../../../../../sdk/telemetry/2.1A3/lib",
 					"../../../carbon/autobuild/CcpCore/MacOsX$(ARCHS)/clang4.2/",
-					"../../../../../../sdk/libnestegg/2015.03.23/lib/MacOsX$(ARCHS)/clang4.2",
+					"../../../../../../sdk/libnestegg/2015.03.23_modified/lib/MacOsX$(ARCHS)/clang4.2",
 					"../../../../../../sdk/libvpx/2015.03.20/lib/MacOsX$(ARCHS)/clang4.2",
 					"../../../../../../sdk/vorbis/1.3.2-1.3.5/lib/MacOsX$(ARCHS)/clang4.2",
 					);
@@ -477,7 +477,7 @@
 					"../../../../../../sdk/telemetry/2.1A3/include",
 					.,
 					"../../../carbon/src",
-					"../../../../../../sdk/libnestegg/2015.03.23/include",
+					"../../../../../../sdk/libnestegg/2015.03.23_modified/include",
 					"../../../../../../sdk/libvpx/2015.03.20/include",
 					"../../../../../../sdk/vorbis/1.3.2-1.3.5/include",
 					..,
@@ -524,7 +524,7 @@
 					"../../../carbon/autobuild/CcpCore/MacOsX$(ARCHS)/clang4.2/",
 					"../../../../../../sdk/telemetry/2.1A3/lib",
 					"../../../carbon/autobuild/CcpCore/MacOsX$(ARCHS)/clang4.2/",
-					"../../../../../../sdk/libnestegg/2015.03.23/lib/MacOsX$(ARCHS)/clang4.2",
+					"../../../../../../sdk/libnestegg/2015.03.23_modified/lib/MacOsX$(ARCHS)/clang4.2",
 					"../../../../../../sdk/libvpx/2015.03.20/lib/MacOsX$(ARCHS)/clang4.2",
 					"../../../../../../sdk/vorbis/1.3.2-1.3.5/lib/MacOsX$(ARCHS)/clang4.2",
 					);
@@ -663,12 +663,12 @@
 		00000081000031cfc05e2f34 = {
 			files = (
 				0000005B000031cfc05e2f34,
-				00000067000031cfc05e2f34,
+				00000069000031cfc05e2f34,
 				00000061000031cfc05e2f34,
 				00000063000031cfc05e2f34,
 				00000065000031cfc05e2f34,
+				00000067000031cfc05e2f34,
 				0000005F000031cfc05e2f34,
-				00000069000031cfc05e2f34,
 				0000006B000031cfc05e2f34,
 				0000006F000031cfc05e2f34,
 				);
@@ -733,10 +733,10 @@
 			sourceTree = "<group>";
 			};
 		0000006C000031cfc05e2f34 = {
-			name = libnestegg.a;
+			name = libpython2.7.dylib;
 			fileEncoding = 4;
-			lastKnownFileType = archive.ar;
-			path = "../../../../../../sdk/libnestegg/2015.03.23/lib/MacOsXx86_64/clang4.2/libnestegg.a";
+			lastKnownFileType = "compiled.mach-o.dylib";
+			path = "../../../../../../shared_tools/python/27_mac/lib/libpython2.7.dylib";
 			isa = PBXFileReference;
 			sourceTree = "<group>";
 			};
@@ -797,7 +797,7 @@
 					"../../../../../../sdk/telemetry/2.1A3/include",
 					.,
 					"../../../carbon/src",
-					"../../../../../../sdk/libnestegg/2015.03.23/include",
+					"../../../../../../sdk/libnestegg/2015.03.23_modified/include",
 					"../../../../../../sdk/libvpx/2015.03.20/include",
 					"../../../../../../sdk/vorbis/1.3.2-1.3.5/include",
 					..,
@@ -837,7 +837,7 @@
 					"../../../../../../shared_tools/python/27_mac/lib",
 					"../../../../../../sdk/telemetry/2.1A3/lib",
 					"../../../carbon/autobuild/CcpCore/MacOsX$(ARCHS)/clang4.2/",
-					"../../../../../../sdk/libnestegg/2015.03.23/lib/MacOsX$(ARCHS)/clang4.2",
+					"../../../../../../sdk/libnestegg/2015.03.23_modified/lib/MacOsX$(ARCHS)/clang4.2",
 					"../../../../../../sdk/libvpx/2015.03.20/lib/MacOsX$(ARCHS)/clang4.2",
 					"../../../../../../sdk/vorbis/1.3.2-1.3.5/lib/MacOsX$(ARCHS)/clang4.2",
 					);
@@ -996,9 +996,9 @@
 				0000005B000031cfc05e2f34,
 				0000005D000031cfc05e2f34,
 				00000061000031cfc05e2f34,
-				00000065000031cfc05e2f34,
+				00000063000031cfc05e2f34,
 				00000067000031cfc05e2f34,
-				0000006B000031cfc05e2f34,
+				00000069000031cfc05e2f34,
 				0000006F000031cfc05e2f34,
 				);
 			buildActionMask = 2147483647;
@@ -1035,7 +1035,7 @@
 			children = (
 				0000005C000031cfc05e2f34,
 				00000062000031cfc05e2f34,
-				00000066000031cfc05e2f34,
+				00000064000031cfc05e2f34,
 				00000068000031cfc05e2f34,
 				0000006A000031cfc05e2f34,
 				0000006C000031cfc05e2f34,
@@ -1045,17 +1045,17 @@
 				0000005C000031cfc05e2f34,
 				0000005E000031cfc05e2f34,
 				00000062000031cfc05e2f34,
-				00000066000031cfc05e2f34,
+				00000064000031cfc05e2f34,
 				00000068000031cfc05e2f34,
-				0000006C000031cfc05e2f34,
+				0000006A000031cfc05e2f34,
 				00000070000031cfc05e2f34,
 				0000005C000031cfc05e2f34,
-				00000068000031cfc05e2f34,
+				0000006A000031cfc05e2f34,
 				00000062000031cfc05e2f34,
 				00000064000031cfc05e2f34,
 				00000066000031cfc05e2f34,
+				00000068000031cfc05e2f34,
 				00000060000031cfc05e2f34,
-				0000006A000031cfc05e2f34,
 				0000006C000031cfc05e2f34,
 				00000070000031cfc05e2f34,
 				);
@@ -1122,10 +1122,10 @@
 			sourceTree = "<group>";
 			};
 		0000006A000031cfc05e2f34 = {
-			name = libpython2.7.dylib;
+			name = libogg.a;
 			fileEncoding = 4;
-			lastKnownFileType = "compiled.mach-o.dylib";
-			path = "../../../../../../shared_tools/python/27_mac/lib/libpython2.7.dylib";
+			lastKnownFileType = archive.ar;
+			path = "../../../../../../sdk/vorbis/1.3.2-1.3.5/lib/MacOsXx86_64/clang4.2/libogg.a";
 			isa = PBXFileReference;
 			sourceTree = "<group>";
 			};
@@ -1169,10 +1169,10 @@
 			fileRef = 0000004C000031cfc05e2f34;
 			};
 		00000068000031cfc05e2f34 = {
-			name = libogg.a;
+			name = libvpx.a;
 			fileEncoding = 4;
 			lastKnownFileType = archive.ar;
-			path = "../../../../../../sdk/vorbis/1.3.2-1.3.5/lib/MacOsXx86_64/clang4.2/libogg.a";
+			path = "../../../../../../sdk/libvpx/2015.03.20/lib/MacOsXx86_64/clang4.2/libvpx.a";
 			isa = PBXFileReference;
 			sourceTree = "<group>";
 			};

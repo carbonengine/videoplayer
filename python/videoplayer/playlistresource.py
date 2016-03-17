@@ -126,10 +126,10 @@ class _VideoPlaylistRenderJob(object):
                 each(player, e, self.constructor_params, self.weak_texture.object)
             uthread2.start_tasklet(self.play_next)
 
-    def _on_video_info_ready(self, player, y_size, uv_size):
+    def _on_video_info_ready(self, player, y_size, uv_size, alpha):
         self.steps.removeAt(-1)
 
-        videoplayer.create_textures(self.video, y_size, uv_size)
+        videoplayer.create_textures(self.video, y_size, uv_size, alpha)
         videoplayer.set_up_decode_render_job(self.video, self, self.generate_mips, self.rt)
 
         def update_texture():

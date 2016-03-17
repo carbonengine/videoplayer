@@ -55,6 +55,7 @@ private:
 	ITriTextureResPtr m_yChannel;
 	ITriTextureResPtr m_uChannel;
 	ITriTextureResPtr m_vChannel;
+	ITriTextureResPtr m_alphaChannel;
 	uint64_t m_lastUpdatedTimeStamp;
 	VideoController::State m_lastState;
 	VideoPlayerResult m_lastError;

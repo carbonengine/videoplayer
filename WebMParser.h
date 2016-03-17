@@ -33,6 +33,7 @@ public:
 	virtual size_t GetFrameCount();
 	virtual uint64_t GetTimeStamp();
 	virtual bool GetFrame( size_t index, uint8_t*& data, size_t& length );
+	virtual bool GetAlphaFrame( uint8_t*& data, size_t& length );
 private:
 	nestegg_packet* m_packet;
 };

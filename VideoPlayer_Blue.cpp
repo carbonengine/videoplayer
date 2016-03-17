@@ -96,6 +96,12 @@ const Be::ClassInfo* VideoPlayer::ExposeToBlue()
 			"Cv channel texture. Needs to be a valid trinity.TriTextureRes texture\n"
 			"with the size matching video size (half of the video size)", 
 			Be::READWRITE | Be::NOTIFY );
+		MAP_ATTRIBUTE( 
+			"alpha_channel", 
+			m_alphaChannel, 
+			"Alpha channel texture. Needs to be a valid trinity.TriTextureRes texture\n"
+			"with the size matching video size", 
+			Be::READWRITE | Be::NOTIFY );
 		MAP_PROPERTY_READONLY(
 			"media_time",
 			GetMediaTime,

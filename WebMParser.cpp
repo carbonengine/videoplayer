@@ -60,6 +60,7 @@ void PopulateVideoMetadata( nestegg* nestEgg, unsigned trackIndex, VideoMetadata
 	nestegg_track_video_params( nestEgg, trackIndex, &params );
 	metadata.width = params.width;
 	metadata.height = params.height;
+	metadata.hasAlpha = params.alpha_mode != 0;
 }
 
 void PopulateAudioMetadata( nestegg* nestEgg, unsigned trackIndex, AudioMetadata& metadata )
@@ -131,6 +132,11 @@ uint64_t NestEggFrame::GetTimeStamp()
 bool NestEggFrame::GetFrame( size_t index, uint8_t*& data, size_t& length )
 {
 	return nestegg_packet_data( m_packet, unsigned( index ), &data, &length ) == 0;
+}
+
+bool NestEggFrame::GetAlphaFrame( uint8_t*& data, size_t& length )
+{
+	return nestegg_packet_additional_data( m_packet, 1, &data, &length ) == 0;
 }
 
 

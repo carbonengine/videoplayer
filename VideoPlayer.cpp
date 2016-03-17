@@ -170,12 +170,13 @@ VideoPlayerResult VideoPlayer::Update()
 		if( frame && m_lastUpdatedTimeStamp != frame->timeStamp )
 		{
 			if( ( m_yChannel && ( !m_yChannel->IsValid() || m_yChannel->GetWidth() != frame->yWidth || m_yChannel->GetHeight() != frame->yHeight ) ) ||
-				( m_uChannel && ( !m_yChannel->IsValid() || m_uChannel->GetWidth() != frame->uvWidth || m_uChannel->GetHeight() != frame->uvHeight ) ) ||
-				( m_vChannel && ( !m_yChannel->IsValid() || m_vChannel->GetWidth() != frame->uvWidth || m_vChannel->GetHeight() != frame->uvHeight ) ) )
+				( m_uChannel && ( !m_uChannel->IsValid() || m_uChannel->GetWidth() != frame->uvWidth || m_uChannel->GetHeight() != frame->uvHeight ) ) ||
+				( m_vChannel && ( !m_vChannel->IsValid() || m_vChannel->GetWidth() != frame->uvWidth || m_vChannel->GetHeight() != frame->uvHeight ) )
+				)
 			{
 				if( m_onCreateTextures )
 				{
-					m_onCreateTextures.CallVoid( this, std::make_pair( frame->yWidth, frame->yHeight ), std::make_pair( frame->uvWidth, frame->uvHeight ) );
+					m_onCreateTextures.CallVoid( this, std::make_pair( frame->yWidth, frame->yHeight ), std::make_pair( frame->uvWidth, frame->uvHeight ), bool( frame->alpha ) );
 				}
 			}
 
@@ -191,6 +192,10 @@ VideoPlayerResult VideoPlayer::Update()
 			{
 				m_vChannel->UpdateSubresource( 0, 0, frame->uvWidth, frame->uvHeight, frame->v.get(), frame->uvWidth );
 			}
+			if( frame->alpha && m_alphaChannel && m_alphaChannel->GetWidth() == frame->yWidth && m_alphaChannel->GetHeight() == frame->yHeight )
+			{
+				m_alphaChannel->UpdateSubresource( 0, 0, frame->yWidth, frame->yHeight, frame->alpha.get(), frame->yWidth );
+			}
 			m_lastUpdatedTimeStamp = frame->timeStamp;
 		}
 	}
@@ -199,7 +204,7 @@ VideoPlayerResult VideoPlayer::Update()
 		auto frame = m_video->GetVideoFrame();
 		if( frame )
 		{
-			m_onCreateTextures.CallVoid( this, std::make_pair( frame->yWidth, frame->yHeight ), std::make_pair( frame->uvWidth, frame->uvHeight ) );
+			m_onCreateTextures.CallVoid( this, std::make_pair( frame->yWidth, frame->yHeight ), std::make_pair( frame->uvWidth, frame->uvHeight ), bool( frame->alpha ) );
 		}
 	}
 	return errors;
@@ -252,6 +257,7 @@ VideoPlayerResult VideoPlayer::GetVideoInfo( std::map<std::string, uint32_t>& me
 	auto& data = m_video->GetParser().GetVideoMetadata();
 	metadata["width"] = data.width;
 	metadata["height"] = data.height;
+	metadata["hasAlpha"] = data.hasAlpha ? 1 : 0;
 	return VideoPlayerResult();
 }
 
@@ -280,6 +286,7 @@ void VideoPlayer::ClearTextures()
 	ClearTexture( m_yChannel, 16 );
 	ClearTexture( m_uChannel, 128 );
 	ClearTexture( m_vChannel, 128 );
+	ClearTexture( m_alphaChannel, 0 );
 }
 
 void VideoPlayer::OnTick( Be::Time realTime, Be::Time simTime, void* cookie )

@@ -26,11 +26,13 @@ struct VideoMetadata
 	Codec codec;
 	uint32_t width;
 	uint32_t height;
+	bool hasAlpha;
 
-	VideoMetadata( Codec codec_ = OTHER, uint32_t width_ = 0, uint32_t height_ = 0 )
+	VideoMetadata( Codec codec_ = OTHER, uint32_t width_ = 0, uint32_t height_ = 0, bool hasAlpha_ = false )
 		:codec( codec_ ),
 		width( width_ ),
-		height( height_ )
+		height( height_ ),
+		hasAlpha( hasAlpha_ )
 	{
 	}
 };
@@ -150,6 +152,7 @@ struct VideoFrame
 	std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> y;
 	std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> u;
 	std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> v;
+	std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> alpha;
 };
 
 typedef FrameQueue<VideoFrame, MaxCountFullPolicy> VideoFrameQueue;
@@ -164,6 +167,7 @@ struct IEncodedFrame
 	virtual size_t GetFrameCount() = 0;
 	virtual uint64_t GetTimeStamp() = 0;
 	virtual bool GetFrame( size_t index, uint8_t*& data, size_t& length ) = 0;
+	virtual bool GetAlphaFrame( uint8_t*& data, size_t& length ) = 0;
 };
 
 typedef FrameQueue<IEncodedFrame, MaxIntervalPolicy> EncodedAudioFrameQueue;

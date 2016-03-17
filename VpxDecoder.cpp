@@ -140,6 +140,9 @@ void VpxDecoder::DecodeThread()
 	auto videoInterface = m_videoMetadata.codec == VideoMetadata::VP8 ? &vpx_codec_vp8_dx_algo : &vpx_codec_vp9_dx_algo;
 	vpx_codec_dec_init( &m_videoCodec, videoInterface, nullptr, 0 );
 
+	bool alphaInitialized = false;
+	bool hasAlpha = false;
+
 	while( !m_stopRequested )
 	{
 		auto packet = m_compressedQueue.Pop();
@@ -154,6 +157,32 @@ void VpxDecoder::DecodeThread()
 
 		for( unsigned j = 0; !m_stopRequested && j < count; ++j ) 
 		{
+			uint8_t* alphaData;
+			size_t alphaLength;
+
+			if( packet->GetAlphaFrame( alphaData, alphaLength ) )
+			{
+				if( !alphaInitialized )
+				{
+					vpx_codec_dec_init( &m_alphaCodec, &vpx_codec_vp8_dx_algo, nullptr, 0 );
+					hasAlpha = true;
+					alphaInitialized = true;
+				}
+				if( hasAlpha )
+				{
+					vpx_codec_err_t e = vpx_codec_decode( &m_alphaCodec, alphaData, unsigned( alphaLength ), nullptr, 0 );
+					if( e ) 
+					{
+						++m_corruptFrames;
+						continue;
+					}
+				}
+			}
+			else
+			{
+				alphaInitialized = true;
+			}
+
 			uint8_t* data;
 			size_t length;
 			if( !packet->GetFrame( j, data, length ) )
@@ -189,10 +218,28 @@ void VpxDecoder::DecodeThread()
 				CopyImagePlane( frame->u.get(), img->planes[1], img->stride[1], frame->uvWidth, frame->uvHeight );
 				frame->v.reset( CCP_NEW( "VpxDecoder/frame/v" ) uint8_t[frame->uvWidth * frame->uvHeight] );
 				CopyImagePlane( frame->v.get(), img->planes[2], img->stride[2], frame->uvWidth, frame->uvHeight );
+				if( hasAlpha )
+				{
+					vpx_codec_iter_t  alphaIter = nullptr;
+					while( auto img = vpx_codec_get_frame( &m_alphaCodec, &alphaIter ) )
+					{
+						frame->alpha.reset( CCP_NEW( "VpxDecoder/frame/alpha" ) uint8_t[frame->yWidth * frame->yHeight] );
+						CopyImagePlane( frame->alpha.get(), img->planes[0], img->stride[0], frame->yWidth, frame->yHeight );
+					}
+				}
+				else
+				{
+					frame->alpha.reset();
+				}
+
 				m_decompressedQueue.Push( frame );
 				++m_processedFrames;
 			}
 		}
 	}
 	vpx_codec_destroy( &m_videoCodec );
+	if( hasAlpha )
+	{
+		vpx_codec_destroy( &m_alphaCodec );
+	}
 }

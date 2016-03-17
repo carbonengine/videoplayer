@@ -40,6 +40,7 @@ private:
 	EncodedVideoFrameQueue& m_compressedQueue;
 	VideoFrameQueue m_decompressedQueue;
 	vpx_codec_ctx_t m_videoCodec;
+	vpx_codec_ctx_t m_alphaCodec;
 	const VideoMetadata& m_videoMetadata;
 	uint64_t m_dropFrameTime;
 	bool m_stopRequested;

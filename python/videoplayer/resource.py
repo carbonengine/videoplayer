@@ -7,6 +7,7 @@ import trinity
 import audio2
 import videoplayer
 import decometaclass
+import uthread2
 
 _error_handlers = set()
 _state_change_handlers = set()
@@ -29,12 +30,38 @@ class VideoRenderJob(object):
         self.weak_texture = None
         self.generate_mips = False
         self.audio_emitter = None
+        self._deleted = False
         self.constructor_params = {}
         self.name = 'VideoRenderJob'
 
     def init(self, video_local=None, video_remote=None, generate_mips=0, **kwargs):
+        if not video_local and not video_remote:
+            raise ValueError()
+
         self.generate_mips = bool(generate_mips)
+
+        def texture_destroyed():
+            self._destroy()
+
+        trinity.renderJobs.recurring.append(self)
+
+        texture = trinity.TriTextureRes()
+        self.weak_texture = blue.BluePythonWeakRef(texture)
+        self.weak_texture.callback = texture_destroyed
+
+        self.constructor_params = dict(kwargs)
+        self.constructor_params.update({'video_local': video_local, 'video_remote': video_remote,
+                                        'generate_mips': generate_mips})
+
+        uthread2.start_tasklet(self._init, video_local, video_remote)
+        return texture
+
+    def _init(self, video_local=None, video_remote=None):
         if video_local:
+            if blue.remoteFileCache.FileExists(video_local) and not blue.paths.FileExistsLocally(video_local):
+                blue.paths.GetFileContentsWithYield(video_local)
+                if self._deleted:
+                    return
             stream = blue.paths.open(video_local, 'rb')
         elif video_remote:
             stream = blue.BlueNetworkStream(video_remote)
@@ -45,19 +72,6 @@ class VideoRenderJob(object):
         self.video.on_create_textures = self._on_video_info_ready
         self.video.on_error = self._on_error
         self.rt = None
-        self.constructor_params = dict(kwargs)
-        self.constructor_params.update({'video_local': video_local, 'video_remote': video_remote,
-                                        'generate_mips': generate_mips})
-
-        def texture_destroyed():
-            self._destroy()
-
-        trinity.renderJobs.recurring.append(self)
-
-        texture = trinity.TriTextureRes()
-        self.weak_texture = blue.BluePythonWeakRef(texture)
-        self.weak_texture.callback = texture_destroyed
-        return texture
 
     def _on_state_change(self, player):
         logging.info('Video player state changed to %s', videoplayer.State.GetNameFromValue(player.state))
@@ -85,6 +99,7 @@ class VideoRenderJob(object):
         self.steps.append(trinity.TriStepPythonCB(update_texture))
 
     def _destroy(self):
+        self._deleted = True
         trinity.renderJobs.recurring.remove(self)
         self.steps.removeAt(-1)
         if self.video:

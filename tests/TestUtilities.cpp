@@ -107,3 +107,8 @@ bool TestEncodedFrame::GetFrame( size_t index, uint8_t*& data, size_t& length )
 	data = (uint8_t*)( m_data );
 	return true;
 }
+
+bool TestEncodedFrame::GetAlphaFrame( uint8_t*& data, size_t& length )
+{
+	return false;
+}

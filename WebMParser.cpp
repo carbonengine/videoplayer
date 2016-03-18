@@ -310,9 +310,9 @@ void WebMParser::ReadThread()
 	m_audioTrack = FindTrack( NESTEGG_TRACK_AUDIO, m_requestedAudioTrack );
 	PopulateAudioMetadata( m_nestEgg, m_audioTrack, m_audioMetadata );
 
-	if( m_audioTrack == -1 && m_videoQueue && !m_looped )
+	if( m_audioTrack == -1 && m_videoQueue )
 	{
-		m_videoQueue->GetFullPolicy().SetMaxCount( std::numeric_limits<size_t>::max() );
+		m_videoQueue->GetFullPolicy().SetMaxCount( VIDEO_QUEUE_LENGTH );
 	}
 
 	m_metadataMutex.Release();

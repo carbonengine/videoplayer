@@ -19,7 +19,13 @@ def _create_tex_param(name, tex):
     return p
 
 
-def set_up_decode_render_job(player, rj, generate_mips=True, rt=None):
+def set_up_decode_render_job(player, rj, generate_mips=True):
+    mip_count = 0 if generate_mips else 1
+    rt = _trinity.Tr2RenderTarget(player.y_channel.width, player.y_channel.height, mip_count,
+                                 _trinity.PIXEL_FORMAT.B8G8R8A8_UNORM)
+    if not rt.isValid:
+        raise RuntimeError('could not create video render target')
+
     effect = _trinity.Tr2Effect()
     effect.effectFilePath = 'res:/graphics/effect/managed/space/system/decodeycucv.fx'
     effect.resources.append(_create_tex_param('YSource', player.y_channel))

@@ -6,7 +6,6 @@ import urllib
 import blue
 import trinity
 import videoplayer
-import decometaclass
 import uthread2
 
 _error_handlers = set()
@@ -18,29 +17,21 @@ def _is_low_quality():
     return trinity.GetShaderModel() == 'SM_3_0_LO'
 
 
-class _VideoPlaylistRenderJob(object):
-    __cid__ = "trinity.TriRenderJob"
-    __metaclass__ = decometaclass.BlueWrappedMetaclass
-
+class _VideoPlaylistController(object):
     def __init__(self):
         self.video = None
-        self.rt = None
         self.weak_texture = None
         self.generate_mips = False
-        self.audio_emitter = None
         self.constructor_params = {}
         self.playlist = None
         self.low_quality_texture_path = None
         self.destroyed = False
-        self.name = 'VideoPlaylistRenderJob'
 
     def init(self, width, height, playlist, low_quality_texture_path=None, **kwargs):
         self.destroyed = False
         self.low_quality_texture_path = low_quality_texture_path
         self.generate_mips = kwargs.pop('generate_mips', False)
         self.constructor_params = kwargs
-        self.rt = trinity.Tr2RenderTarget(width, height, 0 if self.generate_mips else 1,
-                                          trinity.PIXEL_FORMAT.B8G8R8A8_UNORM)
         self.playlist = playlist(**kwargs)
 
         def texture_destroyed():
@@ -53,41 +44,25 @@ class _VideoPlaylistRenderJob(object):
             self.play_next()
         else:
             self._create_low_quality_render_job()
-        trinity.renderJobs.recurring.append(self)
 
         return texture
 
     def _create_low_quality_render_job(self):
-        texture = blue.resMan.GetResource(self.low_quality_texture_path)
-        self.steps.removeAt(-1)
-        self.steps.append(trinity.TriStepPushRenderTarget(self.rt))
-        self.steps.append(trinity.TriStepPushDepthStencil(None))
-        self.steps.append(trinity.TriStepSetStdRndStates(trinity.RM_FULLSCREEN))
-        self.steps.append(trinity.TriStepClear((0, 0, 0, 0)))
-        self.steps.append(trinity.TriStepRenderTexture(texture))
-        self.steps.append(trinity.TriStepPopDepthStencil())
-        self.steps.append(trinity.TriStepPopRenderTarget())
-        if self.generate_mips:
-            self.steps.append(trinity.TriStepGenerateMipMaps(self.rt))
+        lq = blue.resMan.GetResource(self.low_quality_texture_path)
 
-        def update_texture():
-            self.weak_texture.object.SetFromRenderTarget(self.rt)
+        def check():
+            while True:
+                if self.destroyed or not self.low_quality_texture_path or not _is_low_quality():
+                    return
+                if lq.isGood:
+                    try:
+                        self.weak_texture.object.CreateFromTexture(lq)
+                    except:
+                        pass
+                    return
+                blue.synchro.SleepWallclock(100)
 
-        self.steps.append(trinity.TriStepPythonCB(update_texture))
-
-    def DoPrepareResources(self):
-        if self.destroyed:
-            return
-        if self.low_quality_texture_path:
-            if _is_low_quality():
-                if self.video:
-                    self.video = None
-                    self._create_low_quality_render_job()
-            else:
-                if not self.video:
-                    if self not in trinity.renderJobs.recurring:
-                        trinity.renderJobs.recurring.append(self)
-                    self.play_next()
+        uthread2.start_tasklet(check)
 
     def play_next(self):
         if self.destroyed:
@@ -104,6 +79,7 @@ class _VideoPlaylistRenderJob(object):
         else:
             stream = blue.paths.open(item, 'rb')
         self.video = videoplayer.VideoPlayer(stream, None)
+        self.video.bgra_texture = self.weak_texture.object
         self.video.on_state_change = self._on_state_change
         self.video.on_create_textures = self._on_video_info_ready
         self.video.on_error = self._on_error
@@ -126,30 +102,17 @@ class _VideoPlaylistRenderJob(object):
                 each(player, e, self.constructor_params, self.weak_texture.object)
             uthread2.start_tasklet(self.play_next)
 
-    def _on_video_info_ready(self, player, y_size, uv_size, alpha):
-        self.steps.removeAt(-1)
-
-        videoplayer.create_textures(self.video, y_size, uv_size, alpha)
-        videoplayer.set_up_decode_render_job(self.video, self, self.generate_mips, self.rt)
-
-        def update_texture():
-            self.weak_texture.object.SetFromRenderTarget(self.rt)
-
-        self.steps.append(trinity.TriStepPythonCB(update_texture))
+    def _on_video_info_ready(self, _, width, height):
+        if self.weak_texture.object:
+            self.weak_texture.object.__init__(width, height, 1, trinity.PIXEL_FORMAT.B8G8R8A8_UNORM)
 
     def _destroy(self):
-        try:
-            trinity.renderJobs.recurring.remove(self)
-        except RuntimeError:
-            pass
-        self.steps.removeAt(-1)
         if self.video:
+            self.video.bgra_texture = None
             self.video.on_state_change = None
             self.video.on_create_textures = None
             self.video.on_error = None
         self.video = None
-        self.audio_emitter = None
-        self.rt = None
         self.destroyed = True
         if self.weak_texture is not None:
             self.weak_texture.callback = None
@@ -181,7 +144,7 @@ def register_resource_constructor(name, width, height, playlist, low_quality_tex
     def play(param_string):
         # noinspection PyBroadException
         try:
-            rj = _VideoPlaylistRenderJob()
+            rj = _VideoPlaylistController()
             return rj.init(width, height, playlist, low_quality_texture_path, **_url_to_dict(param_string))
         except:
             logging.exception('Exception in video playlist resource constructor')

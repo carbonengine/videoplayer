@@ -4,35 +4,20 @@ import urllib
 
 import blue
 import trinity
-import audio2
 import videoplayer
-import decometaclass
 import uthread2
 
 _error_handlers = set()
 _state_change_handlers = set()
 
 
-def _create_tex_param(name, tex):
-    p = trinity.TriTexture2DParameter()
-    p.name = name
-    p.SetResource(tex)
-    return p
-
-
-class VideoRenderJob(object):
-    __cid__ = "trinity.TriRenderJob"
-    __metaclass__ = decometaclass.BlueWrappedMetaclass
-
+class _VideoController(object):
     def __init__(self):
         self.video = None
-        self.rt = None
         self.weak_texture = None
         self.generate_mips = False
-        self.audio_emitter = None
         self._deleted = False
         self.constructor_params = {}
-        self.name = 'VideoRenderJob'
 
     def init(self, video_local=None, video_remote=None, generate_mips=0, **kwargs):
         if not video_local and not video_remote:
@@ -42,8 +27,6 @@ class VideoRenderJob(object):
 
         def texture_destroyed():
             self._destroy()
-
-        trinity.renderJobs.recurring.append(self)
 
         texture = trinity.TriTextureRes()
         self.weak_texture = blue.BluePythonWeakRef(texture)
@@ -57,6 +40,8 @@ class VideoRenderJob(object):
         return texture
 
     def _init(self, video_local=None, video_remote=None):
+        if self._deleted:
+            return
         if video_local:
             if blue.remoteFileCache.FileExists(video_local) and not blue.paths.FileExistsLocally(video_local):
                 blue.paths.GetFileContentsWithYield(video_local)
@@ -68,10 +53,10 @@ class VideoRenderJob(object):
         else:
             raise ValueError()
         self.video = videoplayer.VideoPlayer(stream, None)
+        self.video.bgra_texture = self.weak_texture.object
         self.video.on_state_change = self._on_state_change
         self.video.on_create_textures = self._on_video_info_ready
         self.video.on_error = self._on_error
-        self.rt = None
 
     def _on_state_change(self, player):
         logging.info('Video player state changed to %s', videoplayer.State.GetNameFromValue(player.state))
@@ -86,29 +71,18 @@ class VideoRenderJob(object):
             for each in _error_handlers:
                 each(player, e, self.constructor_params, self.weak_texture.object)
 
-
-    def _on_video_info_ready(self, player, y_size, uv_size, alpha):
-        self.steps.removeAt(-1)
-
-        videoplayer.create_textures(self.video, y_size, uv_size, alpha)
-        self.rt = videoplayer.set_up_decode_render_job(self.video, self, self.generate_mips)
-
-        def update_texture():
-            self.weak_texture.object.SetFromRenderTarget(self.rt)
-
-        self.steps.append(trinity.TriStepPythonCB(update_texture))
+    def _on_video_info_ready(self, _, width, height):
+        if self.weak_texture.object:
+            self.weak_texture.object.__init__(width, height, 1, trinity.PIXEL_FORMAT.B8G8R8A8_UNORM)
 
     def _destroy(self):
         self._deleted = True
-        trinity.renderJobs.recurring.remove(self)
-        self.steps.removeAt(-1)
         if self.video:
+            self.video.bgra_texture = None
             self.video.on_state_change = None
             self.video.on_create_textures = None
             self.video.on_error = None
         self.video = None
-        self.audio_emitter = None
-        self.rt = None
         if self.weak_texture is not None:
             self.weak_texture.callback = None
 
@@ -127,7 +101,7 @@ def _url_to_dict(param_string):
 def play_video(param_string):
     # noinspection PyBroadException
     try:
-        rj = VideoRenderJob()
+        rj = _VideoController()
         return rj.init(**_url_to_dict(param_string))
     except:
         logging.exception('Exception in video resource constructor')

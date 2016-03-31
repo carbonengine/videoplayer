@@ -259,12 +259,21 @@ void YuvToBgra(
 	}
 }
 
+inline void CopyImagePlane( uint8_t* dest, uint8_t* source, int sourceStride, uint32_t width, uint32_t height )
+{
+	for( uint32_t i = 0; i < height; ++i )
+	{
+		memcpy( dest + width * i, source + sourceStride * i, width );
+	}
+}
+
 }
 
 VpxDecoder::VpxDecoder( const VideoMetadata& videoMetadata, EncodedVideoFrameQueue& compressedQueue )
 	:m_videoMetadata( videoMetadata ),
 	m_compressedQueue( compressedQueue ),
 	m_decompressedQueue( QUEUE_LENGTH ),
+	m_yuvFrameQueue( QUEUE_LENGTH ),
 	m_dropFrameTime( 0 ),
 	m_stopRequested( false ),
 	m_error( DECODER_ERROR_OK ),
@@ -277,12 +286,14 @@ VpxDecoder::VpxDecoder( const VideoMetadata& videoMetadata, EncodedVideoFrameQue
 		m_error = DECODER_ERROR_UNSUPPORTED_CODEC;
 		return;
 	}
+	m_convertThread = CcpThread( &VpxDecoder::ConvertThread, this );
 	m_decodeThread = CcpThread( &VpxDecoder::DecodeThread, this );
 }
 
 VpxDecoder::~VpxDecoder()
 {
 	m_decompressedQueue.SetComplete();
+	m_yuvFrameQueue.SetComplete();
 	m_stopRequested = true;
 	WaitUntilDone();
 }
@@ -322,6 +333,10 @@ void VpxDecoder::WaitUntilDone()
     if( m_decodeThread.joinable() )
     {
         m_decodeThread.join();
+    }
+    if( m_convertThread.joinable() )
+    {
+        m_convertThread.join();
     }
 }
 
@@ -391,7 +406,7 @@ void VpxDecoder::DecodeThread()
 				continue;
 			}
 
-			if( packetTimeStamp < m_dropFrameTime && !IsKeyFrame( &m_videoCodec ) )
+			if( ( packetTimeStamp < m_dropFrameTime ) && ( !IsKeyFrame( &m_videoCodec )  || m_dropFrameTime - packetTimeStamp > 10000000 ) )
 			{
 				++m_droppedFrames;
 				continue;
@@ -400,7 +415,7 @@ void VpxDecoder::DecodeThread()
 			vpx_codec_iter_t  iter = nullptr;
 			while( auto img = vpx_codec_get_frame( &m_videoCodec, &iter ) )
 			{
-				auto frame = CCP_NEW( "VpxDecoder/frame" ) VideoFrame;
+				auto frame = CCP_NEW( "VpxDecoder/frame" ) YuvFrame;
 				frame->width = img->d_w;
 				frame->height = img->d_h;
 				frame->timeStamp = packetTimeStamp;
@@ -411,22 +426,24 @@ void VpxDecoder::DecodeThread()
 					alphaImg = vpx_codec_get_frame( &m_alphaCodec, &alphaIter );
 				}
 
-				frame->bgra.reset( CCP_NEW( "VpxDecoder/frame/bgra" ) uint8_t[4 * frame->width * frame->height] );
-				
-				YuvToBgra( 
-					frame->bgra.get(), 
-					img->planes[0],
-					img->stride[0],
-					img->planes[1],
-					img->stride[1],
-					img->planes[2],
-					img->stride[2],
-					alphaImg ? alphaImg->planes[0] : nullptr,
-					alphaImg ? alphaImg->stride[0] : 0,
-					frame->width, frame->height, img->x_chroma_shift );
-					
+				frame->uvShift = img->x_chroma_shift;
+				auto uvWidth = frame->width >> img->x_chroma_shift;
+				auto uvHeight = frame->height >> img->x_chroma_shift;
 
-				m_decompressedQueue.Push( frame );
+				frame->y.reset( CCP_NEW( "VpxDecoder/frame/y" ) uint8_t[frame->width * frame->height] );
+				CopyImagePlane( frame->y.get(), img->planes[0], img->stride[0], frame->width, frame->height );
+				frame->u.reset( CCP_NEW( "VpxDecoder/frame/u" ) uint8_t[uvWidth * uvHeight] );
+				CopyImagePlane( frame->u.get(), img->planes[1], img->stride[1], uvWidth, uvHeight );
+				frame->v.reset( CCP_NEW( "VpxDecoder/frame/v" ) uint8_t[uvWidth * uvHeight] );
+				CopyImagePlane( frame->v.get(), img->planes[2], img->stride[2], uvWidth, uvHeight );
+
+				if( alphaImg )
+				{
+					frame->alpha.reset( CCP_NEW( "VpxDecoder/frame/a" ) uint8_t[frame->width * frame->height] );
+					CopyImagePlane( frame->alpha.get(), alphaImg->planes[0], alphaImg->stride[0], frame->width, frame->height );
+				}
+
+				m_yuvFrameQueue.Push( frame );
 				++m_processedFrames;
 			}
 		}
@@ -435,5 +452,42 @@ void VpxDecoder::DecodeThread()
 	if( hasAlpha )
 	{
 		vpx_codec_destroy( &m_alphaCodec );
+	}
+}
+
+void VpxDecoder::ConvertThread()
+{
+#ifndef WITH_TESTS
+	CCP_STATS_ZONE( __FUNCTION__ );
+#endif
+	while( !m_stopRequested )
+	{
+		auto yuv = m_yuvFrameQueue.Pop();
+
+		if( ( yuv->timeStamp < m_dropFrameTime ) && m_yuvFrameQueue.Size() )
+		{
+			++m_droppedFrames;
+			continue;
+		}
+
+		auto frame = CCP_NEW( "VpxDecoder/frame" ) VideoFrame;
+		frame->width = yuv->width;
+		frame->height = yuv->height;
+		frame->timeStamp = yuv->timeStamp;
+		frame->bgra.reset( CCP_NEW( "VpxDecoder/frame/bgra" ) uint8_t[4 * frame->width * frame->height] );
+
+		YuvToBgra( 
+			frame->bgra.get(), 
+			yuv->y.get(),
+			yuv->width,
+			yuv->u.get(),
+			yuv->width >> yuv->uvShift,
+			yuv->v.get(),
+			yuv->width >> yuv->uvShift,
+			yuv->alpha.get(),
+			yuv->width,
+			frame->width, frame->height, yuv->uvShift );
+					
+		m_decompressedQueue.Push( frame );
 	}
 }

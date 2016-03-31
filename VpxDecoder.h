@@ -36,6 +36,28 @@ public:
 	void WaitUntilDone();
 private:
 	void DecodeThread();
+	void ConvertThread();
+
+
+	struct YuvFrame
+	{
+		std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> y;
+		std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> u;
+		std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> v;
+		std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> alpha;
+
+		int yStride;
+		int uStride;
+		int vStride;
+		int alphaStride;
+		uint32_t width;
+		uint32_t height; 
+		uint64_t timeStamp;
+		uint32_t uvShift;
+	};
+
+	FrameQueue<YuvFrame, MaxCountFullPolicy> m_yuvFrameQueue;
+
 
 	EncodedVideoFrameQueue& m_compressedQueue;
 	VideoFrameQueue m_decompressedQueue;
@@ -45,6 +67,7 @@ private:
 	uint64_t m_dropFrameTime;
 	bool m_stopRequested;
 	CcpThread m_decodeThread;
+	CcpThread m_convertThread;
 	DecoderError m_error;
 	uint32_t m_processedFrames;
 	uint32_t m_corruptFrames;

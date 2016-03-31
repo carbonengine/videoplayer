@@ -144,15 +144,10 @@ typedef FrameQueue<PcmFrame, MaxCountFullPolicy> PcmFrameQueue;
 // --------------------------------------------------------------------------------------
 struct VideoFrame
 {
-	uint32_t yWidth;
-	uint32_t yHeight;
-	uint32_t uvWidth;
-	uint32_t uvHeight;
+	uint32_t width;
+	uint32_t height;
 	uint64_t timeStamp;
-	std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> y;
-	std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> u;
-	std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> v;
-	std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> alpha;
+	std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> bgra;
 };
 
 typedef FrameQueue<VideoFrame, MaxCountFullPolicy> VideoFrameQueue;

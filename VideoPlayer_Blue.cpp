@@ -79,30 +79,12 @@ const Be::ClassInfo* VideoPlayer::ExposeToBlue()
 			"clear_textures", 
 			ClearTextures, 
 			"Clears channel textures to black" );
-		MAP_ATTRIBUTE( 
-			"y_channel", 
-			m_yChannel, 
-			"Y channel texture. Needs to be a valid trinity.TriTextureRes texture\n"
-			"with the size matching video size", 
-			Be::READWRITE | Be::NOTIFY );
-		MAP_ATTRIBUTE( 
-			"cu_channel", 
-			m_uChannel, 
-			"Cu channel texture. Needs to be a valid trinity.TriTextureRes texture\n"
-			"with the size matching video size (half of the video size)", 
-			Be::READWRITE | Be::NOTIFY );
-		MAP_ATTRIBUTE( 
-			"cv_channel", 
-			m_vChannel, 
-			"Cv channel texture. Needs to be a valid trinity.TriTextureRes texture\n"
-			"with the size matching video size (half of the video size)", 
-			Be::READWRITE | Be::NOTIFY );
-		MAP_ATTRIBUTE( 
-			"alpha_channel", 
-			m_alphaChannel, 
-			"Alpha channel texture. Needs to be a valid trinity.TriTextureRes texture\n"
-			"with the size matching video size", 
-			Be::READWRITE | Be::NOTIFY );
+		MAP_PROPERTY( 
+			"bgra_texture", 
+			GetBgraTexture, 
+			SetBgraTexture,
+			"BGRA8 output texture. Needs to be a valid trinity.TriTextureRes texture\n"
+			"with the size matching video size" );
 		MAP_PROPERTY_READONLY(
 			"media_time",
 			GetMediaTime,

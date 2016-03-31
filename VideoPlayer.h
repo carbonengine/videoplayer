@@ -49,13 +49,14 @@ public:
 	virtual void OnTick( Be::Time realTime, Be::Time simTime, void* cookie );
 
 private:
+	void SetBgraTexture( ITriTextureRes* texture );
+	ITriTextureRes* GetBgraTexture() const;
+
 	std::unique_ptr<VideoController, TrackableDelete<VideoController>> m_video;
 	IBlueStreamPtr m_stream;
 	IAudioSinkExposedPtr m_audioSink;
-	ITriTextureResPtr m_yChannel;
-	ITriTextureResPtr m_uChannel;
-	ITriTextureResPtr m_vChannel;
-	ITriTextureResPtr m_alphaChannel;
+	BlueWeakRef<ITriTextureRes> m_bgraTexture;
+
 	uint64_t m_lastUpdatedTimeStamp;
 	VideoController::State m_lastState;
 	VideoPlayerResult m_lastError;

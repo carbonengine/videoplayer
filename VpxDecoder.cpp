@@ -13,26 +13,31 @@ namespace
 {
 
 const size_t QUEUE_LENGTH = 5;
+const int K1 = int( 1.164 * ( 1 << 16 ) );
+const int K2 = int( 2.018 * ( 1 << 16 ) );
+const int K3 = int( 0.813 * ( 1 << 16 ) );
+const int K4 = int( 0.391 * ( 1 << 16 ) );
+const int K5 = int( 1.596 * ( 1 << 16 ) );
 
 
 inline int ScaleYuv( int v )
 {
-	return ( v + 128000 ) / 256000;
+	return ( v + ( 1 << 15 ) ) >> 16;
 }
 
 inline int RCoeff( int y, int u, int v )
 {
-	return 298082 * y + 0 * u + 408583*v; 
+	return K1 * y + 0 * u + K2 * v; 
 }
 
 inline int GCoeff( int y, int u, int v )
 { 
-	return 298082 * y - 100291 * u - 208120 * v; 
+	return K1 * y - K3 * u - K4 * v; 
 }
 
 inline int BCoeff( int y, int u, int v )
 {
-	return 298082 * y + 516411 * u + 0 * v; 
+	return K1 * y + K5 * u + 0 * v; 
 }
 
 uint8_t Clamp( int vv )
@@ -57,11 +62,200 @@ bool IsKeyFrame( vpx_codec_ctx_t* context )
 	return info.is_kf != 0;
 }
 
-inline void CopyImagePlane( uint8_t* dest, uint8_t* source, int sourceStride, uint32_t width, uint32_t height )
+
+void YuvToBgra444( 
+	uint8_t* dest, 
+	const uint8_t* srcY, 
+	int yStride,
+	const uint8_t* srcU, 
+	int uStride,
+	const uint8_t* srcV, 
+	int vStride,
+	const uint8_t* srcAlpha, 
+	int alphaStride,
+	uint32_t width, 
+	uint32_t height )
 {
-	for( uint32_t i = 0; i < height; ++i )
+	yStride -= int( width );
+	uStride -= int( width );
+	vStride -= int( width );
+	alphaStride -= int( width );
+	for( uint32_t j = 0; j < height; ++j )
 	{
-		memcpy( dest + width * i, source + sourceStride * i, width );
+		for( uint32_t i = 0; i < width; ++i )
+		{
+			int y = int( *srcY++ ) - 16;
+			int u = int( *srcU++ ) - 128;
+			int v = int( *srcV++ ) - 128;
+			*dest++ = Clamp( ScaleYuv( BCoeff( y, u, v ) ) );
+			*dest++ = Clamp( ScaleYuv( GCoeff( y, u, v ) ) );
+			*dest++ = Clamp( ScaleYuv( RCoeff( y, u, v ) ) );
+			*dest++ = *srcAlpha++;
+		}
+		srcY += yStride;
+		srcU += uStride;
+		srcV += vStride;
+		srcAlpha += alphaStride;
+	}
+}
+
+void YuvToBgrx444( 
+	uint8_t* dest, 
+	const uint8_t* srcY, 
+	int yStride,
+	const uint8_t* srcU, 
+	int uStride,
+	const uint8_t* srcV, 
+	int vStride,
+	uint32_t width, 
+	uint32_t height )
+{
+	yStride -= int( width );
+	uStride -= int( width );
+	vStride -= int( width );
+	for( uint32_t j = 0; j < height; ++j )
+	{
+		for( uint32_t i = 0; i < width; ++i )
+		{
+			int y = int( *srcY++ ) - 16;
+			int u = int( *srcU++ ) - 128;
+			int v = int( *srcV++ ) - 128;
+			*dest++ = Clamp( ScaleYuv( BCoeff( y, u, v ) ) );
+			*dest++ = Clamp( ScaleYuv( GCoeff( y, u, v ) ) );
+			*dest++ = Clamp( ScaleYuv( RCoeff( y, u, v ) ) );
+			*dest++ = 0xff;
+		}
+		srcY += yStride;
+		srcU += uStride;
+		srcV += vStride;
+	}
+}
+
+void YuvToBgra422( 
+	uint8_t* dest, 
+	const uint8_t* srcY, 
+	int yStride,
+	const uint8_t* srcU, 
+	int uStride,
+	const uint8_t* srcV, 
+	int vStride,
+	const uint8_t* srcAlpha, 
+	int alphaStride,
+	uint32_t width, 
+	uint32_t height )
+{
+	yStride -= int( width );
+	uStride -= int( width / 2 );
+	vStride -= int( width / 2 );
+	alphaStride -= int( width );
+	for( uint32_t j = 0; j < height; ++j )
+	{
+		auto uRow = srcU;
+		auto vRow = srcV;
+		int u, v;
+		for( uint32_t i = 0; i < width; ++i )
+		{
+			int y = int( *srcY++ ) - 16;
+			if( ( i & 1 ) == 0 )
+			{
+				u = int( *uRow++ ) - 128;
+				v = int( *vRow++ ) - 128;
+			}
+			*dest++ = Clamp( ScaleYuv( BCoeff( y, u, v ) ) );
+			*dest++ = Clamp( ScaleYuv( GCoeff( y, u, v ) ) );
+			*dest++ = Clamp( ScaleYuv( RCoeff( y, u, v ) ) );
+			*dest++ = *srcAlpha++;
+		}
+		srcY += yStride;
+		srcAlpha += alphaStride;
+		if( ( j & 1 ) != 0 )
+		{
+			srcU = uRow;
+			srcV = vRow;
+			srcU += uStride;
+			srcV += vStride;
+		}
+	}
+}
+
+void YuvToBgrx422( 
+	uint8_t* dest, 
+	const uint8_t* srcY, 
+	int yStride,
+	const uint8_t* srcU, 
+	int uStride,
+	const uint8_t* srcV, 
+	int vStride,
+	uint32_t width, 
+	uint32_t height )
+{
+	yStride -= int( width );
+	uStride -= int( width / 2 );
+	vStride -= int( width / 2 );
+	for( uint32_t j = 0; j < height; ++j )
+	{
+		auto uRow = srcU;
+		auto vRow = srcV;
+		int u, v;
+		for( uint32_t i = 0; i < width; ++i )
+		{
+			int y = int( *srcY++ ) - 16;
+			if( ( i & 1 ) == 0 )
+			{
+				u = int( *uRow++ ) - 128;
+				v = int( *vRow++ ) - 128;
+			}
+			*dest++ = Clamp( ScaleYuv( BCoeff( y, u, v ) ) );
+			*dest++ = Clamp( ScaleYuv( GCoeff( y, u, v ) ) );
+			*dest++ = Clamp( ScaleYuv( RCoeff( y, u, v ) ) );
+			*dest++ = 0xff;
+		}
+		srcY += yStride;
+		if( ( j & 1 ) != 0 )
+		{
+			srcU = uRow;
+			srcV = vRow;
+			srcU += uStride;
+			srcV += vStride;
+		}
+	}
+}
+
+void YuvToBgra( 
+	uint8_t* dest, 
+	const uint8_t* srcY, 
+	int yStride,
+	const uint8_t* srcU, 
+	int uStride,
+	const uint8_t* srcV, 
+	int vStride,
+	const uint8_t* srcAlpha, 
+	int alphaStride,
+	uint32_t width, 
+	uint32_t height, 
+	uint32_t uvShift )
+{
+	if( uvShift )
+	{
+		if( srcAlpha )
+		{
+			YuvToBgra422( dest, srcY, yStride, srcU, uStride, srcV, vStride, srcAlpha, alphaStride, width, height );
+		}
+		else
+		{
+			YuvToBgrx422( dest, srcY, yStride, srcU, uStride, srcV, vStride, width, height );
+		}
+	}
+	else
+	{
+		if( srcAlpha )
+		{
+			YuvToBgra444( dest, srcY, yStride, srcU, uStride, srcV, vStride, srcAlpha, alphaStride, width, height );
+		}
+		else
+		{
+			YuvToBgrx444( dest, srcY, yStride, srcU, uStride, srcV, vStride, width, height );
+		}
 	}
 }
 
@@ -207,30 +401,30 @@ void VpxDecoder::DecodeThread()
 			while( auto img = vpx_codec_get_frame( &m_videoCodec, &iter ) )
 			{
 				auto frame = CCP_NEW( "VpxDecoder/frame" ) VideoFrame;
-				frame->yWidth = img->d_w;
-				frame->yHeight = img->d_h;
-				frame->uvWidth = img->d_w >> img->x_chroma_shift;
-				frame->uvHeight = img->d_h >> img->y_chroma_shift;
+				frame->width = img->d_w;
+				frame->height = img->d_h;
 				frame->timeStamp = packetTimeStamp;
-				frame->y.reset( CCP_NEW( "VpxDecoder/frame/y" ) uint8_t[frame->yWidth * frame->yHeight] );
-				CopyImagePlane( frame->y.get(), img->planes[0], img->stride[0], frame->yWidth, frame->yHeight );
-				frame->u.reset( CCP_NEW( "VpxDecoder/frame/u" ) uint8_t[frame->uvWidth * frame->uvHeight] );
-				CopyImagePlane( frame->u.get(), img->planes[1], img->stride[1], frame->uvWidth, frame->uvHeight );
-				frame->v.reset( CCP_NEW( "VpxDecoder/frame/v" ) uint8_t[frame->uvWidth * frame->uvHeight] );
-				CopyImagePlane( frame->v.get(), img->planes[2], img->stride[2], frame->uvWidth, frame->uvHeight );
+				vpx_image_t* alphaImg = nullptr;
 				if( hasAlpha )
 				{
 					vpx_codec_iter_t  alphaIter = nullptr;
-					while( auto img = vpx_codec_get_frame( &m_alphaCodec, &alphaIter ) )
-					{
-						frame->alpha.reset( CCP_NEW( "VpxDecoder/frame/alpha" ) uint8_t[frame->yWidth * frame->yHeight] );
-						CopyImagePlane( frame->alpha.get(), img->planes[0], img->stride[0], frame->yWidth, frame->yHeight );
-					}
+					alphaImg = vpx_codec_get_frame( &m_alphaCodec, &alphaIter );
 				}
-				else
-				{
-					frame->alpha.reset();
-				}
+
+				frame->bgra.reset( CCP_NEW( "VpxDecoder/frame/bgra" ) uint8_t[4 * frame->width * frame->height] );
+				
+				YuvToBgra( 
+					frame->bgra.get(), 
+					img->planes[0],
+					img->stride[0],
+					img->planes[1],
+					img->stride[1],
+					img->planes[2],
+					img->stride[2],
+					alphaImg ? alphaImg->planes[0] : nullptr,
+					alphaImg ? alphaImg->stride[0] : 0,
+					frame->width, frame->height, img->x_chroma_shift );
+					
 
 				m_decompressedQueue.Push( frame );
 				++m_processedFrames;

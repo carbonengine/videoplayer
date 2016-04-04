@@ -102,7 +102,7 @@ TEST( VpxDecoder, DecoderDecodesFrame )
 	VpxDecoder decoder( s_validFrameMetadata, compressedQueue );
 	compressedQueue.Push( CCP_NEW( "test value" ) TestEncodedFrame( s_validFrame, sizeof( s_validFrame ) ) );
 	compressedQueue.SetComplete();
-	Wait( [&] { decoder.WaitUntilDone(); }, 3000 );
+	Wait( [&] { decoder.WaitUntilDone(); }, 30000 );
 	EXPECT_EQ( 0, decoder.GetCorruptFrameCount() );
 	EXPECT_EQ( 1, decoder.GetProcessedFrameCount() );
 	EXPECT_EQ( 1, decoder.GetDecodedQueue().Size() );
@@ -114,11 +114,11 @@ TEST( VpxDecoder, DecodedFrameHasCorrectSize )
 	VpxDecoder decoder( s_validFrameMetadata, compressedQueue );
 	compressedQueue.Push( CCP_NEW( "test value" ) TestEncodedFrame( s_validFrame, sizeof( s_validFrame ) ) );
 	compressedQueue.SetComplete();
-	Wait( [&] { decoder.WaitUntilDone(); }, 3000 );
+	Wait( [&] { decoder.WaitUntilDone(); }, 30000 );
 	ASSERT_EQ( 1, decoder.GetDecodedQueue().Size() );
 	auto frame = decoder.GetDecodedQueue().Pop();
-	EXPECT_EQ( s_validFrameMetadata.width, frame->yWidth );
-	EXPECT_EQ( s_validFrameMetadata.height, frame->yHeight );
+	EXPECT_EQ( s_validFrameMetadata.width, frame->width );
+	EXPECT_EQ( s_validFrameMetadata.height, frame->height );
 }
 
 TEST( VpxDecoder, DecoderDropsLaggingFrame )
@@ -129,7 +129,7 @@ TEST( VpxDecoder, DecoderDropsLaggingFrame )
 	compressedQueue.Push( CCP_NEW( "test value" ) TestEncodedFrame( s_validFrame, sizeof( s_validFrame ) ) );
 	compressedQueue.Push( CCP_NEW( "test value" ) TestEncodedFrame( s_validNonKeyFrame, sizeof( s_validNonKeyFrame ) ) );
 	compressedQueue.SetComplete();
-	Wait( [&] { decoder.WaitUntilDone(); }, 3000 );
+	Wait( [&] { decoder.WaitUntilDone(); }, 30000 );
 	EXPECT_EQ( 1, decoder.GetDroppedFrameCount() );
 	EXPECT_EQ( 1, decoder.GetProcessedFrameCount() );
 	EXPECT_EQ( 1, decoder.GetDecodedQueue().Size() );

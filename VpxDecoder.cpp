@@ -168,7 +168,7 @@ void YuvToBgra422(
 		}
 		srcY += yStride;
 		srcAlpha += alphaStride;
-		if( ( j & 1 ) != 0 )
+		if( ( j & 1 ) != 0 && j / 2 + 1 < height / 2 )
 		{
 			srcU = uRow;
 			srcV = vRow;
@@ -211,7 +211,7 @@ void YuvToBgrx422(
 			*dest++ = 0xff;
 		}
 		srcY += yStride;
-		if( ( j & 1 ) != 0 )
+		if( ( j & 1 ) != 0 && j / 2 + 1 < height / 2 )
 		{
 			srcU = uRow;
 			srcV = vRow;
@@ -357,7 +357,7 @@ void VpxDecoder::DecodeThread()
 		auto packet = m_compressedQueue.Pop();
 		if( !packet )
 		{
-			m_decompressedQueue.SetComplete();
+			m_yuvFrameQueue.SetComplete();
 			break;
 		}
 
@@ -463,6 +463,11 @@ void VpxDecoder::ConvertThread()
 	while( !m_stopRequested )
 	{
 		auto yuv = m_yuvFrameQueue.Pop();
+		if( !yuv )
+		{
+			m_decompressedQueue.SetComplete();
+			break;
+		}
 
 		if( ( yuv->timeStamp < m_dropFrameTime ) && m_yuvFrameQueue.Size() )
 		{
@@ -471,10 +476,21 @@ void VpxDecoder::ConvertThread()
 		}
 
 		auto frame = CCP_NEW( "VpxDecoder/frame" ) VideoFrame;
+		if( !frame )
+		{
+			++m_corruptFrames;
+			continue;
+		}
 		frame->width = yuv->width;
 		frame->height = yuv->height;
 		frame->timeStamp = yuv->timeStamp;
 		frame->bgra.reset( CCP_NEW( "VpxDecoder/frame/bgra" ) uint8_t[4 * frame->width * frame->height] );
+		if( !frame->bgra )
+		{
+			CCP_DELETE frame;
+			++m_corruptFrames;
+			continue;
+		}
 
 		YuvToBgra( 
 			frame->bgra.get(), 

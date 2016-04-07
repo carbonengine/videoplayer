@@ -87,7 +87,7 @@ class _VideoPlaylistController(object):
     def _on_state_change(self, player):
         if self.destroyed:
             return
-        logging.info('Video player state changed to %s', videoplayer.State.GetNameFromValue(player.state))
+        logging.debug('Video player state changed to %s', videoplayer.State.GetNameFromValue(player.state))
         for each in _state_change_handlers:
             each(player, self.constructor_params, self.weak_texture.object)
         if player.state == videoplayer.State.DONE:

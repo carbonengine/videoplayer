@@ -177,7 +177,7 @@ VideoPlayerResult VideoPlayer::Update()
 			}
 			if( !!m_bgraTexture && m_bgraTexture->GetWidth() == frame->width && m_bgraTexture->GetHeight() == frame->height )
 			{
-				m_bgraTexture->UpdateSubresource( 0, 0, frame->width, frame->height, frame->bgra.get(), 4 * frame->width );
+				m_bgraTexture->UpdateSubresource( 0, 0, frame->width, frame->height, frame->bgra, 4 * frame->width );
 			}
 			m_lastUpdatedTimeStamp = frame->timeStamp;
 		}

@@ -125,18 +125,71 @@ struct AudioMetadata
 
 // --------------------------------------------------------------------------------------
 // Description:
+//   Owner of frames responsible for releasing/deleting them.
+// --------------------------------------------------------------------------------------
+template <typename Frame>
+struct FrameOwner
+{
+	virtual void ReleaseFrame( Frame* frame ) = 0;
+};
+
+// --------------------------------------------------------------------------------------
+// Description:
+//   Frame deleter interface to std::unique_ptr.
+// --------------------------------------------------------------------------------------
+template <typename Frame, typename Deleter = TrackableDelete<Frame>>
+class FrameDeleter
+{
+public:
+	FrameDeleter( FrameOwner<Frame>* owner = nullptr )
+		:m_owner( owner )
+	{
+	}
+
+	void operator()( Frame* frame )
+	{
+		if( m_owner )
+		{
+			m_owner->ReleaseFrame( frame );
+		}
+		else
+		{
+			Deleter()( frame );
+		}
+	}
+private:
+	FrameOwner<Frame>* m_owner;
+};
+
+// --------------------------------------------------------------------------------------
+// Description:
 //   A frame of uncompressed PCM audio. Audio decoders emit these frames for audio sinks
 //   to consume.
 // --------------------------------------------------------------------------------------
 struct PcmFrame
 {
+	PcmFrame()
+	{
+		data = reinterpret_cast<int16_t*>( reinterpret_cast<uint8_t*>( this ) + sizeof( *this ) );
+	}
+
+	static void* operator new( std::size_t sz, uint32_t channels, uint32_t samples )
+	{
+		return CCP_MALLOC( "PcmFrame", sz + channels * samples * sizeof( int16_t ) );
+	}
+
+	static void operator delete( void* ptr )
+	{
+		CCP_FREE( ptr );
+	}
+
 	uint64_t timeStamp;
 	uint32_t samples;
 	uint32_t channels;
-	std::unique_ptr<int16_t[], TrackableDelete<int16_t[]>> data;
+	int16_t* data;
 };
 
-typedef FrameQueue<PcmFrame, MaxCountFullPolicy> PcmFrameQueue;
+typedef FrameQueue<PcmFrame, MaxCountFullPolicy, FrameDeleter<PcmFrame>> PcmFrameQueue;
 
 // --------------------------------------------------------------------------------------
 // Description:
@@ -144,13 +197,28 @@ typedef FrameQueue<PcmFrame, MaxCountFullPolicy> PcmFrameQueue;
 // --------------------------------------------------------------------------------------
 struct VideoFrame
 {
+	VideoFrame()
+	{
+		bgra = reinterpret_cast<uint8_t*>( this ) + sizeof( *this );
+	}
+
+	static void* operator new( std::size_t sz, uint32_t width, uint32_t height )
+	{
+		return CCP_MALLOC( "VideoFrame", sz + width * height * 4 );
+	}
+
+	static void operator delete( void* ptr )
+	{
+		CCP_FREE( ptr );
+	}
+
 	uint32_t width;
 	uint32_t height;
 	uint64_t timeStamp;
-	std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> bgra;
+	uint8_t* bgra;
 };
 
-typedef FrameQueue<VideoFrame, MaxCountFullPolicy> VideoFrameQueue;
+typedef FrameQueue<VideoFrame, MaxCountFullPolicy, FrameDeleter<VideoFrame>> VideoFrameQueue;
 
 // --------------------------------------------------------------------------------------
 // Description:

@@ -272,8 +272,9 @@ inline void CopyImagePlane( uint8_t* dest, uint8_t* source, int sourceStride, ui
 VpxDecoder::VpxDecoder( const VideoMetadata& videoMetadata, EncodedVideoFrameQueue& compressedQueue )
 	:m_videoMetadata( videoMetadata ),
 	m_compressedQueue( compressedQueue ),
-	m_decompressedQueue( QUEUE_LENGTH ),
-	m_yuvFrameQueue( QUEUE_LENGTH ),
+	m_decompressedQueue( QUEUE_LENGTH, FrameDeleter<VideoFrame>( this ) ),
+	m_yuvFrameQueue( QUEUE_LENGTH, FrameDeleter<YuvFrame>( this ) ),
+	m_poolMutex( "VpxDecoder", "m_poolMutex" ),
 	m_dropFrameTime( 0 ),
 	m_stopRequested( false ),
 	m_error( DECODER_ERROR_OK ),
@@ -415,9 +416,7 @@ void VpxDecoder::DecodeThread()
 			vpx_codec_iter_t  iter = nullptr;
 			while( auto img = vpx_codec_get_frame( &m_videoCodec, &iter ) )
 			{
-				auto frame = CCP_NEW( "VpxDecoder/frame" ) YuvFrame;
-				frame->width = img->d_w;
-				frame->height = img->d_h;
+				auto frame = GetNewYuvFrame( img->d_w, img->d_h, img->x_chroma_shift, hasAlpha );
 				frame->timeStamp = packetTimeStamp;
 				vpx_image_t* alphaImg = nullptr;
 				if( hasAlpha )
@@ -426,21 +425,16 @@ void VpxDecoder::DecodeThread()
 					alphaImg = vpx_codec_get_frame( &m_alphaCodec, &alphaIter );
 				}
 
-				frame->uvShift = img->x_chroma_shift;
 				auto uvWidth = frame->width >> img->x_chroma_shift;
 				auto uvHeight = frame->height >> img->x_chroma_shift;
 
-				frame->y.reset( CCP_NEW( "VpxDecoder/frame/y" ) uint8_t[frame->width * frame->height] );
-				CopyImagePlane( frame->y.get(), img->planes[0], img->stride[0], frame->width, frame->height );
-				frame->u.reset( CCP_NEW( "VpxDecoder/frame/u" ) uint8_t[uvWidth * uvHeight] );
-				CopyImagePlane( frame->u.get(), img->planes[1], img->stride[1], uvWidth, uvHeight );
-				frame->v.reset( CCP_NEW( "VpxDecoder/frame/v" ) uint8_t[uvWidth * uvHeight] );
-				CopyImagePlane( frame->v.get(), img->planes[2], img->stride[2], uvWidth, uvHeight );
+				CopyImagePlane( frame->y, img->planes[0], img->stride[0], frame->width, frame->height );
+				CopyImagePlane( frame->u, img->planes[1], img->stride[1], uvWidth, uvHeight );
+				CopyImagePlane( frame->v, img->planes[2], img->stride[2], uvWidth, uvHeight );
 
 				if( alphaImg )
 				{
-					frame->alpha.reset( CCP_NEW( "VpxDecoder/frame/a" ) uint8_t[frame->width * frame->height] );
-					CopyImagePlane( frame->alpha.get(), alphaImg->planes[0], alphaImg->stride[0], frame->width, frame->height );
+					CopyImagePlane( frame->alpha, alphaImg->planes[0], alphaImg->stride[0], frame->width, frame->height );
 				}
 
 				m_yuvFrameQueue.Push( frame );
@@ -475,7 +469,7 @@ void VpxDecoder::ConvertThread()
 			continue;
 		}
 
-		auto frame = CCP_NEW( "VpxDecoder/frame" ) VideoFrame;
+		auto frame = GetNewVideoFrame( yuv->width, yuv->height );
 		if( !frame )
 		{
 			++m_corruptFrames;
@@ -484,26 +478,105 @@ void VpxDecoder::ConvertThread()
 		frame->width = yuv->width;
 		frame->height = yuv->height;
 		frame->timeStamp = yuv->timeStamp;
-		frame->bgra.reset( CCP_NEW( "VpxDecoder/frame/bgra" ) uint8_t[4 * frame->width * frame->height] );
-		if( !frame->bgra )
-		{
-			CCP_DELETE frame;
-			++m_corruptFrames;
-			continue;
-		}
 
 		YuvToBgra( 
-			frame->bgra.get(), 
-			yuv->y.get(),
+			frame->bgra, 
+			yuv->y,
 			yuv->width,
-			yuv->u.get(),
+			yuv->u,
 			yuv->width >> yuv->uvShift,
-			yuv->v.get(),
+			yuv->v,
 			yuv->width >> yuv->uvShift,
-			yuv->alpha.get(),
+			yuv->alpha,
 			yuv->width,
 			frame->width, frame->height, yuv->uvShift );
 					
 		m_decompressedQueue.Push( frame );
 	}
+}
+
+YuvFrame::YuvFrame( uint32_t width_, uint32_t height_, uint32_t uvShift_, bool alpha_ )
+	:width( width_ ),
+	height( height_ ),
+	uvShift( uvShift_ )
+{
+	size_t sz = sizeof( YuvFrame );
+	size_t ySize = width * height;
+	size_t uvSize = ySize >> ( uvShift * 2 );
+	uint8_t* offset = reinterpret_cast<uint8_t*>( this );
+	offset += sz;
+	y = offset;
+	offset += ySize;
+	u = offset;
+	offset += uvSize;
+	v = offset;
+	if( alpha_ )
+	{
+		offset += uvSize;
+		alpha = offset;
+	}
+	else
+	{
+		alpha = nullptr;
+	}
+}
+
+void* YuvFrame::operator new( std::size_t sz, uint32_t width, uint32_t height, uint32_t uvShift, bool alpha )
+{
+	size_t ySize = width * height;
+	size_t uvSize = ySize >> ( uvShift * 2 );
+	size_t size = sz + ySize + uvSize * 2;
+	if( alpha )
+	{
+		size += ySize;
+	}
+	return CCP_MALLOC( "VpxDecoder::YuvFrame", size );
+}
+
+void YuvFrame::operator delete( void* ptr )
+{
+	CCP_FREE( ptr );
+}
+
+
+YuvFrame* VpxDecoder::GetNewYuvFrame( uint32_t width, uint32_t height, uint32_t uvShift, bool alpha )
+{
+	CcpAutoMutex lock( m_poolMutex );
+	if( m_yuvFramePool.empty() )
+	{
+		return new( width, height, uvShift, alpha )  YuvFrame( width, height, uvShift, alpha );
+	}
+	else
+	{
+		auto frame = m_yuvFramePool.back().release();
+		m_yuvFramePool.pop_back();
+		return frame;
+	}
+}
+
+VideoFrame* VpxDecoder::GetNewVideoFrame( uint32_t width, uint32_t height )
+{
+	CcpAutoMutex lock( m_poolMutex );
+	if( m_videoFramePool.empty() )
+	{
+		return new( width, height )  VideoFrame;
+	}
+	else
+	{
+		auto frame = m_videoFramePool.back().release();
+		m_videoFramePool.pop_back();
+		return frame;
+	}
+}
+
+void VpxDecoder::ReleaseFrame( YuvFrame* frame )
+{
+	CcpAutoMutex lock( m_poolMutex );
+	m_yuvFramePool.push_back( std::unique_ptr<YuvFrame>( frame ) );
+}
+
+void VpxDecoder::ReleaseFrame( VideoFrame* frame )
+{
+	CcpAutoMutex lock( m_poolMutex );
+	m_videoFramePool.push_back( std::unique_ptr<VideoFrame>( frame ) );
 }

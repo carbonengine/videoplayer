@@ -138,12 +138,12 @@ bool WaveOutAudioSink::CreateDevice()
 
 void WaveOutAudioSink::SubmitThread()
 {
-	std::unique_ptr<PcmFrame, TrackableDelete<PcmFrame>> frameRing[MAX_QUEUED_BUFFERS];
+	std::unique_ptr<PcmFrame, FrameDeleter<PcmFrame>> frameRing[MAX_QUEUED_BUFFERS];
 	uint32_t headerIndex = 0;
 
 	while( !m_stopRequested )
 	{
-		std::unique_ptr<PcmFrame, TrackableDelete<PcmFrame>> packet( m_frameQueue->Pop() );
+		auto packet = m_frameQueue->Pop();
 		if( !packet )
 		{
 			FinishPlaying();
@@ -174,7 +174,7 @@ void WaveOutAudioSink::SubmitThread()
 		}
 		ZeroMemory(&header, sizeof(WAVEHDR));
 		header.dwBufferLength = packet->samples * packet->channels * 2;
-		header.lpData = reinterpret_cast<char*>( packet->data.get() );
+		header.lpData = reinterpret_cast<char*>( packet->data );
 
 		if( waveOutPrepareHeader(m_waveOut, &header, sizeof(WAVEHDR)) == MMSYSERR_NOERROR )
 		{

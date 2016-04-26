@@ -144,7 +144,7 @@ void Audio2Sink::SubmitThread()
 
 	while( !m_stopRequested )
 	{
-		std::unique_ptr<PcmFrame, TrackableDelete<PcmFrame>> packet( m_frameQueue->Pop() );
+		auto packet = m_frameQueue->Pop();
 		if( !packet )
 		{
 			m_bufferReady = currentBuffer;
@@ -198,6 +198,10 @@ void Audio2Sink::SubmitThread()
 			{
 				while( m_bufferReady < 2 )
 				{
+					if( m_stopRequested )
+					{
+						return;
+					}
 					CcpThreadSleep( 1 );
 				}
 				m_bufferReady = currentBuffer;

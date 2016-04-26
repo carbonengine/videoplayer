@@ -16,11 +16,33 @@
 
 // --------------------------------------------------------------------------------------
 // Description:
+//   Decoded video frame in YUV format.
+// --------------------------------------------------------------------------------------
+struct YuvFrame
+{
+	YuvFrame( uint32_t width, uint32_t height, uint32_t uvShift, bool alpha );
+
+	static void* operator new( std::size_t sz, uint32_t width, uint32_t height, uint32_t uvShift, bool alpha );
+	static void operator delete( void* ptr );
+
+	uint8_t* y;
+	uint8_t* u;
+	uint8_t* v;
+	uint8_t* alpha;
+
+	uint32_t width;
+	uint32_t height; 
+	uint64_t timeStamp;
+	uint32_t uvShift;
+};
+
+// --------------------------------------------------------------------------------------
+// Description:
 //   A decoder for VP8/VP9 video.
 // See also:
 //   IVideoDecoder
 // --------------------------------------------------------------------------------------
-class VpxDecoder: public IVideoDecoder
+class VpxDecoder: public IVideoDecoder, public FrameOwner<YuvFrame>, public FrameOwner<VideoFrame>
 {
 public:
 	VpxDecoder( const VideoMetadata& videoMetadata, EncodedVideoFrameQueue& compressedQueue );
@@ -38,29 +60,19 @@ private:
 	void DecodeThread();
 	void ConvertThread();
 
+	YuvFrame* GetNewYuvFrame( uint32_t width, uint32_t height, uint32_t uvShift, bool alpha );
+	VideoFrame* GetNewVideoFrame( uint32_t width, uint32_t height );
+	void ReleaseFrame( YuvFrame* frame );
+	void ReleaseFrame( VideoFrame* frame );
 
-	struct YuvFrame
-	{
-		std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> y;
-		std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> u;
-		std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> v;
-		std::unique_ptr<uint8_t[], TrackableDelete<uint8_t[]>> alpha;
+	std::vector<std::unique_ptr<YuvFrame>> m_yuvFramePool;
+	std::vector<std::unique_ptr<VideoFrame>> m_videoFramePool;
+	CcpMutex m_poolMutex;
 
-		int yStride;
-		int uStride;
-		int vStride;
-		int alphaStride;
-		uint32_t width;
-		uint32_t height; 
-		uint64_t timeStamp;
-		uint32_t uvShift;
-	};
-
-	FrameQueue<YuvFrame, MaxCountFullPolicy> m_yuvFrameQueue;
-
-
+	FrameQueue<YuvFrame, MaxCountFullPolicy, FrameDeleter<YuvFrame>> m_yuvFrameQueue;
 	EncodedVideoFrameQueue& m_compressedQueue;
 	VideoFrameQueue m_decompressedQueue;
+
 	vpx_codec_ctx_t m_videoCodec;
 	vpx_codec_ctx_t m_alphaCodec;
 	const VideoMetadata& m_videoMetadata;

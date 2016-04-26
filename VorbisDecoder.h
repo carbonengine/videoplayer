@@ -20,7 +20,7 @@
 // See also:
 //   IAudioDecoder
 // --------------------------------------------------------------------------------------
-class VorbisDecoder: public IAudioDecoder
+class VorbisDecoder: public IAudioDecoder, public FrameOwner<PcmFrame>
 {
 public:
 	VorbisDecoder( const AudioMetadata& audioMetadata, EncodedAudioFrameQueue& compressedQueue );
@@ -41,6 +41,11 @@ private:
 		BLOCK,
 	};
 	void DecodeThread();
+	PcmFrame* GetNewFrame( uint32_t channels, uint32_t samples );
+	void ReleaseFrame( PcmFrame* frame );
+
+	std::vector<std::unique_ptr<PcmFrame>> m_framePool;
+	CcpMutex m_poolMutex;
 
 	EncodedAudioFrameQueue& m_compressedQueue;
 	PcmFrameQueue m_decodedQueue;

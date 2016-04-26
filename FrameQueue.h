@@ -25,10 +25,11 @@ template <typename Frame, typename FullPolicy, typename Deleter = TrackableDelet
 class FrameQueue
 {
 public:
-	FrameQueue( FullPolicy fullPolicy )
+	FrameQueue( FullPolicy fullPolicy, Deleter deleter = Deleter() )
 		:m_mutex( "FrameQueue", "m_mutex" ),
 		m_complete( false ),
-		m_fullPolicy( fullPolicy )
+		m_fullPolicy( fullPolicy ),
+		m_deleter( deleter )
 	{
 	}
 
@@ -44,12 +45,12 @@ public:
 			if( m_complete )
 			{
 				m_mutex.Release();
-				Deleter()( packet );
+				m_deleter( packet );
 				break;
 			}
 			if( !m_fullPolicy.IsFull( *this ) )
 			{
-				m_queue.push_back( std::unique_ptr<Frame, Deleter>( packet ) );
+				m_queue.push_back( std::unique_ptr<Frame, Deleter>( packet, m_deleter ) );
 				m_mutex.Release();
 				break;
 			}
@@ -149,6 +150,7 @@ private:
 	CcpSemaphore m_changed;
 	bool m_complete;
 	FullPolicy m_fullPolicy;
+	Deleter m_deleter;
 };
 
 

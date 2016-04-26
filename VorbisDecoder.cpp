@@ -16,9 +16,8 @@ namespace
 
 const size_t QUEUE_LENGTH = 30;
 
-int16_t* ResampleTo16Bps( float** pcm, uint32_t channels, uint32_t samples )
+void ResampleTo16Bps( float** pcm, uint32_t channels, uint32_t samples, int16_t* data )
 {
-	int16_t* data = CCP_NEW( "ResampleTo16Bps/data" ) int16_t[channels * samples];
 	for( uint32_t j = 0; j < channels; ++j )
 	{
 		for( uint32_t i = 0; i < samples; ++i )
@@ -36,7 +35,6 @@ int16_t* ResampleTo16Bps( float** pcm, uint32_t channels, uint32_t samples )
 			data[i * channels + j] = int16_t( val );
 		}
 	}
-	return data;
 }
 
 }
@@ -44,7 +42,8 @@ int16_t* ResampleTo16Bps( float** pcm, uint32_t channels, uint32_t samples )
 VorbisDecoder::VorbisDecoder( const AudioMetadata& audioMetadata, EncodedAudioFrameQueue& compressedQueue )
 	:m_audioMetadata( audioMetadata ),
 	m_compressedQueue( compressedQueue ),
-	m_decodedQueue( MaxCountFullPolicy( QUEUE_LENGTH ) ),
+	m_decodedQueue( MaxCountFullPolicy( QUEUE_LENGTH ), FrameDeleter<PcmFrame>( this ) ),
+	m_poolMutex( "VorbisDecoder", "m_poolMutex" ),
 	m_stopRequested( false ),
 	m_initializeState( NONE ),
 	m_error( DECODER_ERROR_UNSUPPORTED_CODEC ),
@@ -191,7 +190,7 @@ void VorbisDecoder::DecodeThread()
 			int32_t samples = vorbis_synthesis_pcmout( &m_vorbisDsp, &pcm );
 			if( samples == 0 && firstFrame )
 			{
-				PcmFrame* pcmFrame = CCP_NEW( "VorbisDecoder/frame" ) PcmFrame;
+				PcmFrame* pcmFrame = GetNewFrame( 0, 0 );
 				pcmFrame->timeStamp = packet->GetTimeStamp();
 				pcmFrame->samples = 0;
 				pcmFrame->channels = 0;
@@ -201,11 +200,11 @@ void VorbisDecoder::DecodeThread()
 			firstFrame = false;
 			while( !m_stopRequested && samples > 0 )
 			{
-				PcmFrame* pcmFrame = CCP_NEW( "VorbisDecoder/frame" ) PcmFrame;
+				PcmFrame* pcmFrame = GetNewFrame( m_audioMetadata.channels, samples );
 				pcmFrame->timeStamp = packet->GetTimeStamp();
 				pcmFrame->samples = samples;
 				pcmFrame->channels = m_audioMetadata.channels;
-				pcmFrame->data.reset( ResampleTo16Bps( pcm, m_audioMetadata.channels, samples ) );
+				ResampleTo16Bps( pcm, m_audioMetadata.channels, samples, pcmFrame->data );
 				m_decodedQueue.Push( pcmFrame );
 
 				if( vorbis_synthesis_read( &m_vorbisDsp, samples ) != 0 ) 
@@ -216,4 +215,29 @@ void VorbisDecoder::DecodeThread()
 			}
 		}
 	}
+}
+
+PcmFrame* VorbisDecoder::GetNewFrame( uint32_t channels, uint32_t samples )
+{
+	CcpAutoMutex lock( m_poolMutex );
+	if( !m_framePool.empty() )
+	{
+		for( size_t i = m_framePool.size(); i > 0; --i )
+		{
+			auto& ptr = m_framePool[i - 1];
+			if( ptr->channels == channels && ptr->samples == samples )
+			{
+				auto frame = ptr.release();
+				m_framePool.erase( m_framePool.begin() + i - 1 );
+				return frame;
+			}
+		}
+	}
+	return new( channels, samples )  PcmFrame;
+}
+
+void VorbisDecoder::ReleaseFrame( PcmFrame* frame )
+{
+	CcpAutoMutex lock( m_poolMutex );
+	m_framePool.push_back( std::unique_ptr<PcmFrame>( frame ) );
 }

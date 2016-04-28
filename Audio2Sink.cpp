@@ -41,7 +41,7 @@ Audio2Sink::~Audio2Sink()
 	Close();
 }
 
-void Audio2Sink::Create( intptr_t audioFunction, intptr_t audioPositionFunction, int32_t outputChannel )
+void Audio2Sink::Create( int64_t audioFunction, int64_t audioPositionFunction, int32_t outputChannel )
 {
 	m_setAudioStream = reinterpret_cast<SetAudioStream>( audioFunction );
 	m_getAudioStreamPosition = reinterpret_cast<GetAudioStreamPosition>( audioPositionFunction );

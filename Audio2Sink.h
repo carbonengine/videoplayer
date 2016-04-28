@@ -29,7 +29,7 @@ public:
 
 	EXPOSE_TO_BLUE();
 
-	void Create( intptr_t audioFunction, intptr_t audioPositionFunction, int32_t outputChannel );
+	void Create( int64_t audioFunction, int64_t audioPositionFunction, int32_t outputChannel );
 
 	virtual void Open( const AudioMetadata& audioMetadata, PcmFrameQueue& frameQueue );
 	virtual void Close();

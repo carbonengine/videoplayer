@@ -25,8 +25,17 @@ VideoController::VideoController( ICcpStream* stream, IAudioSink* audioSink, uns
 	:m_state( UNINITIALIZED ),
 	m_paused( false ),
 	m_audioSink( audioSink ),
-	m_looped( looped )
+	m_looped( looped ),
+	m_seekOffset( 0 )
 {
+	if( m_audioSink )
+	{
+		m_audioSink->Pause();
+	}
+	else
+	{
+		m_mediaTime.Pause();
+	}
 	m_parser.reset( CreateVideoContainerParser( stream, audioSink ? STREAM_AUDIO_VIDEO : STREAM_VIDEO, audioTrack, looped ) );
 	m_state = PARSING_METADATA;
 }
@@ -96,6 +105,33 @@ void VideoController::Resume()
 	}
 }
 
+void VideoController::Seek( uint64_t time )
+{
+	if( m_state < INITIAL_BUFFERING || m_state > FINISHING_BUFFERING )
+	{
+		return;
+	}
+	if( m_audioSink )
+	{
+		m_audioSink->Pause();
+	}
+	else
+	{
+		m_mediaTime.Pause();
+	}
+	m_seekOffset = time;
+	m_parser->Seek( time );
+	m_state = INITIAL_BUFFERING;
+	if( m_audioDecoder )
+	{
+		m_audioDecoder->GetDecodedQueue().Clear();
+	}
+	if( m_videoDecoder )
+	{
+		m_videoDecoder->GetDecodedQueue().Clear();
+	}
+}
+
 bool VideoController::IsPaused() const
 {
 	return m_paused;
@@ -155,6 +191,14 @@ void VideoController::Update()
 		{
 			m_mediaTime.Start();
 		}
+		if( m_audioSink )
+		{
+			m_audioSink->Resume();
+		}
+		else
+		{
+			m_mediaTime.Resume();
+		}
 		Update();
 		break;
 	case BUFFERING:
@@ -190,7 +234,7 @@ void VideoController::Update()
 		}
 		if( m_videoDecoder && m_audioDecoder )
 		{
-			m_videoDecoder->SetDropFrameTime( GetMediaTime() + DROP_FRAME_THRESHOLD );
+			m_videoDecoder->SetDropFrameTime( GetMediaTime() - DROP_FRAME_THRESHOLD );
 		}
 		RemoveExpiredFrames();
 		if( IsDone() )
@@ -226,7 +270,11 @@ VideoFrame* VideoController::GetVideoFrame()
 
 uint64_t VideoController::GetMediaTime()
 {
-	return m_audioSink ? m_audioSink->GetTime() : m_mediaTime.GetTime();
+	if( m_state == INITIAL_BUFFERING )
+	{
+		return m_seekOffset;
+	}
+	return m_audioSink ? m_audioSink->GetTime() : m_seekOffset + m_mediaTime.GetTime();
 }
 
 void VideoController::RemoveExpiredFrames()

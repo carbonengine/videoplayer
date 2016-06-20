@@ -29,11 +29,13 @@ class WebMParser;
 class NestEggFrame: public IEncodedFrame
 {
 public:
-	explicit NestEggFrame( nestegg_packet* packet, WebMParser* parser, uint64_t timeOffset );
+	NestEggFrame( nestegg_packet* packet, WebMParser* parser, uint64_t timeOffset );
+	NestEggFrame( WebMParser* parser, uint64_t timeOffset );
 	~NestEggFrame();
 
 	virtual size_t GetFrameCount();
 	virtual uint64_t GetTimeStamp();
+	virtual bool IsSeekFrame() const;
 	virtual bool GetFrame( size_t index, uint8_t*& data, size_t& length );
 	virtual bool GetAlphaFrame( uint8_t*& data, size_t& length );
 private:
@@ -62,6 +64,8 @@ public:
 	void CompleteQueues();
 	uint64_t GetDuration() const;
 	uint64_t GetDownloadedMediaTime() const;
+
+	void Seek( uint64_t time );
 
 	EncodedAudioFrameQueue* GetAudioQueue();
 	EncodedVideoFrameQueue* GetVideoQueue();
@@ -95,6 +99,8 @@ private:
 	StreamType m_outputStreams;
 	uint64_t m_duration;
 	uint64_t m_downloadedMediaTime;
+
+	uint64_t m_seekOffset;
 
 	// all read packets, used for looped videos
 	TrackableStdVector<nestegg_packet*> m_packets;

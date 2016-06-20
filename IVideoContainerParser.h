@@ -21,6 +21,8 @@ struct IVideoContainerParser
 	virtual uint64_t GetDuration() const = 0;
 	virtual uint64_t GetDownloadedMediaTime() const = 0;
 
+	virtual void Seek( uint64_t time ) = 0;
+
 	virtual EncodedAudioFrameQueue* GetAudioQueue() = 0;
 	virtual EncodedVideoFrameQueue* GetVideoQueue() = 0;
 	virtual ParserError GetError() const = 0;

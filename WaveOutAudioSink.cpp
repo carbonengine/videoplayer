@@ -19,7 +19,8 @@ WaveOutAudioSink::WaveOutAudioSink()
 	m_stopRequested( false ),
 	m_submitThread( nullptr ),
 	m_waveOutMutex( "WaveOutAudioSink", "m_waveOutMutex" ),
-	m_stoppedTime( 0 )
+	m_stoppedTime( 0 ),
+	m_timeOffset( 0 )
 {
 	memset( m_headerRing, 0, sizeof( m_headerRing ) );
 }
@@ -33,7 +34,10 @@ void WaveOutAudioSink::Open( const AudioMetadata& audioMetadata, PcmFrameQueue& 
 {
 	m_audioMetadata = &audioMetadata;
 	m_frameQueue = &frameQueue;
-	m_submitThread = CreateThread( nullptr, 0, &SubmitThreadHelper, this, 0, nullptr );
+	if( !m_submitThread )
+	{
+		m_submitThread = CreateThread( nullptr, 0, &SubmitThreadHelper, this, 0, nullptr );
+	}
 }
 
 void WaveOutAudioSink::Close()
@@ -75,13 +79,13 @@ uint64_t WaveOutAudioSink::GetTime()
 
 	if( !m_waveOut )
 	{
-		return m_stoppedTime;
+		return m_stoppedTime + m_timeOffset;
 	}
 	MMTIME mt;
 	mt.wType = TIME_SAMPLES;
 	mt.u.sample = 0;
 	waveOutGetPosition( m_waveOut, &mt, sizeof( mt ) );
-	return ( uint64_t( mt.u.sample ) * 1000000 ) / uint64_t( m_audioMetadata->rate ) * 1000;
+	return ( uint64_t( mt.u.sample ) * 1000000 ) / uint64_t( m_audioMetadata->rate ) * 1000 + m_timeOffset;
 }
 
 bool WaveOutAudioSink::IsDone()
@@ -150,6 +154,34 @@ void WaveOutAudioSink::SubmitThread()
 			break;
 		}
 		
+		if( packet->samples == 0 )
+		{
+			if( m_waveOut )
+			{
+				CcpAutoMutex lock( m_waveOutMutex );
+
+				waveOutReset( m_waveOut );
+				for( int i = 0; i < MAX_QUEUED_BUFFERS; ++i )
+				{
+					if( m_headerRing[i].dwFlags & WHDR_PREPARED )
+					{
+						waveOutUnprepareHeader( m_waveOut, &m_headerRing[i], sizeof(WAVEHDR) );
+					}
+				}
+				waveOutClose( m_waveOut );
+				m_waveOut = nullptr;
+				memset( m_headerRing, 0, sizeof( m_headerRing ) );
+				headerIndex = 0;
+				for( int i = 0; i < MAX_QUEUED_BUFFERS; ++i )
+				{
+					frameRing[i].reset();
+				}
+			}
+			m_stoppedTime = 0;
+			m_timeOffset = packet->timeStamp;
+			continue;
+		}
+
 		MMRESULT result;
 		if( !m_waveOut )
 		{
@@ -158,11 +190,6 @@ void WaveOutAudioSink::SubmitThread()
 				break;
 			}
 		}
-		if( packet->samples == 0 )
-		{
-			continue;
-		}
-
 		WAVEHDR& header = m_headerRing[headerIndex];
 
 		if( header.dwFlags & WHDR_PREPARED )

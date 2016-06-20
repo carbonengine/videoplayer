@@ -70,6 +70,7 @@ private:
 	CcpAtomic<uint32_t> m_bufferReady;
 	uint32_t m_paused;
 	unsigned int m_startSampleCount;
+	uint64_t m_timeOffset;
 	bool m_started;
 };
 

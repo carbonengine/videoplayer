@@ -229,6 +229,7 @@ struct IEncodedFrame
 	virtual ~IEncodedFrame() = 0;
 	virtual size_t GetFrameCount() = 0;
 	virtual uint64_t GetTimeStamp() = 0;
+	virtual bool IsSeekFrame() const = 0;
 	virtual bool GetFrame( size_t index, uint8_t*& data, size_t& length ) = 0;
 	virtual bool GetAlphaFrame( uint8_t*& data, size_t& length ) = 0;
 };

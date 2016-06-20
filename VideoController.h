@@ -76,6 +76,7 @@ public:
 	void Pause();
 	void Resume();
 	bool IsPaused() const;
+	void Seek( uint64_t time );
 private:
 	bool NeedsBuffering() const;
 	void RemoveExpiredFrames();
@@ -92,6 +93,8 @@ private:
 	IAudioSink* m_audioSink;
 	// timer to use if audio sink is NULL (otherwise use audio time)
 	Timer m_mediaTime;
+
+	uint64_t m_seekOffset;
 	// if the playback is paused
 	bool m_paused;
 	// if the playback is looped

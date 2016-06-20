@@ -52,6 +52,7 @@ private:
 	HANDLE m_submitThread;
 	CcpMutex m_waveOutMutex;
 	uint64_t m_stoppedTime;
+	uint64_t m_timeOffset;
 };
 
 TYPEDEF_BLUECLASS( WaveOutAudioSink );

@@ -37,6 +37,15 @@ public:
 	{
 	}
 
+	void Clear()
+	{
+		m_mutex.Acquire();
+		m_queue.clear();
+		m_complete = false;
+		m_mutex.Release();
+		m_changed.Signal();
+	}
+
 	void Push( Frame* packet )
 	{
 		while( true )

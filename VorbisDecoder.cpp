@@ -156,6 +156,13 @@ void VorbisDecoder::DecodeThread()
 			break;
 		}
 
+		if( packet->IsSeekFrame() )
+		{
+			m_decodedQueue.Clear();
+			firstFrame = true;
+			continue;
+		}
+
 		auto count = packet->GetFrameCount();
 		int nframes = 0;
 
@@ -188,7 +195,7 @@ void VorbisDecoder::DecodeThread()
 			}
 			float **pcm; 
 			int32_t samples = vorbis_synthesis_pcmout( &m_vorbisDsp, &pcm );
-			if( samples == 0 && firstFrame )
+			if( firstFrame )
 			{
 				PcmFrame* pcmFrame = GetNewFrame( 0, 0 );
 				pcmFrame->timeStamp = packet->GetTimeStamp();

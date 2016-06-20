@@ -227,6 +227,14 @@ bool VideoPlayer::IsPaused() const
 	return false;
 }
 
+void VideoPlayer::Seek( uint64_t time )
+{
+	if( m_video )
+	{
+		m_video->Seek( time );
+	}
+}
+
 VideoPlayerResult VideoPlayer::GetVideoInfo( std::map<std::string, uint32_t>& metadata )
 {
 	if( !m_video )

@@ -36,6 +36,7 @@ public:
 	void Pause();
 	void Resume();
 	bool IsPaused() const;
+	void Seek( uint64_t time );
 	uint64_t GetMediaTime() const;
 	uint64_t GetDuration() const;
 	uint64_t GetDownloadedMediaTime() const;

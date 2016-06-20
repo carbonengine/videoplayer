@@ -68,6 +68,11 @@ const Be::ClassInfo* VideoPlayer::ExposeToBlue()
 			Resume, 
 			"Resumes playback after pausing" );
 		MAP_METHOD_AND_WRAP( 
+			"seek", 
+			Seek, 
+			"Changes play position to a specified time\n"
+			":param time: seek time (from video start) in nanoseconds" );
+		MAP_METHOD_AND_WRAP( 
 			"get_video_info", 
 			GetVideoInfo, 
 			"" );

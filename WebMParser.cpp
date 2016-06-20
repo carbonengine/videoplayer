@@ -112,32 +112,63 @@ NestEggFrame::NestEggFrame( nestegg_packet* packet, WebMParser* parser, uint64_t
 {
 }
 
+NestEggFrame::NestEggFrame( WebMParser* parser, uint64_t timeOffset )
+	:m_packet( nullptr ),
+	m_parser( parser ),
+	m_timeOffset( timeOffset )
+{
+}
+
 NestEggFrame::~NestEggFrame()
 {
-	m_parser->ReleasePacket( m_packet );
+	if( m_packet )
+	{
+		m_parser->ReleasePacket( m_packet );
+	}
 }
 
 size_t NestEggFrame::GetFrameCount()
 {
-	unsigned count;
-	nestegg_packet_count( m_packet, &count );
-	return count;
+	if( m_packet )
+	{
+		unsigned count;
+		nestegg_packet_count( m_packet, &count );
+		return count;
+	}
+	return 0;
 }
 
 uint64_t NestEggFrame::GetTimeStamp()
 {
-	uint64_t t;
-	nestegg_packet_tstamp( m_packet, &t );
-	return t + m_timeOffset;
+	if( m_packet )
+	{
+		uint64_t t;
+		nestegg_packet_tstamp( m_packet, &t );
+		return t + m_timeOffset;
+	}
+	return m_timeOffset;
+}
+
+bool NestEggFrame::IsSeekFrame() const
+{
+	return m_packet == nullptr;
 }
 
 bool NestEggFrame::GetFrame( size_t index, uint8_t*& data, size_t& length )
 {
+	if( !m_packet )
+	{
+		return false;
+	}
 	return nestegg_packet_data( m_packet, unsigned( index ), &data, &length ) == 0;
 }
 
 bool NestEggFrame::GetAlphaFrame( uint8_t*& data, size_t& length )
 {
+	if( !m_packet )
+	{
+		return false;
+	}
 	return nestegg_packet_additional_data( m_packet, 1, &data, &length ) == 0;
 }
 
@@ -158,7 +189,8 @@ WebMParser::WebMParser( ICcpStream* videoStream, StreamType outputStreams, unsig
 	m_outputStreams( outputStreams ),
 	m_duration( 0 ),
 	m_downloadedMediaTime( 0 ),
-	m_packets( "WebMParser::m_packets" )
+	m_packets( "WebMParser::m_packets" ),
+	m_seekOffset( 0xffffffffffffffff )
 {
 	if( m_outputStreams & STREAM_VIDEO )
 	{
@@ -184,6 +216,11 @@ WebMParser::~WebMParser()
 	for( auto it = m_packets.begin(); it != m_packets.end(); ++it )
 	{
 		nestegg_free_packet( *it );
+	}
+	if( m_nestEgg )
+	{
+		nestegg_destroy( m_nestEgg );
+		m_nestEgg = nullptr;
 	}
 }
 
@@ -256,6 +293,19 @@ void WebMParser::ReleasePacket( nestegg_packet* packet )
 	}
 }
 
+void WebMParser::Seek( uint64_t time )
+{
+	m_seekOffset = time;
+	if( m_audioQueue )
+	{
+		m_audioQueue->Clear();
+	}
+	if( m_videoQueue )
+	{
+		m_videoQueue->Clear();
+	}
+}
+
 unsigned WebMParser::FindTrack( int trackType, int trackIndex )
 {
 	unsigned trackCount = 0;
@@ -289,9 +339,9 @@ void WebMParser::ReadThread()
 	m_threadStarted.Signal();
 
 	nestegg_io io;
-	io.read = Read;
-	io.seek = Seek;
-	io.tell = Tell;
+	io.read = ::Read;
+	io.seek = ::Seek;
+	io.tell = ::Tell;
 	io.userdata = m_videoStream;
 
 	if( nestegg_init( &m_nestEgg, io, nullptr, -1 ) )
@@ -321,8 +371,27 @@ void WebMParser::ReadThread()
 	uint64_t timeOffset = 0;
 
 	nestegg_packet* packet = 0;
+	bool seeking = false;
 	while( !m_stopRequested )
 	{
+		if( m_seekOffset != 0xffffffffffffffff )
+		{
+			if( nestegg_track_seek( m_nestEgg, m_videoTrack != -1 ? m_videoTrack : m_audioTrack, m_seekOffset ) != 0 )
+			{
+				continue;
+			}
+			if( m_audioQueue )
+			{
+				m_audioQueue->Clear();
+			}
+			if( m_videoQueue )
+			{
+				m_videoQueue->Clear();
+			}
+			seeking = true;
+			m_seekOffset = 0xffffffffffffffff;
+		}
+
 		auto r = nestegg_read_packet( m_nestEgg, &packet );
 		if( r == 1 && packet == 0 )
 		{
@@ -335,13 +404,44 @@ void WebMParser::ReadThread()
 		}
 		else if( r == 0 )
 		{
-			break;
+			if( m_looped )
+			{
+				break;
+			}
+			else
+			{
+				if( m_seekOffset == 0xffffffffffffffff )
+				{
+					if( m_videoQueue )
+					{
+						m_videoQueue->SetComplete();
+					}
+					if( m_audioQueue )
+					{
+						m_audioQueue->SetComplete();
+					}
+				}
+				Sleep( 1 );
+				continue;
+			}
 		}
 
 		unsigned int track = 0;
 		nestegg_packet_track( packet, &track );
 		uint64_t packetTime = 0;
-
+		if( seeking )
+		{
+			nestegg_packet_tstamp( packet, &packetTime );
+			if( m_videoQueue )
+			{
+				m_videoQueue->Push( CCP_NEW( "WebMParser/video frame" ) NestEggFrame( this, packetTime ) );
+			}
+			if( m_audioQueue )
+			{
+				m_audioQueue->Push( CCP_NEW( "WebMParser/video frame" ) NestEggFrame( this, packetTime ) );
+			}
+			seeking = false;
+		}
 		if( nestegg_track_type( m_nestEgg, track ) == NESTEGG_TRACK_VIDEO ) 
 		{
 			if( track == m_videoTrack && m_videoQueue )
@@ -419,6 +519,4 @@ void WebMParser::ReadThread()
 	{
 		m_audioQueue->SetComplete();
 	}
-	nestegg_destroy( m_nestEgg );
-	m_nestEgg = nullptr;
 }

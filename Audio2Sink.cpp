@@ -24,7 +24,8 @@ Audio2Sink::Audio2Sink()
 	m_submittedSamples( 0 ),
 	m_paused( 0 ),
 	m_startSampleCount( -1 ),
-	m_started( false )
+	m_started( false ),
+	m_timeOffset( 0 )
 {
 	m_bufferSizes[0] = 0;
 	m_bufferSizes[1] = 0;
@@ -63,8 +64,11 @@ void Audio2Sink::Close()
 {
 	m_stopRequested = true;
 	m_submitThread.join();
+	m_stopRequested = false;
 	m_audioMetadata = nullptr;
 	m_frameQueue = nullptr;
+	m_started = false;
+	m_bufferReady = 2;
 }
 
 void Audio2Sink::Pause()
@@ -81,7 +85,7 @@ uint64_t Audio2Sink::GetTime()
 {
 	if( !m_started )
 	{
-		return 0;
+		return m_timeOffset;
 	}
 	auto sampleCount = uint64_t( ( *m_getAudioStreamPosition )( m_outputChannel ) );
 	if( sampleCount < m_startSampleCount )
@@ -96,7 +100,7 @@ uint64_t Audio2Sink::GetTime()
 			m_timer.Start();
 		}
 	}
-	return sampleCount / 2 * 1000000 / WWISE_RATE + m_timer.GetTime();
+	return m_timeOffset + sampleCount / 2 * 1000000 / WWISE_RATE + m_timer.GetTime();
 }
 
 bool Audio2Sink::IsDone()
@@ -150,6 +154,11 @@ void Audio2Sink::SubmitThread()
 			m_bufferReady = currentBuffer;
 			m_finishedSubmitting = true;
 			break;
+		}
+
+		if( packet->samples == 0 )
+		{
+			m_timeOffset = packet->timeStamp;
 		}
 
 		if( m_volume == 0 )

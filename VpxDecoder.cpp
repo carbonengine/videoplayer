@@ -362,6 +362,15 @@ void VpxDecoder::DecodeThread()
 			break;
 		}
 
+		if( packet->IsSeekFrame() )
+		{
+			m_decompressedQueue.Clear();
+			m_yuvFrameQueue.Clear();
+			m_yuvFrameQueue.Push( new( 0, 0, 0, false )  YuvFrame( 0, 0, 0, false ) );
+			m_dropFrameTime = 0;
+			continue;
+		}
+
 		auto count = packet->GetFrameCount();
 		uint64_t packetTimeStamp = packet->GetTimeStamp();
 
@@ -461,6 +470,12 @@ void VpxDecoder::ConvertThread()
 		{
 			m_decompressedQueue.SetComplete();
 			break;
+		}
+
+		if( yuv->width == 0 )
+		{
+			m_decompressedQueue.Clear();
+			continue;
 		}
 
 		if( ( yuv->timeStamp < m_dropFrameTime ) && m_yuvFrameQueue.Size() )
@@ -571,8 +586,15 @@ VideoFrame* VpxDecoder::GetNewVideoFrame( uint32_t width, uint32_t height )
 
 void VpxDecoder::ReleaseFrame( YuvFrame* frame )
 {
-	CcpAutoMutex lock( m_poolMutex );
-	m_yuvFramePool.push_back( std::unique_ptr<YuvFrame>( frame ) );
+	if( !frame->width )
+	{
+		CCP_DELETE frame;
+	}
+	else
+	{
+		CcpAutoMutex lock( m_poolMutex );
+		m_yuvFramePool.push_back( std::unique_ptr<YuvFrame>( frame ) );
+	}
 }
 
 void VpxDecoder::ReleaseFrame( VideoFrame* frame )

@@ -91,6 +91,11 @@ TestEncodedFrame::TestEncodedFrame( const uint8_t* frameData, size_t size )
 {
 }
 
+bool TestEncodedFrame::IsSeekFrame() const
+{
+	return m_data != nullptr;
+}
+
 size_t TestEncodedFrame::GetFrameCount()
 {
 	return 1;

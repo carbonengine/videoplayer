@@ -32,6 +32,7 @@ public:
 	TestEncodedFrame( const uint8_t* frameData, size_t size );
 	virtual size_t GetFrameCount();
 	virtual uint64_t GetTimeStamp();
+	virtual bool IsSeekFrame() const;
 	virtual bool GetFrame( size_t index, uint8_t*& data, size_t& length );
 	virtual bool GetAlphaFrame( uint8_t*& data, size_t& length );
 private:

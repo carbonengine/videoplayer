@@ -421,7 +421,7 @@ void WebMParser::ReadThread()
 						m_audioQueue->SetComplete();
 					}
 				}
-				Sleep( 1 );
+				CcpThreadSleep( 1 );
 				continue;
 			}
 		}

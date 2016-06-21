@@ -69,6 +69,12 @@ void Audio2Sink::Close()
 	m_frameQueue = nullptr;
 	m_started = false;
 	m_bufferReady = 2;
+	m_submittedSamples = 0;
+	m_length = 0;
+	m_finishedSubmitting = false;
+	m_bufferSizes[0] = 0;
+	m_bufferSizes[1] = 0;
+	( *m_setAudioStream )( nullptr, -1, m_outputChannel );
 }
 
 void Audio2Sink::Pause()

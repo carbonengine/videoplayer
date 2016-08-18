@@ -41,7 +41,7 @@ class _VideoPlaylistController(object):
         self.weak_texture.callback = texture_destroyed
 
         if not self.low_quality_texture_path or not _is_low_quality():
-            self.play_next()
+            uthread2.start_tasklet(self.play_next)
         else:
             self._create_low_quality_render_job()
 
@@ -77,6 +77,10 @@ class _VideoPlaylistController(object):
         if item.lower().startswith('http'):
             stream = blue.BlueNetworkStream(item)
         else:
+            if blue.remoteFileCache.FileExists(item) and not blue.paths.FileExistsLocally(item):
+                blue.paths.GetFileContentsWithYield(item)
+            if self.destroyed:
+                return
             stream = blue.paths.open(item, 'rb')
         self.video = videoplayer.VideoPlayer(stream, None)
         self.video.bgra_texture = self.weak_texture.object

@@ -45,6 +45,21 @@ class _VideoPlaylistController(object):
         else:
             self._create_low_quality_render_job()
 
+        def check_focus():
+            while not self.destroyed:
+                if self.video:
+                    if trinity.app.IsHidden():
+                        if not self.video.is_paused:
+                            logging.debug('Pausing videos as the window is minimized')
+                            self.video.pause()
+                    else:
+                        if self.video.is_paused:
+                            logging.debug('Resuming videos as the window is not minimized anymore')
+                            self.video.resume()
+                blue.synchro.SleepWallclock(300)
+
+        uthread2.start_tasklet(check_focus)
+
         return texture
 
     def _create_low_quality_render_job(self):

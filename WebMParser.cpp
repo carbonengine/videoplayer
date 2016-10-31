@@ -105,17 +105,19 @@ void PopulateAudioMetadata( nestegg* nestEgg, unsigned trackIndex, AudioMetadata
 
 
 
-NestEggFrame::NestEggFrame( nestegg_packet* packet, WebMParser* parser, uint64_t timeOffset )
+NestEggFrame::NestEggFrame( nestegg_packet* packet, WebMParser* parser, uint64_t timeOffset, bool seekSkipFrame )
 	:m_packet( packet ),
 	m_parser( parser ),
-	m_timeOffset( timeOffset )
+	m_timeOffset( timeOffset ),
+	m_seekSkipFrame( seekSkipFrame )
 {
 }
 
 NestEggFrame::NestEggFrame( WebMParser* parser, uint64_t timeOffset )
 	:m_packet( nullptr ),
 	m_parser( parser ),
-	m_timeOffset( timeOffset )
+	m_timeOffset( timeOffset ),
+	m_seekSkipFrame( false )
 {
 }
 
@@ -372,6 +374,8 @@ void WebMParser::ReadThread()
 
 	nestegg_packet* packet = 0;
 	bool seeking = false;
+	uint64_t decodeToTime = 0xffffffffffffffff;
+
 	while( !m_stopRequested )
 	{
 		if( m_seekOffset != 0xffffffffffffffff )
@@ -389,6 +393,7 @@ void WebMParser::ReadThread()
 				m_videoQueue->Clear();
 			}
 			seeking = true;
+			decodeToTime = m_seekOffset;
 			m_seekOffset = 0xffffffffffffffff;
 		}
 
@@ -429,9 +434,9 @@ void WebMParser::ReadThread()
 		unsigned int track = 0;
 		nestegg_packet_track( packet, &track );
 		uint64_t packetTime = 0;
+		nestegg_packet_tstamp( packet, &packetTime );
 		if( seeking )
 		{
-			nestegg_packet_tstamp( packet, &packetTime );
 			if( m_videoQueue )
 			{
 				m_videoQueue->Push( CCP_NEW( "WebMParser/video frame" ) NestEggFrame( this, packetTime ) );
@@ -442,11 +447,24 @@ void WebMParser::ReadThread()
 			}
 			seeking = false;
 		}
+		bool isSkipFrame = false;
+		if( decodeToTime != 0xffffffffffffffff )
+		{
+			if( packetTime < decodeToTime )
+			{
+				isSkipFrame = true;
+
+			}
+			else
+			{
+				decodeToTime = 0xffffffffffffffff;
+			}
+		}
 		if( nestegg_track_type( m_nestEgg, track ) == NESTEGG_TRACK_VIDEO ) 
 		{
 			if( track == m_videoTrack && m_videoQueue )
 			{
-				m_videoQueue->Push( CCP_NEW( "WebMParser/video frame" ) NestEggFrame( packet, this, timeOffset ) );
+				m_videoQueue->Push( CCP_NEW( "WebMParser/video frame" ) NestEggFrame( packet, this, timeOffset, isSkipFrame ) );
 				if( m_looped )
 				{
 					m_packets.push_back( packet );
@@ -466,7 +484,7 @@ void WebMParser::ReadThread()
 		{
 			if( track == m_audioTrack && m_audioQueue )
 			{
-				m_audioQueue->Push( CCP_NEW( "WebMParser/audio frame" ) NestEggFrame( packet, this, timeOffset ) );
+				m_audioQueue->Push( CCP_NEW( "WebMParser/audio frame" ) NestEggFrame( packet, this, timeOffset, isSkipFrame ) );
 				if( m_looped )
 				{
 					m_packets.push_back( packet );

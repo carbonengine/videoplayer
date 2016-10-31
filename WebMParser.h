@@ -29,7 +29,7 @@ class WebMParser;
 class NestEggFrame: public IEncodedFrame
 {
 public:
-	NestEggFrame( nestegg_packet* packet, WebMParser* parser, uint64_t timeOffset );
+	NestEggFrame( nestegg_packet* packet, WebMParser* parser, uint64_t timeOffset, bool seekSkipFrame = false );
 	NestEggFrame( WebMParser* parser, uint64_t timeOffset );
 	~NestEggFrame();
 
@@ -38,10 +38,12 @@ public:
 	virtual bool IsSeekFrame() const;
 	virtual bool GetFrame( size_t index, uint8_t*& data, size_t& length );
 	virtual bool GetAlphaFrame( uint8_t*& data, size_t& length );
+	virtual bool IsSkipFrame() const { return m_seekSkipFrame; }
 private:
 	nestegg_packet* m_packet;
 	WebMParser* m_parser;
 	uint64_t m_timeOffset;
+	bool m_seekSkipFrame;
 };
 
 

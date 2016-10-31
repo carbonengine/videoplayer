@@ -35,6 +35,7 @@ public:
 	virtual bool IsSeekFrame() const;
 	virtual bool GetFrame( size_t index, uint8_t*& data, size_t& length );
 	virtual bool GetAlphaFrame( uint8_t*& data, size_t& length );
+	virtual bool IsSkipFrame() const { return false; }
 private:
 	const uint8_t* m_data;
 	size_t m_size;

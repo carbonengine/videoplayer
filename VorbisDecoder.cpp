@@ -163,6 +163,11 @@ void VorbisDecoder::DecodeThread()
 			continue;
 		}
 
+		if( packet->IsSkipFrame() )
+		{
+			continue;
+		}
+
 		auto count = packet->GetFrameCount();
 		int nframes = 0;
 

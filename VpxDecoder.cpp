@@ -416,6 +416,12 @@ void VpxDecoder::DecodeThread()
 				continue;
 			}
 
+			if( packet->IsSkipFrame() )
+			{
+				m_dropFrameTime = 0;
+				continue;
+			}
+
 			if( ( packetTimeStamp < m_dropFrameTime ) && ( !IsKeyFrame( &m_videoCodec )  || m_dropFrameTime - packetTimeStamp > 10000000 ) )
 			{
 				++m_droppedFrames;

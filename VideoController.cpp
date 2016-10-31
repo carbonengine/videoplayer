@@ -107,7 +107,7 @@ void VideoController::Resume()
 
 void VideoController::Seek( uint64_t time )
 {
-	if( m_state < INITIAL_BUFFERING || m_state > FINISHING_BUFFERING )
+	if( m_state <= INITIAL_BUFFERING || m_state > FINISHING_BUFFERING )
 	{
 		return;
 	}

@@ -2,6 +2,7 @@ import logging
 import random
 import re
 import urllib
+import weakref
 
 import blue
 import trinity
@@ -26,6 +27,7 @@ class _VideoPlaylistController(object):
         self.playlist = None
         self.low_quality_texture_path = None
         self.destroyed = False
+        self.current_path = None
 
     def init(self, width, height, playlist, low_quality_texture_path=None, **kwargs):
         self.destroyed = False
@@ -63,6 +65,7 @@ class _VideoPlaylistController(object):
         return texture
 
     def _create_low_quality_render_job(self):
+        self.current_path = None
         lq = blue.resMan.GetResource(self.low_quality_texture_path)
 
         def check():
@@ -85,6 +88,7 @@ class _VideoPlaylistController(object):
         try:
             item = self.playlist.next()
         except StopIteration:
+            self.current_path = None
             for each in _play_list_finished_handlers:
                 each(self.constructor_params, self.weak_texture.object)
             self._destroy()
@@ -102,6 +106,7 @@ class _VideoPlaylistController(object):
         self.video.on_state_change = self._on_state_change
         self.video.on_create_textures = self._on_video_info_ready
         self.video.on_error = self._on_error
+        self.current_path = item
 
     def _on_state_change(self, player):
         if self.destroyed:
@@ -148,6 +153,9 @@ def _url_to_dict(param_string):
     return params
 
 
+_video_controllers = weakref.WeakValueDictionary()
+
+
 def register_resource_constructor(name, width, height, playlist, low_quality_texture_path=None):
     """
     Registers a dynamic resource handler to play videos from a playlist
@@ -164,6 +172,7 @@ def register_resource_constructor(name, width, height, playlist, low_quality_tex
         # noinspection PyBroadException
         try:
             rj = _VideoPlaylistController()
+            _video_controllers['dynamic:/%s%s' % (name, param_string)] = rj
             return rj.init(width, height, playlist, low_quality_texture_path, **_url_to_dict(param_string))
         except:
             logging.exception('Exception in video playlist resource constructor')
@@ -219,6 +228,18 @@ def unregister_playlist_finished_handler(playlist_finished_handler):
     :param playlist_finished_handler: callback passed to register_playlist_finished_handler
     """
     _play_list_finished_handlers.remove(playlist_finished_handler)
+
+
+def get_currently_played_video(res_path):
+    """
+    Returns currently played video res path for the given playlist res path.
+    :param res_path: dynamic res path for the playlist
+    :type res_path: str
+    :return: res path for the currently played video or None if the video is not playing
+    :rtype: str
+    :raises KeyError: if the playlist path is not currently used
+    """
+    return _video_controllers[res_path].current_path
 
 
 def shuffled_videos(*res_path):

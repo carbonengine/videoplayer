@@ -31,6 +31,7 @@ BLUE_REGISTER_ENUM_EX( "State", VideoController::State, VideoControllerState, EN
 
 // TODO: why do I need this here?
 BLUE_DEFINE_INTERFACE( ITriTextureRes );
+BLUE_DEFINE_INTERFACE( IBlueStream );
 
 
 BLUE_DEFINE( VideoPlayer );

@@ -22,9 +22,9 @@ const Be::ClassInfo* Audio2Sink::ExposeToBlue()
 			"__init__", 
 			Create, 
 			"Creates an audio sink for audio2.\n"
-			"Arguments:\n"
-			"audio_function - The magic thing you get from audio2.GetDirectSoundPtr()\n"
-			"channel - Audio channel index" );
+			":param audio_function: The magic thing you get from audio2.GetDirectSoundPtr()\n"
+			":param audio_position_function: The magic thing you get from audio2.GetStreamPositionPtr()\n"
+			":param channel: Audio channel index" );
 		MAP_ATTRIBUTE(
 			"volume",
 			m_volume,

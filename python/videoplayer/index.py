@@ -3,6 +3,7 @@ import os
 import urllib2
 
 import uthread2
+from eveprefs import prefs
 
 
 class VideoIndex(object):

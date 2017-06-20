@@ -552,6 +552,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Audio2Sink.h"/>
+    <ClInclude Include="autoversion.h"/>
     <ClInclude Include="FrameQueue.h"/>
     <ClInclude Include="IAudioDecoder.h"/>
     <ClInclude Include="IAudioSink.h"/>

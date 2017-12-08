@@ -30,21 +30,6 @@ Link:
   ProgramDatabaseFile: $(TargetDir)$(TargetName).pdb
 
 BaseConfigurations:
-  WithBlue:
-    Imports:
-    - ../blue/Include/uses_blue.yaml
-    - ../CcpCore/uses_CcpCore.yaml
-    
-  WithBlue27:
-    Imports:
-    - ../blue/Include/uses_blue_27.yaml
-    - ../CcpCore/uses_CcpCore.yaml
-    
-  WithoutBlue:
-    Imports:
-    - ../BlueExposure/uses_BlueExposureStatic.yaml
-    - ../CcpCore/uses_CcpCoreStatic.yaml
-    
   Debug:
     General: 
       LinkIncremental: true
@@ -121,8 +106,10 @@ Configurations:
     BaseConfigurations:
     - Debug
     - ExeFile
-    - WithBlue
     - Windows
+    Imports:
+    - ../blue/Include/uses_blue.yaml
+    - ../CcpCore/uses_CcpCore.yaml
     General:
       TargetName: _videoplayer_d
       ConfigurationType: DynamicLibrary
@@ -131,8 +118,10 @@ Configurations:
     BaseConfigurations:
     - Dev
     - Python27
-    - WithBlue
     - Windows
+    Imports:
+    - ../blue/Include/uses_blue.yaml
+    - ../CcpCore/uses_CcpCore.yaml
     General:
       TargetName: _videoplayer_dev
       ConfigurationType: DynamicLibrary
@@ -141,8 +130,10 @@ Configurations:
     BaseConfigurations:
     - Release
     - Python27
-    - WithBlue27
     - Windows
+    Imports:
+    - ../blue/Include/uses_blue_27.yaml
+    - ../CcpCore/uses_CcpCore.yaml
     General:
       TargetName: _videoplayer
       ConfigurationType: DynamicLibrary
@@ -151,8 +142,10 @@ Configurations:
     BaseConfigurations:
     - Release
     - ExeFile
-    - WithBlue
     - Windows
+    Imports:
+    - ../blue/Include/uses_blue.yaml
+    - ../CcpCore/uses_CcpCore.yaml
     General:
       TargetName: _videoplayer
       ConfigurationType: DynamicLibrary
@@ -162,8 +155,10 @@ Configurations:
     - Dev
     - Test
     - Python27
-    - WithoutBlue
     - Windows
+    Imports:
+    - ../BlueExposure/uses_BlueExposureStatic.yaml
+    - ../CcpCore/uses_CcpCoreStatic.yaml
     General:
       TargetName: VideoPlayerTest
   
@@ -172,7 +167,9 @@ Configurations:
     BaseConfigurations:
     - Release
     - Python27
-    - WithBlue27
+    Imports:
+    - ../blue/Include/uses_blue_27.yaml
+    - ../CcpCore/uses_CcpCore.yaml
     General:
       TargetName: _videoplayer
       ConfigurationType: DynamicLibrary
@@ -184,7 +181,9 @@ Configurations:
     BaseConfigurations:
     - Release
     - ExeFile
-    - WithBlue
+    Imports:
+    - ../blue/Include/uses_blue.yaml
+    - ../CcpCore/uses_CcpCore.yaml
     General:
       TargetName: _videoplayer
       ConfigurationType: DynamicLibrary
@@ -199,7 +198,9 @@ Configurations:
     - Dev
     - Test
     - Python27
-    - WithoutBlue
+    Imports:
+    - ../BlueExposure/uses_BlueExposureStatic.yaml
+    - ../CcpCore/uses_CcpCoreStatic.yaml
     General:
       TargetName: VideoPlayerTest
   

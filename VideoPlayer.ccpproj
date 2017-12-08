@@ -29,143 +29,147 @@ Link:
   GenerateDebugInformation: true
   ProgramDatabaseFile: $(TargetDir)$(TargetName).pdb
 
-WithBlue: &WithBlue
-  Imports:
-    - ../blue/Include/uses_blue.yaml
-    - ../CcpCore/uses_CcpCore.yaml
+BaseConfigurations:
+  Debug:
+    General: 
+      LinkIncremental: true
+      TargetExt: .pyd
+    ClCompile:
+      PreprocessorDefinitions:
+      - _DEBUG
+      - CCP_ASSERT_ENABLED=1
+      Optimization: Disabled
+      RuntimeLibrary: MultiThreadedDebugDLL
+      DebugInformationFormat: EditAndContinue
+  
+  Dev:
+    General: 
+      LinkIncremental: true
+      TargetExt: .pyd
+    ClCompile:
+      PreprocessorDefinitions:
+      - NDEBUG
+      - CCP_ASSERT_ENABLED=1
+      Optimization: Disabled
+      RuntimeLibrary: MultiThreadedDLL
+      DebugInformationFormat: EditAndContinue
 
-WithBlue27: &WithBlue27
-  Imports:
-  - ../blue/Include/uses_blue_27.yaml
-  - ../CcpCore/uses_CcpCore.yaml
+  Release:
+    General: 
+      TargetExt: .pyd
+    ClCompile:
+      PreprocessorDefinitions:
+      - NDEBUG
+      Optimization: MaxSpeed
+      RuntimeLibrary: MultiThreadedDLL
+      DebugInformationFormat: ProgramDatabase
+      WholeProgramOptimization: true
+    Link:
+      LinkTimeCodeGeneration: UseLinkTimeCodeGeneration
 
-WithoutBlue: &WithoutBlue
-  Imports:
-  - ../BlueExposure/uses_BlueExposureStatic.yaml
-  - ../CcpCore/uses_CcpCoreStatic.yaml
-
-Debug: &Debug
-  General:
-    LinkIncremental: true
-    TargetExt: .pyd
-  ClCompile:
-    PreprocessorDefinitions:
-    - _DEBUG
-    - CCP_ASSERT_ENABLED=1
-    Optimization: Disabled
-    RuntimeLibrary: MultiThreadedDebugDLL
-    DebugInformationFormat: EditAndContinue
-
-Dev: &Dev
-  General:
-    LinkIncremental: true
-    TargetExt: .pyd
-  ClCompile:
-    PreprocessorDefinitions:
-    - NDEBUG
-    - CCP_ASSERT_ENABLED=1
-    Optimization: Disabled
-    RuntimeLibrary: MultiThreadedDLL
-    DebugInformationFormat: EditAndContinue
-
-Release: &Release
-  General:
-    TargetExt: .pyd
-  ClCompile:
-    PreprocessorDefinitions:
-    - NDEBUG
-    Optimization: MaxSpeed
-    RuntimeLibrary: MultiThreadedDLL
-    DebugInformationFormat: ProgramDatabase
-    WholeProgramOptimization: true
-  Link:
-    LinkTimeCodeGeneration: UseLinkTimeCodeGeneration
-
-Test: &Test
-  General:
-    ConfigurationType: Application
-    GenerateCodeCoverage: true
-    TargetExt: .exe
-  ClCompile:
-    PreprocessorDefinitions:
-    - NDEBUG
-    - WITH_TESTS
-  Imports:
-  - ../../../../../../sdk/GoogleTest/1.6.0/gtest.yaml
-  - ../../../../../../sdk/python/Python_2.7.yaml
-
-ExeFile: &ExeFile
-  Imports:
-  - ../stackless/stackless.yaml
-  General:
-    OutDir: ../../autobuild/VideoPlayer/exefile/$(Platform)/$(PlatformToolset)/
-    IntDir: ../temp/VideoPlayer/exefile/$(Platform)/$(Configuration)/$(PlatformToolset)/
-    TargetExt: .dll
-
-Python27: &Python27
-  Imports:
-  - ../../../../../../sdk/python/Python_2.7.yaml
-  General:
-    OutDir: ../../autobuild/VideoPlayer/python_27/$(Platform)/$(PlatformToolset)/
-    IntDir: ../temp/VideoPlayer/python_27/$(Platform)/$(Configuration)/$(PlatformToolset)/
-    TargetExt: .pyd
-
-Windows: &Windows
-  Link:
-    AdditionalDependencies:
-    - Winmm.lib
+  Test:
+    General: 
+      ConfigurationType: Application
+      GenerateCodeCoverage: true
+      TargetExt: .exe
+    ClCompile:
+      PreprocessorDefinitions:
+      - NDEBUG
+      - WITH_TESTS
+    Imports:
+    - ../../../../../../sdk/GoogleTest/1.6.0/gtest.yaml
+    - ../../../../../../sdk/python/Python_2.7.yaml
+  
+  ExeFile:
+    Imports:
+    - ../stackless/stackless.yaml
+    General: 
+      OutDir: ../../autobuild/VideoPlayer/exefile/$(Platform)/$(PlatformToolset)/
+      IntDir: ../temp/VideoPlayer/exefile/$(Platform)/$(Configuration)/$(PlatformToolset)/
+      TargetExt: .dll
+  
+  Python27:
+    Imports:
+    - ../../../../../../sdk/python/Python_2.7.yaml
+    General:
+      OutDir: ../../autobuild/VideoPlayer/python_27/$(Platform)/$(PlatformToolset)/
+      IntDir: ../temp/VideoPlayer/python_27/$(Platform)/$(Configuration)/$(PlatformToolset)/
+      TargetExt: .pyd
+  
+  Windows:
+    Link:
+      AdditionalDependencies:
+      - Winmm.lib
 
 Configurations:
   Debug|Win32,x64:
-    << : *Debug
-    << : *ExeFile
-    << : *Windows
-    << : *WithBlue
+    BaseConfigurations:
+    - Debug
+    - ExeFile
+    - Windows
+    Imports:
+    - ../blue/Include/uses_blue.yaml
+    - ../CcpCore/uses_CcpCore.yaml
     General:
       TargetName: _videoplayer_d
       ConfigurationType: DynamicLibrary
   
   Dev|Win32,x64:
-    << : *Dev
-    << : *Python27
-    << : *Windows
-    << : *WithBlue
+    BaseConfigurations:
+    - Dev
+    - Python27
+    - Windows
+    Imports:
+    - ../blue/Include/uses_blue.yaml
+    - ../CcpCore/uses_CcpCore.yaml
     General:
       TargetName: _videoplayer_dev
       ConfigurationType: DynamicLibrary
   
   Release_27|Win32,x64:
-    << : *Release
-    << : *Python27
-    << : *Windows
-    << : *WithBlue27
+    BaseConfigurations:
+    - Release
+    - Python27
+    - Windows
+    Imports:
+    - ../blue/Include/uses_blue_27.yaml
+    - ../CcpCore/uses_CcpCore.yaml
     General:
       TargetName: _videoplayer
       ConfigurationType: DynamicLibrary
   
   Release|Win32,x64:
-    << : *Release
-    << : *ExeFile
-    << : *Windows
-    << : *WithBlue
+    BaseConfigurations:
+    - Release
+    - ExeFile
+    - Windows
+    Imports:
+    - ../blue/Include/uses_blue.yaml
+    - ../CcpCore/uses_CcpCore.yaml
     General:
       TargetName: _videoplayer
       ConfigurationType: DynamicLibrary
   
   Dev_Test|Win32,x64:
-    << : *Dev
-    << : *Test
-    << : *Python27
-    << : *Windows
-    << : *WithoutBlue
+    BaseConfigurations:
+    - Dev
+    - Test
+    - Python27
+    - Windows
+    Imports:
+    - ../BlueExposure/uses_BlueExposureStatic.yaml
+    - ../CcpCore/uses_CcpCoreStatic.yaml
     General:
       TargetName: VideoPlayerTest
   
   
   Release_27|Mac64:
-    << : *Release
-    << : *Python27
-    << : *WithBlue27
+    BaseConfigurations:
+    - Release
+    - Python27
+    Imports:
+    - ../blue/Include/uses_blue_27.yaml
+    - ../CcpCore/uses_CcpCore.yaml
     General:
       TargetName: _videoplayer
       ConfigurationType: DynamicLibrary
@@ -174,9 +178,12 @@ Configurations:
       TargetExt: .pyd
   
   Release|Mac64:
-    << : *Release
-    << : *ExeFile
-    << : *WithBlue
+    BaseConfigurations:
+    - Release
+    - ExeFile
+    Imports:
+    - ../blue/Include/uses_blue.yaml
+    - ../CcpCore/uses_CcpCore.yaml
     General:
       TargetName: _videoplayer
       ConfigurationType: DynamicLibrary
@@ -187,10 +194,13 @@ Configurations:
   Dev_Test|Mac64:
     Imports:
     - ../BlueExposure/uses_BlueExposure.yaml
-    << : *Dev
-    << : *Test
-    << : *Python27
-    << : *WithoutBlue
+    BaseConfigurations:
+    - Dev
+    - Test
+    - Python27
+    Imports:
+    - ../BlueExposure/uses_BlueExposureStatic.yaml
+    - ../CcpCore/uses_CcpCoreStatic.yaml
     General:
       TargetName: VideoPlayerTest
   

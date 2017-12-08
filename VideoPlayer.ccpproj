@@ -32,12 +32,12 @@ Link:
 BaseConfigurations:
   WithBlue:
     Imports:
-    - ../blue/uses_blue.yaml
+    - ../blue/Include/uses_blue.yaml
     - ../CcpCore/uses_CcpCore.yaml
     
   WithBlue27:
     Imports:
-    - ../blue/uses_blue_27.yaml
+    - ../blue/Include/uses_blue_27.yaml
     - ../CcpCore/uses_CcpCore.yaml
     
   WithoutBlue:

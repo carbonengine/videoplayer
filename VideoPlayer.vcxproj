@@ -225,9 +225,9 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dev_Test|x64'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>NDEBUG;WITH_TESTS;CCP_ASSERT_ENABLED=1;BLUE_WITH_PYTHON=1;BLUEBUILD_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLUEBUILD_STATIC;BLUE_WITH_PYTHON=1;CCP_ASSERT_ENABLED=1;NDEBUG;WITH_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(CcpSdkPath)/googletest/1.6.0/include;$(CcpSdkPath)\telemetry\3.0.1.1008\include;$(CcpSdkPath)\Python\27_64\include;..;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;.;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CcpSdkPath)/googletest/1.6.0/include;$(CcpSdkPath)\Python\27_64\include;$(CcpSdkPath)\telemetry\3.0.1.1008\include;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;.;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>True</MultiProcessorCompilation>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <TreatWarningAsError>True</TreatWarningAsError>
@@ -244,9 +244,9 @@
     <Link>
       <GenerateDebugInformation>True</GenerateDebugInformation>
       <AdditionalAppleFrameworks>CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
-      <AdditionalLibraryDirectories>$(CcpSdkPath)/googletest/1.6.0/lib/VC100.SP1/$(Platform);../../../carbon/autobuild/BlueExposure/exefile/$(Platform)/$(PlatformToolset);$(CcpSdkPath)\Python\27_64\libs;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;$(CcpSdkPath)\telemetry\3.0.1.1008\lib;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CcpSdkPath)/googletest/1.6.0/lib/VC100.SP1/$(Platform);$(CcpSdkPath)\Python\27_64\libs;$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/BlueExposure/exefile/$(Platform)/$(PlatformToolset);../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>gtest.lib;psapi.lib;rad_tm_win64.lib;CcpCoreStatic.lib;python27.lib;libogg_static.lib;vpxmd.lib;BlueExposureStatic.lib;libnestegg.lib;libvorbis_static.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>BlueExposureStatic.lib;CcpCoreStatic.lib;Winmm.lib;gtest.lib;libnestegg.lib;libogg_static.lib;libvorbis_static.lib;psapi.lib;python27.lib;rad_tm_win64.lib;vpxmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile/>
     <Manifest/>
@@ -257,9 +257,9 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>CCP_ASSERT_ENABLED=1;BLUE_WITH_PYTHON=1;CCP_STACKLESS=1;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLUE_WITH_PYTHON=1;CCP_ASSERT_ENABLED=1;CCP_STACKLESS=1;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>..\..\..\carbon\src\stackless\pc;..\..\..\carbon\src\stackless\stackless;$(CcpSdkPath)\telemetry\3.0.1.1008\include;..\..\..\carbon\src\stackless\include;..;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;.;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CcpSdkPath)\telemetry\3.0.1.1008\include;..\..\..\carbon\src\stackless\include;..\..\..\carbon\src\stackless\pc;..\..\..\carbon\src\stackless\stackless;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;.;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>True</MultiProcessorCompilation>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <TreatWarningAsError>True</TreatWarningAsError>
@@ -276,9 +276,9 @@
     <Link>
       <GenerateDebugInformation>True</GenerateDebugInformation>
       <AdditionalAppleFrameworks>CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
-      <AdditionalLibraryDirectories>$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;../../../carbon/autobuild/blue/exefile/$(Platform)/$(PlatformToolset)/;..\..\..\carbon\autobuild\stackless\$(Platform);$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;../../../carbon/autobuild/blue/exefile/$(Platform)/$(PlatformToolset)/;..\..\..\carbon\autobuild\stackless\$(Platform);$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>CcpCore_d.lib;vpxmdd.lib;psapi.lib;rad_tm_win32.lib;libnestegg_d.lib;python27_d.lib;libvorbis_static_d.lib;libogg_static_d.lib;blue_d.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore_d.lib;Winmm.lib;blue_d.lib;libnestegg_d.lib;libogg_static_d.lib;libvorbis_static_d.lib;psapi.lib;python27_d.lib;rad_tm_win32.lib;vpxmdd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile/>
     <Manifest/>
@@ -289,9 +289,9 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_27|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>NDEBUG;BLUE_WITH_PYTHON=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLUE_WITH_PYTHON=1;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(CcpSdkPath)\Python\27\include;$(CcpSdkPath)\telemetry\3.0.1.1008\include;..;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;.;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CcpSdkPath)\Python\27\include;$(CcpSdkPath)\telemetry\3.0.1.1008\include;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;.;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>True</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <WholeProgramOptimization>True</WholeProgramOptimization>
@@ -307,12 +307,12 @@
       <RuntimeTypeInfo>True</RuntimeTypeInfo>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>../../../carbon/autobuild/blue/python_27/$(Platform)/$(PlatformToolset)/;$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;$(CcpSdkPath)\Python\27\libs;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CcpSdkPath)\Python\27\libs;$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;../../../carbon/autobuild/blue/python_27/$(Platform)/$(PlatformToolset)/;$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>True</GenerateDebugInformation>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalAppleFrameworks>CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>psapi.lib;rad_tm_win32.lib;python27.lib;libogg_static.lib;vpxmd.lib;blue.lib;libnestegg.lib;libvorbis_static.lib;CcpCore.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore.lib;Winmm.lib;blue.lib;libnestegg.lib;libogg_static.lib;libvorbis_static.lib;psapi.lib;python27.lib;rad_tm_win32.lib;vpxmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile/>
     <Manifest/>
@@ -323,9 +323,9 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>CCP_ASSERT_ENABLED=1;BLUE_WITH_PYTHON=1;CCP_STACKLESS=1;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLUE_WITH_PYTHON=1;CCP_ASSERT_ENABLED=1;CCP_STACKLESS=1;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>..\..\..\carbon\src\stackless\pc;..\..\..\carbon\src\stackless\stackless;$(CcpSdkPath)\telemetry\3.0.1.1008\include;..\..\..\carbon\src\stackless\include;..;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;.;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CcpSdkPath)\telemetry\3.0.1.1008\include;..\..\..\carbon\src\stackless\include;..\..\..\carbon\src\stackless\pc;..\..\..\carbon\src\stackless\stackless;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;.;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>True</MultiProcessorCompilation>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <TreatWarningAsError>True</TreatWarningAsError>
@@ -342,9 +342,9 @@
     <Link>
       <GenerateDebugInformation>True</GenerateDebugInformation>
       <AdditionalAppleFrameworks>CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
-      <AdditionalLibraryDirectories>$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;../../../carbon/autobuild/blue/exefile/$(Platform)/$(PlatformToolset)/;..\..\..\carbon\autobuild\stackless\$(Platform);$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;../../../carbon/autobuild/blue/exefile/$(Platform)/$(PlatformToolset)/;..\..\..\carbon\autobuild\stackless\$(Platform);$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>CcpCore_d.lib;vpxmdd.lib;psapi.lib;rad_tm_win64.lib;libnestegg_d.lib;python27_d.lib;libvorbis_static_d.lib;libogg_static_d.lib;blue_d.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore_d.lib;Winmm.lib;blue_d.lib;libnestegg_d.lib;libogg_static_d.lib;libvorbis_static_d.lib;psapi.lib;python27_d.lib;rad_tm_win64.lib;vpxmdd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile/>
     <Manifest/>
@@ -355,9 +355,9 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_27|x64'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>NDEBUG;BLUE_WITH_PYTHON=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLUE_WITH_PYTHON=1;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(CcpSdkPath)\telemetry\3.0.1.1008\include;$(CcpSdkPath)\Python\27_64\include;..;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;.;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CcpSdkPath)\Python\27_64\include;$(CcpSdkPath)\telemetry\3.0.1.1008\include;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;.;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>True</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <WholeProgramOptimization>True</WholeProgramOptimization>
@@ -373,12 +373,12 @@
       <RuntimeTypeInfo>True</RuntimeTypeInfo>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/blue/python_27/$(Platform)/$(PlatformToolset)/;$(CcpSdkPath)\Python\27_64\libs;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CcpSdkPath)\Python\27_64\libs;$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;../../../carbon/autobuild/blue/python_27/$(Platform)/$(PlatformToolset)/;$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>True</GenerateDebugInformation>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalAppleFrameworks>CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>psapi.lib;rad_tm_win64.lib;python27.lib;libogg_static.lib;vpxmd.lib;blue.lib;libnestegg.lib;libvorbis_static.lib;CcpCore.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore.lib;Winmm.lib;blue.lib;libnestegg.lib;libogg_static.lib;libvorbis_static.lib;psapi.lib;python27.lib;rad_tm_win64.lib;vpxmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile/>
     <Manifest/>
@@ -389,9 +389,9 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dev|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>NDEBUG;CCP_ASSERT_ENABLED=1;BLUE_WITH_PYTHON=1;CCP_STACKLESS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLUE_WITH_PYTHON=1;CCP_ASSERT_ENABLED=1;CCP_STACKLESS=1;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>..\..\..\carbon\src\stackless\pc;..\..\..\carbon\src\stackless\stackless;$(CcpSdkPath)\Python\27\include;$(CcpSdkPath)\telemetry\3.0.1.1008\include;..\..\..\carbon\src\stackless\include;..;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;.;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CcpSdkPath)\Python\27\include;$(CcpSdkPath)\telemetry\3.0.1.1008\include;..\..\..\carbon\src\stackless\include;..\..\..\carbon\src\stackless\pc;..\..\..\carbon\src\stackless\stackless;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;.;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>True</MultiProcessorCompilation>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <TreatWarningAsError>True</TreatWarningAsError>
@@ -408,9 +408,9 @@
     <Link>
       <GenerateDebugInformation>True</GenerateDebugInformation>
       <AdditionalAppleFrameworks>CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
-      <AdditionalLibraryDirectories>$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;$(CcpSdkPath)\Python\27\libs;..\..\..\carbon\autobuild\stackless\$(Platform);../../../carbon/autobuild/blue/exefile/$(Platform)/$(PlatformToolset)/;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CcpSdkPath)\Python\27\libs;$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;../../../carbon/autobuild/blue/exefile/$(Platform)/$(PlatformToolset)/;..\..\..\carbon\autobuild\stackless\$(Platform);$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>psapi.lib;rad_tm_win32.lib;python27.lib;libogg_static.lib;vpxmd.lib;blue.lib;libnestegg.lib;libvorbis_static.lib;CcpCore.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore.lib;Winmm.lib;blue.lib;libnestegg.lib;libogg_static.lib;libvorbis_static.lib;psapi.lib;python27.lib;rad_tm_win32.lib;vpxmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile/>
     <Manifest/>
@@ -421,9 +421,9 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dev|x64'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>NDEBUG;CCP_ASSERT_ENABLED=1;BLUE_WITH_PYTHON=1;CCP_STACKLESS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLUE_WITH_PYTHON=1;CCP_ASSERT_ENABLED=1;CCP_STACKLESS=1;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>..\..\..\carbon\src\stackless\pc;..\..\..\carbon\src\stackless\stackless;$(CcpSdkPath)\telemetry\3.0.1.1008\include;$(CcpSdkPath)\Python\27_64\include;..\..\..\carbon\src\stackless\include;..;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;.;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CcpSdkPath)\Python\27_64\include;$(CcpSdkPath)\telemetry\3.0.1.1008\include;..\..\..\carbon\src\stackless\include;..\..\..\carbon\src\stackless\pc;..\..\..\carbon\src\stackless\stackless;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;.;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>True</MultiProcessorCompilation>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <TreatWarningAsError>True</TreatWarningAsError>
@@ -440,9 +440,9 @@
     <Link>
       <GenerateDebugInformation>True</GenerateDebugInformation>
       <AdditionalAppleFrameworks>CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
-      <AdditionalLibraryDirectories>$(CcpSdkPath)\telemetry\3.0.1.1008\lib;$(CcpSdkPath)\Python\27_64\libs;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;../../../carbon/autobuild/blue/exefile/$(Platform)/$(PlatformToolset)/;..\..\..\carbon\autobuild\stackless\$(Platform);$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CcpSdkPath)\Python\27_64\libs;$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;../../../carbon/autobuild/blue/exefile/$(Platform)/$(PlatformToolset)/;..\..\..\carbon\autobuild\stackless\$(Platform);$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>psapi.lib;rad_tm_win64.lib;python27.lib;libogg_static.lib;vpxmd.lib;blue.lib;libnestegg.lib;libvorbis_static.lib;CcpCore.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore.lib;Winmm.lib;blue.lib;libnestegg.lib;libogg_static.lib;libvorbis_static.lib;psapi.lib;python27.lib;rad_tm_win64.lib;vpxmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile/>
     <Manifest/>
@@ -453,9 +453,9 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dev_Test|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>NDEBUG;WITH_TESTS;CCP_ASSERT_ENABLED=1;BLUE_WITH_PYTHON=1;BLUEBUILD_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLUEBUILD_STATIC;BLUE_WITH_PYTHON=1;CCP_ASSERT_ENABLED=1;NDEBUG;WITH_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(CcpSdkPath)/googletest/1.6.0/include;$(CcpSdkPath)\Python\27\include;$(CcpSdkPath)\telemetry\3.0.1.1008\include;..;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;.;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CcpSdkPath)/googletest/1.6.0/include;$(CcpSdkPath)\Python\27\include;$(CcpSdkPath)\telemetry\3.0.1.1008\include;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;.;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>True</MultiProcessorCompilation>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <TreatWarningAsError>True</TreatWarningAsError>
@@ -472,9 +472,9 @@
     <Link>
       <GenerateDebugInformation>True</GenerateDebugInformation>
       <AdditionalAppleFrameworks>CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
-      <AdditionalLibraryDirectories>$(CcpSdkPath)/googletest/1.6.0/lib/VC100.SP1/$(Platform);../../../carbon/autobuild/BlueExposure/exefile/$(Platform)/$(PlatformToolset);$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;$(CcpSdkPath)\Python\27\libs;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CcpSdkPath)/googletest/1.6.0/lib/VC100.SP1/$(Platform);$(CcpSdkPath)\Python\27\libs;$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/BlueExposure/exefile/$(Platform)/$(PlatformToolset);../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>gtest.lib;psapi.lib;rad_tm_win32.lib;CcpCoreStatic.lib;python27.lib;libogg_static.lib;vpxmd.lib;BlueExposureStatic.lib;libnestegg.lib;libvorbis_static.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>BlueExposureStatic.lib;CcpCoreStatic.lib;Winmm.lib;gtest.lib;libnestegg.lib;libogg_static.lib;libvorbis_static.lib;psapi.lib;python27.lib;rad_tm_win32.lib;vpxmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile/>
     <Manifest/>
@@ -485,9 +485,9 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>NDEBUG;BLUE_WITH_PYTHON=1;CCP_STACKLESS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLUE_WITH_PYTHON=1;CCP_STACKLESS=1;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>..\..\..\carbon\src\stackless\pc;..\..\..\carbon\src\stackless\stackless;$(CcpSdkPath)\telemetry\3.0.1.1008\include;..\..\..\carbon\src\stackless\include;..;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;.;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CcpSdkPath)\telemetry\3.0.1.1008\include;..\..\..\carbon\src\stackless\include;..\..\..\carbon\src\stackless\pc;..\..\..\carbon\src\stackless\stackless;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;.;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>True</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <WholeProgramOptimization>True</WholeProgramOptimization>
@@ -503,12 +503,12 @@
       <RuntimeTypeInfo>True</RuntimeTypeInfo>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;../../../carbon/autobuild/blue/exefile/$(Platform)/$(PlatformToolset)/;..\..\..\carbon\autobuild\stackless\$(Platform);$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;../../../carbon/autobuild/blue/exefile/$(Platform)/$(PlatformToolset)/;..\..\..\carbon\autobuild\stackless\$(Platform);$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>True</GenerateDebugInformation>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalAppleFrameworks>CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>psapi.lib;rad_tm_win64.lib;python27.lib;libogg_static.lib;vpxmd.lib;blue.lib;libnestegg.lib;libvorbis_static.lib;CcpCore.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore.lib;Winmm.lib;blue.lib;libnestegg.lib;libogg_static.lib;libvorbis_static.lib;psapi.lib;python27.lib;rad_tm_win64.lib;vpxmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile/>
     <Manifest/>
@@ -519,9 +519,9 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>NDEBUG;BLUE_WITH_PYTHON=1;CCP_STACKLESS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLUE_WITH_PYTHON=1;CCP_STACKLESS=1;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>..\..\..\carbon\src\stackless\pc;..\..\..\carbon\src\stackless\stackless;$(CcpSdkPath)\telemetry\3.0.1.1008\include;..\..\..\carbon\src\stackless\include;..;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;.;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CcpSdkPath)\telemetry\3.0.1.1008\include;..\..\..\carbon\src\stackless\include;..\..\..\carbon\src\stackless\pc;..\..\..\carbon\src\stackless\stackless;$(CcpBranchPath)/carbon/src;$(CcpSdkPath)/libnestegg/2015.03.23_modified/include;$(CcpSdkPath)/libvpx/1.6.1/include;$(CcpSdkPath)/vorbis/1.3.2-1.3.5/include;.;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>True</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <WholeProgramOptimization>True</WholeProgramOptimization>
@@ -537,12 +537,12 @@
       <RuntimeTypeInfo>True</RuntimeTypeInfo>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;../../../carbon/autobuild/blue/exefile/$(Platform)/$(PlatformToolset)/;..\..\..\carbon\autobuild\stackless\$(Platform);$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CcpSdkPath)\telemetry\3.0.1.1008\lib;../../../carbon/autobuild/CcpCore/$(Platform)/$(PlatformToolset)/;../../../carbon/autobuild/blue/exefile/$(Platform)/$(PlatformToolset)/;..\..\..\carbon\autobuild\stackless\$(Platform);$(CcpSdkPath)/libnestegg/2015.03.23_modified/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/libvpx/1.6.1/lib/$(Platform)/$(PlatformToolset);$(CcpSdkPath)/vorbis/1.3.2-1.3.5/lib/$(Platform)/$(PlatformToolset);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>True</GenerateDebugInformation>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalAppleFrameworks>CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>psapi.lib;rad_tm_win32.lib;python27.lib;libogg_static.lib;vpxmd.lib;blue.lib;libnestegg.lib;libvorbis_static.lib;CcpCore.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore.lib;Winmm.lib;blue.lib;libnestegg.lib;libogg_static.lib;libvorbis_static.lib;psapi.lib;python27.lib;rad_tm_win32.lib;vpxmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile/>
     <Manifest/>

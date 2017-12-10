@@ -82,7 +82,7 @@ BaseConfigurations:
   
   ExeFile:
     Imports:
-    - ../stackless/stackless.yaml
+    - ../stackless/Include/stackless.yaml
     General: 
       OutDir: ../../autobuild/VideoPlayer/exefile/$(Platform)/$(PlatformToolset)/
       IntDir: ../temp/VideoPlayer/exefile/$(Platform)/$(Configuration)/$(PlatformToolset)/

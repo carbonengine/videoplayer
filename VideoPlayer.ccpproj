@@ -78,7 +78,7 @@ BaseConfigurations:
       - WITH_TESTS
     Imports:
     - ../../../../../../sdk/GoogleTest/1.6.0/gtest.yaml
-    - ../../../../../../sdk/python/Python_2.7.yaml
+    - ../../../../../../sdk/python/ccpproj/Python_2.7.yaml
   
   ExeFile:
     Imports:
@@ -90,7 +90,7 @@ BaseConfigurations:
   
   Python27:
     Imports:
-    - ../../../../../../sdk/python/Python_2.7.yaml
+    - ../../../../../../sdk/python/ccpproj/Python_2.7.yaml
     General:
       OutDir: ../../autobuild/VideoPlayer/python_27/$(Platform)/$(PlatformToolset)/
       IntDir: ../temp/VideoPlayer/python_27/$(Platform)/$(Configuration)/$(PlatformToolset)/

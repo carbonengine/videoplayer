@@ -192,14 +192,12 @@ Configurations:
       TargetExt: .dll
   
   Dev_Test|Mac64:
-    Imports:
-    - ../BlueExposure/uses_BlueExposure.yaml
     BaseConfigurations:
     - Dev
     - Test
     - Python27
     Imports:
-    - ../BlueExposure/uses_BlueExposureStatic.yaml
+    - ../BlueExposure/uses_BlueExposure.yaml
     - ../CcpCore/uses_CcpCoreStatic.yaml
     General:
       TargetName: VideoPlayerTest

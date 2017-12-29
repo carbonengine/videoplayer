@@ -63,7 +63,7 @@ VorbisDecoder::VorbisDecoder( const AudioMetadata& audioMetadata, EncodedAudioFr
 	{
 		ogg_packet packet;
 		packet.packet = m_audioMetadata.codecInitializationData[header].data.get();
-		packet.bytes = m_audioMetadata.codecInitializationData[header].length;
+		packet.bytes = long( m_audioMetadata.codecInitializationData[header].length );
 		packet.b_o_s = header == 0;
 		packet.e_o_s = false;
 		packet.granulepos = 0;
@@ -182,7 +182,7 @@ void VorbisDecoder::DecodeThread()
 
 			ogg_packet oggPacket;
 			oggPacket.packet = const_cast<unsigned char*>(data);
-			oggPacket.bytes = length;
+			oggPacket.bytes = long( length );
 			oggPacket.b_o_s = false;
 			oggPacket.e_o_s = false;
 			oggPacket.granulepos = -1;

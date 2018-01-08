@@ -42,7 +42,9 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <PropertyGroup Label="Globals"/>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{ad5ab0fd-eb67-511c-be11-4949d4cb68b2}</ProjectGuid>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dev_Test|x64'" Label="Configuration">
     <PlatformToolset>v100</PlatformToolset>
   </PropertyGroup>
@@ -73,7 +75,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <PlatformToolset>v100</PlatformToolset>
   </PropertyGroup>
-  <Import Project="$(VCTargetsPath)/Microsoft.Cpp.Default.props"/>
+  <Import Project="$(VCTargetsPath)/Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dev_Test|x64'">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>False</UseOfMfc>
@@ -134,7 +136,7 @@
     <IntDir>../temp/VideoPlayer/$(Platform)/$(Configuration)/$(PlatformToolset)/</IntDir>
     <OutDir>../../autobuild/VideoPlayer/$(Platform)/$(PlatformToolset)/</OutDir>
   </PropertyGroup>
-  <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props"/>
+  <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props" />
   <PropertyGroup Label="UserMacros">
     <CcpSdkPath>../../../../../../sdk</CcpSdkPath>
     <CcpSharedToolsPath>../../../../../../shared_tools</CcpSharedToolsPath>
@@ -151,17 +153,17 @@
       <Value>$(CcpBranchPath)</Value>
     </BuildMacro>
   </ItemGroup>
-  <ImportGroup Label="ExtensionSettings"/>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Dev_Test|x64'" Label="PropertySheets"/>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets"/>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_27|Win32'" Label="PropertySheets"/>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets"/>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_27|x64'" Label="PropertySheets"/>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Dev|Win32'" Label="PropertySheets"/>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Dev|x64'" Label="PropertySheets"/>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Dev_Test|Win32'" Label="PropertySheets"/>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets"/>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets"/>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Dev_Test|x64'" Label="PropertySheets" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_27|Win32'" Label="PropertySheets" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_27|x64'" Label="PropertySheets" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Dev|Win32'" Label="PropertySheets" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Dev|x64'" Label="PropertySheets" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Dev_Test|Win32'" Label="PropertySheets" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets" />
   <PropertyGroup>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Dev_Test|x64'">../temp/VideoPlayer/python_27/$(Platform)/$(Configuration)/$(PlatformToolset)/</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Dev_Test|x64'">True</LinkIncremental>
@@ -248,11 +250,11 @@
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>BlueExposureStatic.lib;CcpCoreStatic.lib;Winmm.lib;gtest.lib;libnestegg.lib;libogg_static.lib;libvorbis_static.lib;psapi.lib;python27.lib;rad_tm_win64.lib;vpxmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <ResourceCompile/>
-    <Manifest/>
-    <PreBuildEvent/>
-    <PreLinkEvent/>
-    <PostBuildEvent/>
+    <ResourceCompile />
+    <Manifest />
+    <PreBuildEvent />
+    <PreLinkEvent />
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -280,11 +282,11 @@
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>CcpCore_d.lib;Winmm.lib;blue_d.lib;libnestegg_d.lib;libogg_static_d.lib;libvorbis_static_d.lib;psapi.lib;python27_d.lib;rad_tm_win32.lib;vpxmdd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <ResourceCompile/>
-    <Manifest/>
-    <PreBuildEvent/>
-    <PreLinkEvent/>
-    <PostBuildEvent/>
+    <ResourceCompile />
+    <Manifest />
+    <PreBuildEvent />
+    <PreLinkEvent />
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_27|Win32'">
     <ClCompile>
@@ -314,11 +316,11 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>CcpCore.lib;Winmm.lib;blue.lib;libnestegg.lib;libogg_static.lib;libvorbis_static.lib;psapi.lib;python27.lib;rad_tm_win32.lib;vpxmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <ResourceCompile/>
-    <Manifest/>
-    <PreBuildEvent/>
-    <PreLinkEvent/>
-    <PostBuildEvent/>
+    <ResourceCompile />
+    <Manifest />
+    <PreBuildEvent />
+    <PreLinkEvent />
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -346,11 +348,11 @@
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>CcpCore_d.lib;Winmm.lib;blue_d.lib;libnestegg_d.lib;libogg_static_d.lib;libvorbis_static_d.lib;psapi.lib;python27_d.lib;rad_tm_win64.lib;vpxmdd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <ResourceCompile/>
-    <Manifest/>
-    <PreBuildEvent/>
-    <PreLinkEvent/>
-    <PostBuildEvent/>
+    <ResourceCompile />
+    <Manifest />
+    <PreBuildEvent />
+    <PreLinkEvent />
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_27|x64'">
     <ClCompile>
@@ -380,11 +382,11 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>CcpCore.lib;Winmm.lib;blue.lib;libnestegg.lib;libogg_static.lib;libvorbis_static.lib;psapi.lib;python27.lib;rad_tm_win64.lib;vpxmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <ResourceCompile/>
-    <Manifest/>
-    <PreBuildEvent/>
-    <PreLinkEvent/>
-    <PostBuildEvent/>
+    <ResourceCompile />
+    <Manifest />
+    <PreBuildEvent />
+    <PreLinkEvent />
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dev|Win32'">
     <ClCompile>
@@ -412,11 +414,11 @@
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>CcpCore.lib;Winmm.lib;blue.lib;libnestegg.lib;libogg_static.lib;libvorbis_static.lib;psapi.lib;python27.lib;rad_tm_win32.lib;vpxmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <ResourceCompile/>
-    <Manifest/>
-    <PreBuildEvent/>
-    <PreLinkEvent/>
-    <PostBuildEvent/>
+    <ResourceCompile />
+    <Manifest />
+    <PreBuildEvent />
+    <PreLinkEvent />
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dev|x64'">
     <ClCompile>
@@ -444,11 +446,11 @@
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>CcpCore.lib;Winmm.lib;blue.lib;libnestegg.lib;libogg_static.lib;libvorbis_static.lib;psapi.lib;python27.lib;rad_tm_win64.lib;vpxmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <ResourceCompile/>
-    <Manifest/>
-    <PreBuildEvent/>
-    <PreLinkEvent/>
-    <PostBuildEvent/>
+    <ResourceCompile />
+    <Manifest />
+    <PreBuildEvent />
+    <PreLinkEvent />
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dev_Test|Win32'">
     <ClCompile>
@@ -476,11 +478,11 @@
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>BlueExposureStatic.lib;CcpCoreStatic.lib;Winmm.lib;gtest.lib;libnestegg.lib;libogg_static.lib;libvorbis_static.lib;psapi.lib;python27.lib;rad_tm_win32.lib;vpxmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <ResourceCompile/>
-    <Manifest/>
-    <PreBuildEvent/>
-    <PreLinkEvent/>
-    <PostBuildEvent/>
+    <ResourceCompile />
+    <Manifest />
+    <PreBuildEvent />
+    <PreLinkEvent />
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -510,11 +512,11 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>CcpCore.lib;Winmm.lib;blue.lib;libnestegg.lib;libogg_static.lib;libvorbis_static.lib;psapi.lib;python27.lib;rad_tm_win64.lib;vpxmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <ResourceCompile/>
-    <Manifest/>
-    <PreBuildEvent/>
-    <PreLinkEvent/>
-    <PostBuildEvent/>
+    <ResourceCompile />
+    <Manifest />
+    <PreBuildEvent />
+    <PreLinkEvent />
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -544,64 +546,63 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>CcpCore.lib;Winmm.lib;blue.lib;libnestegg.lib;libogg_static.lib;libvorbis_static.lib;psapi.lib;python27.lib;rad_tm_win32.lib;vpxmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <ResourceCompile/>
-    <Manifest/>
-    <PreBuildEvent/>
-    <PreLinkEvent/>
-    <PostBuildEvent/>
+    <ResourceCompile />
+    <Manifest />
+    <PreBuildEvent />
+    <PreLinkEvent />
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Audio2Sink.h"/>
-    <ClInclude Include="autoversion.h"/>
-    <ClInclude Include="FrameQueue.h"/>
-    <ClInclude Include="IAudioDecoder.h"/>
-    <ClInclude Include="IAudioSink.h"/>
-    <ClInclude Include="IAudioSinkExposed.h"/>
-    <ClInclude Include="IVideoContainerParser.h"/>
-    <ClInclude Include="IVideoDecoder.h"/>
-    <ClInclude Include="Metadata.h"/>
-    <ClInclude Include="StdAfx.h"/>
-    <ClInclude Include="Timer.h"/>
-    <ClInclude Include="VideoController.h"/>
-    <ClInclude Include="VideoPlayer.h"/>
-    <ClInclude Include="VideoPlayerResult.h"/>
-    <ClInclude Include="VorbisDecoder.h"/>
-    <ClInclude Include="VpxDecoder.h"/>
-    <ClInclude Include="WaveOutAudioSink.h"/>
-    <ClInclude Include="WebMParser.h"/>
-    <ClInclude Include="test\TestUtilities.h"/>
+    <ClInclude Include="Audio2Sink.h" />
+    <ClInclude Include="FrameQueue.h" />
+    <ClInclude Include="IAudioDecoder.h" />
+    <ClInclude Include="IAudioSink.h" />
+    <ClInclude Include="IAudioSinkExposed.h" />
+    <ClInclude Include="IVideoContainerParser.h" />
+    <ClInclude Include="IVideoDecoder.h" />
+    <ClInclude Include="Metadata.h" />
+    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="Timer.h" />
+    <ClInclude Include="VideoController.h" />
+    <ClInclude Include="VideoPlayer.h" />
+    <ClInclude Include="VideoPlayerResult.h" />
+    <ClInclude Include="VorbisDecoder.h" />
+    <ClInclude Include="VpxDecoder.h" />
+    <ClInclude Include="WaveOutAudioSink.h" />
+    <ClInclude Include="WebMParser.h" />
+    <ClInclude Include="test\TestUtilities.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Audio2Sink.cpp"/>
-    <ClCompile Include="Audio2Sink_Blue.cpp"/>
-    <ClCompile Include="IAudioDecoder.cpp"/>
-    <ClCompile Include="IAudioSink.cpp"/>
-    <ClCompile Include="IVideoContainerParser.cpp"/>
-    <ClCompile Include="IVideoDecoder.cpp"/>
-    <ClCompile Include="Metadata.cpp"/>
+    <ClCompile Include="Audio2Sink.cpp" />
+    <ClCompile Include="Audio2Sink_Blue.cpp" />
+    <ClCompile Include="IAudioDecoder.cpp" />
+    <ClCompile Include="IAudioSink.cpp" />
+    <ClCompile Include="IVideoContainerParser.cpp" />
+    <ClCompile Include="IVideoDecoder.cpp" />
+    <ClCompile Include="Metadata.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Timer.cpp"/>
-    <ClCompile Include="VideoController.cpp"/>
-    <ClCompile Include="VideoPlayer.cpp"/>
-    <ClCompile Include="VideoPlayerResult.cpp"/>
-    <ClCompile Include="VideoPlayerResult_Blue.cpp"/>
-    <ClCompile Include="VideoPlayer_Blue.cpp"/>
-    <ClCompile Include="VorbisDecoder.cpp"/>
-    <ClCompile Include="VpxDecoder.cpp"/>
-    <ClCompile Include="WaveOutAudioSink.cpp"/>
-    <ClCompile Include="WaveOutAudioSink_Blue.cpp"/>
-    <ClCompile Include="WebMParser.cpp"/>
-    <ClCompile Include="test\main.cpp"/>
-    <ClCompile Include="test\TestFrameQueue.cpp"/>
-    <ClCompile Include="test\TestUtilities.cpp"/>
-    <ClCompile Include="test\TestVideoPlayerController.cpp"/>
-    <ClCompile Include="test\TestVorbisDecoder.cpp"/>
-    <ClCompile Include="test\TestVpxDecoder.cpp"/>
-    <ClCompile Include="test\TestWebMParser.cpp"/>
+    <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="VideoController.cpp" />
+    <ClCompile Include="VideoPlayer.cpp" />
+    <ClCompile Include="VideoPlayerResult.cpp" />
+    <ClCompile Include="VideoPlayerResult_Blue.cpp" />
+    <ClCompile Include="VideoPlayer_Blue.cpp" />
+    <ClCompile Include="VorbisDecoder.cpp" />
+    <ClCompile Include="VpxDecoder.cpp" />
+    <ClCompile Include="WaveOutAudioSink.cpp" />
+    <ClCompile Include="WaveOutAudioSink_Blue.cpp" />
+    <ClCompile Include="WebMParser.cpp" />
+    <ClCompile Include="test\main.cpp" />
+    <ClCompile Include="test\TestFrameQueue.cpp" />
+    <ClCompile Include="test\TestUtilities.cpp" />
+    <ClCompile Include="test\TestVideoPlayerController.cpp" />
+    <ClCompile Include="test\TestVorbisDecoder.cpp" />
+    <ClCompile Include="test\TestVpxDecoder.cpp" />
+    <ClCompile Include="test\TestWebMParser.cpp" />
   </ItemGroup>
-  <ItemGroup/>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
-  <ImportGroup Label="ExtensionTargets"/>
+  <ItemGroup />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
 </Project>

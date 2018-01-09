@@ -8,6 +8,9 @@
     <ClInclude Include="Audio2Sink.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="autoversion.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
     <ClInclude Include="FrameQueue.h">
       <Filter>Source Files</Filter>
     </ClInclude>

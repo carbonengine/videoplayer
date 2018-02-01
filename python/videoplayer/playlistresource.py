@@ -251,7 +251,7 @@ def shuffled_videos(*res_path):
     """
     paths = []
     for path in res_path:
-        if not path.lower().startswith('http') and blue.paths.isdir(path):
+        if not path.lower().startswith('http') and blue.paths.exists(path) and blue.paths.isdir(path):
             for each in blue.paths.listdir(path):
                 if each.lower().endswith('.webm'):
                     paths.append('%s/%s' % (path, each))

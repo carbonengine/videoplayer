@@ -178,6 +178,7 @@ VideoPlayerResult VideoPlayer::Update()
 			if( !!m_bgraTexture && m_bgraTexture->GetWidth() == frame->width && m_bgraTexture->GetHeight() == frame->height )
 			{
 				m_bgraTexture->UpdateSubresource( 0, 0, frame->width, frame->height, frame->bgra, 4 * frame->width );
+				m_bgraTexture->SetAverageColor( frame->averageColor.red, frame->averageColor.green, frame->averageColor.blue, frame->averageColor.alpha );
 			}
 			m_lastUpdatedTimeStamp = frame->timeStamp;
 		}
@@ -267,6 +268,7 @@ void ClearTexture( ITriTextureRes* texture, uint8_t fillColor )
 		CcpMallocBuffer zeros( "VideoPlayer::ClearTextures", 4 * texture->GetWidth() * texture->GetHeight() );
 		memset( zeros.get(), fillColor, zeros.size() );
 		texture->UpdateSubresource( 0, 0, texture->GetWidth(), texture->GetHeight(), zeros.get(), 4 * texture->GetWidth() );
+		texture->SetAverageColor( 0, 0, 0, 0 );
 	}
 }
 

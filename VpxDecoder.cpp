@@ -65,7 +65,7 @@ bool IsKeyFrame( vpx_codec_ctx_t* context )
 
 void YuvToBgra444( 
 	uint8_t* dest, 
-	const uint8_t* srcY, 
+	const uint8_t* srcY,
 	int yStride,
 	const uint8_t* srcU, 
 	int uStride,
@@ -101,7 +101,7 @@ void YuvToBgra444(
 
 void YuvToBgrx444( 
 	uint8_t* dest, 
-	const uint8_t* srcY, 
+	const uint8_t* srcY,
 	int yStride,
 	const uint8_t* srcU, 
 	int uStride,
@@ -133,7 +133,7 @@ void YuvToBgrx444(
 
 void YuvToBgra422( 
 	uint8_t* dest, 
-	const uint8_t* srcY, 
+	const uint8_t* srcY,
 	int yStride,
 	const uint8_t* srcU, 
 	int uStride,
@@ -180,7 +180,7 @@ void YuvToBgra422(
 
 void YuvToBgrx422( 
 	uint8_t* dest, 
-	const uint8_t* srcY, 
+	const uint8_t* srcY,
 	int yStride,
 	const uint8_t* srcU, 
 	int uStride,
@@ -221,8 +221,9 @@ void YuvToBgrx422(
 	}
 }
 
-void YuvToBgra( 
-	uint8_t* dest, 
+void YuvToBgra(
+	uint8_t* dest,
+	VideoFrame::Color& averageColor,
 	const uint8_t* srcY, 
 	int yStride,
 	const uint8_t* srcU, 
@@ -257,6 +258,23 @@ void YuvToBgra(
 			YuvToBgrx444( dest, srcY, yStride, srcU, uStride, srcV, vStride, width, height );
 		}
 	}
+
+	uint32_t numPixels = width * height;
+	uint32_t r = 0;
+	uint32_t g = 0;
+	uint32_t b = 0;
+	uint32_t a = 0;
+	for( uint32_t i = 0; i < numPixels; ++i )
+	{
+		b += *dest++;
+		g += *dest++;
+		r += *dest++;
+		a += *dest++;
+	}
+	averageColor.red = float( double( r ) / 255. / numPixels );
+	averageColor.green = float( double( g ) / 255. / numPixels );
+	averageColor.blue = float( double( b ) / 255. / numPixels );
+	averageColor.alpha = float( double( a ) / 255. / numPixels );
 }
 
 inline void CopyImagePlane( uint8_t* dest, uint8_t* source, int sourceStride, uint32_t width, uint32_t height )
@@ -502,6 +520,7 @@ void VpxDecoder::ConvertThread()
 
 		YuvToBgra( 
 			frame->bgra, 
+			frame->averageColor,
 			yuv->y,
 			yuv->width,
 			yuv->u,

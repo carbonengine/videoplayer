@@ -216,6 +216,11 @@ struct VideoFrame
 	uint32_t height;
 	uint64_t timeStamp;
 	uint8_t* bgra;
+
+	struct Color
+	{
+		float red, green, blue, alpha;
+	} averageColor;
 };
 
 typedef FrameQueue<VideoFrame, MaxCountFullPolicy, FrameDeleter<VideoFrame>> VideoFrameQueue;

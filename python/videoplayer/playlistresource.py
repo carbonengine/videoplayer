@@ -4,6 +4,7 @@ import re
 import urllib
 import weakref
 
+import audio2
 import blue
 import trinity
 import videoplayer
@@ -101,6 +102,7 @@ class _VideoPlaylistController(object):
             if self.destroyed:
                 return
             stream = blue.paths.open(item, 'rb')
+
         self.video = videoplayer.VideoPlayer(stream, None)
         self.video.bgra_texture = self.weak_texture.object
         self.video.on_state_change = self._on_state_change
@@ -142,6 +144,37 @@ class _VideoPlaylistController(object):
             self.weak_texture.callback = None
 
 
+class _VideoPlaylistControllerWithSound(_VideoPlaylistController):
+    def play_next(self):
+        if self.destroyed:
+            return
+        try:
+            item = self.playlist.next()
+        except StopIteration:
+            self.current_path = None
+            for each in _play_list_finished_handlers:
+                each(self.constructor_params, self.weak_texture.object)
+            self._destroy()
+            return
+        if item.lower().startswith('http'):
+            stream = blue.BlueNetworkStream(item)
+        else:
+            if blue.remoteFileCache.FileExists(item) and not blue.paths.FileExistsLocally(item):
+                blue.paths.GetFileContentsWithYield(item)
+            if self.destroyed:
+                return
+            stream = blue.paths.open(item, 'rb')
+
+        sink = videoplayer.Audio2Sink(audio2.GetDirectSoundPtr(), audio2.GetStreamPositionPtr(), 0)
+        self.video = videoplayer.VideoPlayer(stream, sink, 0, True)
+
+        self.video.bgra_texture = self.weak_texture.object
+        self.video.on_state_change = self._on_state_change
+        self.video.on_create_textures = self._on_video_info_ready
+        self.video.on_error = self._on_error
+        self.current_path = item
+
+
 def _url_to_dict(param_string):
     params = {}
     expr = re.compile(r'\?((\w+)=([^&]*))(&?(\w+)=([^&]*))*')
@@ -156,7 +189,7 @@ def _url_to_dict(param_string):
 _video_controllers = weakref.WeakValueDictionary()
 
 
-def register_resource_constructor(name, width, height, playlist, low_quality_texture_path=None):
+def register_resource_constructor(name, width, height, playlist, low_quality_texture_path=None, withSound=False):
     """
     Registers a dynamic resource handler to play videos from a playlist
 
@@ -171,7 +204,10 @@ def register_resource_constructor(name, width, height, playlist, low_quality_tex
     def play(param_string):
         # noinspection PyBroadException
         try:
-            rj = _VideoPlaylistController()
+            if withSound:
+                rj = _VideoPlaylistControllerWithSound()
+            else:
+                rj = _VideoPlaylistController()
             _video_controllers['dynamic:/%s%s' % (name, param_string)] = rj
             return rj.init(width, height, playlist, low_quality_texture_path, **_url_to_dict(param_string))
         except:

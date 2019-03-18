@@ -275,7 +275,10 @@ def get_currently_played_video(res_path):
     :rtype: str
     :raises KeyError: if the playlist path is not currently used
     """
-    return _video_controllers[res_path].current_path
+    video = _video_controllers.get(res_path, None)
+    if video is None:
+        return None
+    return video.current_path
 
 
 def shuffled_videos(*res_path):

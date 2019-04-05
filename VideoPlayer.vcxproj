@@ -44,6 +44,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{ad5ab0fd-eb67-511c-be11-4949d4cb68b2}</ProjectGuid>
+    <ProjectName>videoplayer</ProjectName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dev_Test|x64'" Label="Configuration">
     <PlatformToolset>v100</PlatformToolset>

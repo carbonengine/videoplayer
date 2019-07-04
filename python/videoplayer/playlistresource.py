@@ -1,7 +1,6 @@
 import logging
 import random
 import re
-import urllib
 import weakref
 
 import audio2
@@ -175,6 +174,28 @@ class _VideoPlaylistControllerWithSound(_VideoPlaylistController):
         self.current_path = item
 
 
+_hexdig = '0123456789ABCDEFabcdef'
+_hextochr = dict((a + b, chr(int(a + b, 16)))
+                 for a in _hexdig for b in _hexdig)
+
+
+def _unquote(s):
+    """unquote('abc%20def') -> 'abc def'."""
+    res = s.split('%')
+    # fastpath
+    if len(res) == 1:
+        return s
+    s = res[0]
+    for item in res[1:]:
+        try:
+            s += _hextochr[item[:2]] + item[2:]
+        except KeyError:
+            s += '%' + item
+        except UnicodeDecodeError:
+            s += unichr(int(item[:2], 16)) + item[2:]
+    return s
+
+
 def _url_to_dict(param_string):
     params = {}
     expr = re.compile(r'\?((\w+)=([^&]*))(&?(\w+)=([^&]*))*')
@@ -182,7 +203,7 @@ def _url_to_dict(param_string):
     if match:
         for i in xrange(1, len(match.groups()), 3):
             if match.group(i) is not None:
-                params[match.group(i + 1)] = str(urllib.unquote(match.group(i + 2)))
+                params[match.group(i + 1)] = str(_unquote(match.group(i + 2)))
     return params
 
 

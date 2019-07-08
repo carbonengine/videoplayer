@@ -212,7 +212,10 @@ WebMParser::~WebMParser()
 {
 	m_stopRequested = true;
 	CompleteQueues();
-	m_parseThread.join();
+	if( m_parseThread.joinable() )
+	{
+		m_parseThread.join();
+	}
 	m_audioQueue.reset();
 	m_videoQueue.reset();
 	for( auto it = m_packets.begin(); it != m_packets.end(); ++it )

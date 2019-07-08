@@ -46,7 +46,10 @@ protected:
 		{
 			if( m_players[i]->m_deleted )
 			{
-				m_players[i]->m_thread.join();
+				if( m_players[i]->m_thread.joinable() )
+				{
+					m_players[i]->m_thread.join();
+				}
 				CCP_DELETE m_players[i];
 				m_players.erase( m_players.begin() + i );
 			}

@@ -63,15 +63,9 @@ void Audio2Sink::Open( const AudioMetadata& audioMetadata, PcmFrameQueue& frameQ
 void Audio2Sink::Close()
 {
 	m_stopRequested = true;
-	try
+	if( m_submitThread.joinable() )
 	{
-		if( m_submitThread.joinable() )
-		{
-			m_submitThread.join();
-		}
-	}
-	catch( std::system_error& )
-	{
+		m_submitThread.join();
 	}
 	m_stopRequested = false;
 	m_audioMetadata = nullptr;

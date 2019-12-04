@@ -117,7 +117,7 @@ Configurations:
   Dev|Win32,x64:
     BaseConfigurations:
     - Dev
-    - Python27
+    - ExeFile
     - Windows
     Imports:
     - ../blue/Include/uses_blue.yaml

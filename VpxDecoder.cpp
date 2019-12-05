@@ -145,8 +145,8 @@ void YuvToBgra422(
 	uint32_t height )
 {
 	yStride -= int( width );
-	uStride -= int( width / 2 );
-	vStride -= int( width / 2 );
+	uStride -= int( ( width + 1 ) / 2 );
+	vStride -= int( ( width + 1 ) / 2 );
 	alphaStride -= int( width );
 	for( uint32_t j = 0; j < height; ++j )
 	{
@@ -190,8 +190,8 @@ void YuvToBgrx422(
 	uint32_t height )
 {
 	yStride -= int( width );
-	uStride -= int( width / 2 );
-	vStride -= int( width / 2 );
+	uStride -= int( ( width + 1 ) / 2 );
+	vStride -= int( ( width + 1 ) / 2 );
 	for( uint32_t j = 0; j < height; ++j )
 	{
 		auto uRow = srcU;

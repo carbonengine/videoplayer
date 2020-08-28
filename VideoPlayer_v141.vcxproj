@@ -555,7 +555,6 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Audio2Sink.h" />
     <ClInclude Include="FrameQueue.h" />
     <ClInclude Include="IAudioDecoder.h" />
     <ClInclude Include="IAudioSink.h" />
@@ -573,10 +572,9 @@
     <ClInclude Include="WaveOutAudioSink.h" />
     <ClInclude Include="WebMParser.h" />
     <ClInclude Include="test\TestUtilities.h" />
+    <ClInclude Include="WwiseAudioSink.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Audio2Sink.cpp" />
-    <ClCompile Include="Audio2Sink_Blue.cpp" />
     <ClCompile Include="IAudioDecoder.cpp" />
     <ClCompile Include="IAudioSink.cpp" />
     <ClCompile Include="IVideoContainerParser.cpp" />
@@ -603,6 +601,8 @@
     <ClCompile Include="test\TestVorbisDecoder.cpp" />
     <ClCompile Include="test\TestVpxDecoder.cpp" />
     <ClCompile Include="test\TestWebMParser.cpp" />
+    <ClCompile Include="WwiseAudioSink.cpp" />
+    <ClCompile Include="WwiseAudioSink_Blue.cpp" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

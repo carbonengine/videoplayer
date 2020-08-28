@@ -164,7 +164,8 @@ class _VideoPlaylistControllerWithSound(_VideoPlaylistController):
                 return
             stream = blue.paths.open(item, 'rb')
 
-        sink = videoplayer.Audio2Sink(audio2.GetDirectSoundPtr(), audio2.GetStreamPositionPtr(), 0)
+        inputMgr = audio2.AudioInputMgr()
+        sink = videoplayer.WwiseAudioSink(inputMgr)
         self.video = videoplayer.VideoPlayer(stream, sink, 0, True)
 
         self.video.bgra_texture = self.weak_texture.object

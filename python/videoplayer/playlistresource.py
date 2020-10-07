@@ -237,10 +237,6 @@ def register_resource_constructor(name, width, height, playlist, low_quality_tex
     blue.resMan.RegisterResourceConstructor(name, play)
 
 
-def unregister_resource_constructor(name):
-    blue.resMan.UnregisterResourceConstructor(name)
-
-
 def register_error_handler(error_handler):
     """
     Registers an error handler that is called when there is an error playing video

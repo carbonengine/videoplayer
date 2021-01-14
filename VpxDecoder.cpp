@@ -386,6 +386,13 @@ void VpxDecoder::DecodeThread()
 			m_yuvFrameQueue.Clear();
 			m_yuvFrameQueue.Push( new( 0, 0, 0, false )  YuvFrame( 0, 0, 0, false ) );
 			m_dropFrameTime = 0;
+			vpx_codec_destroy( &m_videoCodec );
+			vpx_codec_dec_init( &m_videoCodec, videoInterface, nullptr, 0 );
+			if( hasAlpha )
+			{
+				vpx_codec_destroy( &m_alphaCodec );
+				vpx_codec_dec_init( &m_alphaCodec, &vpx_codec_vp8_dx_algo, nullptr, 0 );
+			}
 			continue;
 		}
 

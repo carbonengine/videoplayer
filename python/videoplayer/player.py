@@ -2,10 +2,11 @@
 Test player application that uses videoplayer to play webm videos
 """
 
+import argparse
 import os
 import sys
+import time
 import wx
-
 
 def get_path(wildcard):
     style = wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
@@ -20,24 +21,27 @@ def get_path(wildcard):
 
 wxapp = wx.App()
 
-if len(sys.argv) > 1:
-    path = sys.argv[1]
-else:
-    path = get_path('*.webm')
-if not path:
-    sys.exit()
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import binbootstrapper
 binbootstrapper.update_binaries(__file__, binbootstrapper.DLL_VIDEOPLAYER, binbootstrapper.DLL_AUDIO, *binbootstrapper.DLLS_GRAPHICS)
 
+import audio2
 import blue
+import eveaudio
 import trinity
 import uthread2
 import videoplayer
 from binbootstrapper.trinityapp import TrinityApp
+from eveaudio.audiomanager import CreateAudioSettings, AudioManager 
 
+WWISE_ARG = "wwise"
+WAVE_ARG = "wave"
+VALID_ARGS = [WWISE_ARG, WAVE_ARG]
+
+parser = argparse.ArgumentParser(description="Application to test the videoplayer with webm videos.")
+parser.add_argument("--videopath", type=str, help="A path to a video. If not given then an explorer window will open.")
+parser.add_argument("--audio", required=True, type=str, help="One of {} which will determine how audio is handled when playing the video.".format(VALID_ARGS))
 
 class Controls(wx.Frame):
     def __init__(self, video):
@@ -124,8 +128,33 @@ def _on_video_info_ready(_, width, height):
     trinity.app.height = height
     trinity.app.MoveWindow(trinity.app.left, trinity.app.top, trinity.app.width, trinity.app.height)
 
+args = parser.parse_args()
+if args.videopath:
+    if os.path.isfile(args.videopath):
+        path = args.videopath 
+    else:
+        print("{} is not a valid path to a .webm file".format(args.videopath))
+        sys.exit(1)
+else:
+    path = get_path('*.webm')
+if not path:
+    sys.exit(1)
 
-video = videoplayer.VideoPlayer(blue.paths.open(path, 'rb'), videoplayer.WaveOutAudioSink())
+video = None 
+# If I place the creation of the video player inside a function it doesn't play the video.
+if args.audio == WAVE_ARG:
+    video = videoplayer.VideoPlayer(blue.paths.open(path, 'rb'), videoplayer.WaveOutAudioSink())
+elif args.audio == WWISE_ARG:
+    blue.paths.SetSearchPath("res", os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "eve", "client", "res")))
+    resAudio = "res:/Audio/"
+    settings = CreateAudioSettings(resAudio, "en", "Videoplayer")
+    manager = AudioManager()
+    manager.Enable(settings, eveaudio.EVE_COMMON_BANKS)
+    uiPlayer = audio2.GetUIPlayer()
+    inputMgr = audio2.AudioInputMgr()
+    sink = videoplayer.WwiseAudioSink(inputMgr)
+    video = videoplayer.VideoPlayer(blue.paths.open(path, 'rb'), sink, 0, True)
+
 texture = trinity.TriTextureRes()
 video.bgra_texture = texture
 video.on_create_textures = _on_video_info_ready

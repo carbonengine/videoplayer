@@ -37,23 +37,24 @@ public:
 	// IAudioInputSink
 	int FillBuffer( IAudioInputMgr::BufferData& ) override;
 
-	void WwiseAudioSink::Create( IAudioInputMgr * inputMgr );
-private : 
-	void SubmitThread();
-	static DWORD WINAPI SubmitThreadHelper( LPVOID lpThreadParameter );
+	// WwiseAudioSink
+	void Create( IAudioInputMgr * inputMgr );
+	void SetVolume( float volume );
+	float GetVolume();
+
+private:
 	void FinishPlaying();
+
+	static const uint64_t NSEC_TO_SEC = 1000000000; // Nano seconds to seconds.
 
 	const AudioMetadata* m_audioMetadata;
 	PcmFrameQueue* m_frameQueue;
-	std::vector<int16_t> m_threadBuffer;
 	bool m_done;
-	bool m_stopRequested;
-	HANDLE m_submitThread;
-	CcpMutex m_bufferQueueMutex;
-	uint64_t m_timeOffset;
-	uint64_t m_samplesSubmitted;
-	Timer m_timer;
 	bool m_playing;
+	bool m_stopRequested;
+	uint64_t m_samplesSubmitted;
+	int m_pauseCounter;
+	float m_volume;
 
 	IAudioInputMgrPtr m_audioInputMgr;
 };

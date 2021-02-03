@@ -16,11 +16,10 @@ WwiseAudioSink::WwiseAudioSink() :
 	m_frameQueue( nullptr ),
 	m_done( false ),
 	m_stopRequested( false ),
-	m_submitThread( nullptr ),
-	m_bufferQueueMutex( "WwiseAudioSink", "m_bufferQueueMutex" ),
-	m_timeOffset( 0 ),
-	m_playing( false ),
-	m_samplesSubmitted( 0 )
+	m_pauseCounter( 0 ),
+	m_samplesSubmitted( 0 ),
+	m_volume( 0.7 ),
+	m_playing( false )
 {
 }
 
@@ -38,47 +37,76 @@ void WwiseAudioSink::Create( IAudioInputMgr* inputMgr )
 }
 
 // A callback for the audio input manager that will be called every audio frame in Wwise.
-// bufferData includes the buffer to fill for that Wwise plays back.
+// bufferData is a pointer to the buffer Wwise wants filled.
 // Returns the number of valid sample frames successfully copied to Wwises buffer.
 int WwiseAudioSink::FillBuffer( IAudioInputMgr::BufferData& bufferData )
 {
-
-	if( m_playing )
+	if ( m_pauseCounter > 0 )
 	{
-		CcpAutoMutex lock( m_bufferQueueMutex );
-		// Fill Wwises buffer with as much as it can handle from what our internal buffer has built up.
-		auto numSamples = std::min( bufferData.numSamples, (int)( m_threadBuffer.size() ) );
-		std::copy( m_threadBuffer.begin(), m_threadBuffer.begin() + numSamples, bufferData.data );
-		m_threadBuffer.erase( m_threadBuffer.begin(), m_threadBuffer.begin() + numSamples );
-
-		m_samplesSubmitted += numSamples / bufferData.numChannels;
-
-		return numSamples / bufferData.numChannels;
+		return 0;
 	}
+	else
+	{
+		int samplesProcessed = 0;
+		bool fillBuffer = true;
+		int16_t* wwiseBuffer = bufferData.data;
+		while( fillBuffer )
+		{
+			auto packetPeek = m_frameQueue->Peek();
 
-	return 0;
+			// If there are no more packets then the video is finished playing.
+			if( !packetPeek )
+			{
+				FinishPlaying();
+				return 0;
+			}
+
+			// Videoplayer signals it is seeking by sending a single packet with 0 samples.
+			if( packetPeek && packetPeek->samples == 0 )
+			{
+				auto packet = m_frameQueue->Pop();
+				m_samplesSubmitted = packet->timeStamp * m_audioMetadata->rate / NSEC_TO_SEC;
+
+				return 0;
+
+			}
+
+			int samplesToProcess = samplesProcessed + packetPeek->samples * packetPeek->channels;
+			if( packetPeek->samples && samplesToProcess <= bufferData.numSamples )
+			{
+				auto packet = m_frameQueue->Pop();
+				auto sampleCount = packet->samples * packet->channels;
+				// A sample is 16 bytes
+				memcpy( wwiseBuffer, packet->data, sampleCount * m_audioMetadata->bps / 8);
+				wwiseBuffer += sampleCount; // Move pointer forward so we don't keep putting samples in head of the buffer.
+				samplesProcessed += sampleCount;
+			}
+			else
+			{
+				fillBuffer = false;
+			}
+		}
+
+		m_samplesSubmitted += samplesProcessed / bufferData.numChannels;
+		return samplesProcessed / bufferData.numChannels;
+	}
 }
 
 void WwiseAudioSink::Open( const AudioMetadata& audioMetadata, PcmFrameQueue& frameQueue )
 {
 	m_audioMetadata = &audioMetadata;
 	m_frameQueue = &frameQueue;
-	m_audioInputMgr->StartInput( audioMetadata.channels, audioMetadata.bps, audioMetadata.rate );
-	if( !m_submitThread )
+	if( !m_playing)
 	{
-		m_submitThread = CreateThread( nullptr, 0, &SubmitThreadHelper, this, 0, nullptr );
+		m_audioInputMgr->StartInput( audioMetadata.channels, audioMetadata.bps, audioMetadata.rate );
+		m_audioInputMgr->SetVolume( m_volume );
+		m_playing = true;
 	}
 }
 
 void WwiseAudioSink::Close()
 {
-	if( m_submitThread )
-	{
-		m_stopRequested = true;
-		WaitForSingleObject( m_submitThread, INFINITE );
-		CloseHandle( m_submitThread );
-		m_submitThread = nullptr;
-	}
+	m_stopRequested = true;
 
 	m_audioInputMgr->StopInput();
 
@@ -89,69 +117,59 @@ void WwiseAudioSink::Close()
 
 void WwiseAudioSink::Pause()
 {
-	m_playing = false;
-	if( m_timer.IsRunning() )
-	{
-		m_timer.Pause();
-	}
+	m_pauseCounter += 1;
 }
 
 void WwiseAudioSink::Resume()
 {
-	m_playing = true;
-	if( !m_timer.IsRunning() )
-	{
-		m_timer.Start();
-	}
-	else if( m_timer.IsPaused() )
-	{
-		m_timer.Resume();
-	}
+	m_pauseCounter -= 1;
 }
 
+// Note: the video player relies on its audio sink to know where it is in the video.
+// This function is supposed to return how many seconds have passed in the playing video.
 uint64_t WwiseAudioSink::GetTime()
 {
-	if( !m_playing )
+	if( m_audioMetadata != nullptr )
 	{
-		return m_timeOffset;
+		return m_samplesSubmitted * NSEC_TO_SEC / m_audioMetadata->rate;
 	}
 
-	return m_timeOffset + m_timer.GetTime();
+	return 0;
 }
 
 bool WwiseAudioSink::IsDone()
 {
-	if( m_stopRequested) 
-	{
-		return true;
-	}
-
-	uint64_t currentTime = GetTime();
-	uint64_t videoLength = m_samplesSubmitted * 100000000 / m_audioMetadata->rate; 
-	return currentTime > videoLength;
+	return m_done || m_stopRequested;
 }
 
-void WwiseAudioSink::SubmitThread()
+void WwiseAudioSink::FinishPlaying()
 {
-	while( !m_stopRequested )
+	m_done = true;
+}
+
+void WwiseAudioSink::SetVolume( float volume )
+{
+	// Volume must be between 0 and 1
+	if( volume < 0 )
 	{
-		auto packet = m_frameQueue->Pop();
-		if( !packet )
-		{
-			break;
-		}
-		if( packet->samples == 0 )
-		{
-			m_timeOffset = packet->timeStamp;
-		}
-		CcpAutoMutex lock( m_bufferQueueMutex );
-		auto sampleCount = packet->samples * packet->channels;
-		m_threadBuffer.insert( m_threadBuffer.end(), packet->data, packet->data + sampleCount );
+		m_volume = 0;
+	}
+	else if( volume > 1 )
+	{
+		m_volume = 1;
+	}
+	else
+	{
+		m_volume = volume;
+	}
+
+	if( m_audioInputMgr != nullptr )
+	{
+		m_audioInputMgr->SetVolume( m_volume );
 	}
 }
 
-DWORD WINAPI WwiseAudioSink::SubmitThreadHelper( LPVOID lpThreadParameter )
+float WwiseAudioSink::GetVolume()
 {
-	static_cast<WwiseAudioSink*>( lpThreadParameter )->SubmitThread();
-	return 0;
+	return m_volume;
 }

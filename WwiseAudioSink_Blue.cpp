@@ -26,5 +26,11 @@ const Be::ClassInfo* WwiseAudioSink::ExposeToBlue()
 			"Creates an audio sink for Wwise.\n"
 			":param audioInputMgr: Instance of an audio2.AudioInputMgr" 
 		);
+		MAP_PROPERTY( 
+			"volume", 
+			GetVolume, 
+			SetVolume,
+			"The volume of the video that's playing. Must be a float between 0 and 1."
+		);
 	EXPOSURE_END()
 }

@@ -41,7 +41,7 @@ void WwiseAudioSink::Create( IAudioInputMgr* inputMgr )
 // Returns the number of valid sample frames successfully copied to Wwises buffer.
 int WwiseAudioSink::FillBuffer( IAudioInputMgr::BufferData& bufferData )
 {
-	if ( m_pauseCounter > 0 )
+	if( m_pauseCounter > 0 )
 	{
 		return 0;
 	}
@@ -57,18 +57,20 @@ int WwiseAudioSink::FillBuffer( IAudioInputMgr::BufferData& bufferData )
 			// If there are no more packets then the video is finished playing.
 			if( !packetPeek )
 			{
-				FinishPlaying();
+				if( m_frameQueue->IsComplete() )
+				{
+					FinishPlaying();
+				}
 				return 0;
 			}
 
 			// Videoplayer signals it is seeking by sending a single packet with 0 samples.
-			if( packetPeek && packetPeek->samples == 0 )
+			if( packetPeek->samples == 0 )
 			{
 				auto packet = m_frameQueue->Pop();
 				m_samplesSubmitted = packet->timeStamp * m_audioMetadata->rate / NSEC_TO_SEC;
 
 				return 0;
-
 			}
 
 			int samplesToProcess = samplesProcessed + packetPeek->samples * packetPeek->channels;
@@ -77,7 +79,7 @@ int WwiseAudioSink::FillBuffer( IAudioInputMgr::BufferData& bufferData )
 				auto packet = m_frameQueue->Pop();
 				auto sampleCount = packet->samples * packet->channels;
 				// A sample is 16 bytes
-				memcpy( wwiseBuffer, packet->data, sampleCount * m_audioMetadata->bps / 8);
+				memcpy( wwiseBuffer, packet->data, sampleCount * m_audioMetadata->bps / 8 );
 				wwiseBuffer += sampleCount; // Move pointer forward so we don't keep putting samples in head of the buffer.
 				samplesProcessed += sampleCount;
 			}
@@ -96,7 +98,7 @@ void WwiseAudioSink::Open( const AudioMetadata& audioMetadata, PcmFrameQueue& fr
 {
 	m_audioMetadata = &audioMetadata;
 	m_frameQueue = &frameQueue;
-	if( !m_playing)
+	if( !m_playing )
 	{
 		m_audioInputMgr->StartInput( audioMetadata.channels, audioMetadata.bps, audioMetadata.rate );
 		m_audioInputMgr->SetVolume( m_volume );
@@ -145,6 +147,7 @@ bool WwiseAudioSink::IsDone()
 void WwiseAudioSink::FinishPlaying()
 {
 	m_done = true;
+	m_audioInputMgr->StopInput();
 }
 
 void WwiseAudioSink::SetVolume( float volume )

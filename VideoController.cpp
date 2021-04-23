@@ -32,10 +32,8 @@ VideoController::VideoController( ICcpStream* stream, IAudioSink* audioSink, uns
 	{
 		m_audioSink->Pause();
 	}
-	else
-	{
-		m_mediaTime.Pause();
-	}
+	m_mediaTime.Pause();
+
 	m_parser.reset( CreateVideoContainerParser( stream, audioSink ? STREAM_AUDIO_VIDEO : STREAM_VIDEO, audioTrack, looped ) );
 	m_state = PARSING_METADATA;
 }
@@ -82,10 +80,7 @@ void VideoController::Pause()
 	{
 		m_audioSink->Pause();
 	}
-	else
-	{
-		m_mediaTime.Pause();
-	}
+	m_mediaTime.Pause();
 }
 
 void VideoController::Resume()
@@ -99,10 +94,7 @@ void VideoController::Resume()
 	{
 		m_audioSink->Resume();
 	}
-	else
-	{
-		m_mediaTime.Resume();
-	}
+	m_mediaTime.Resume();
 }
 
 void VideoController::Seek( uint64_t time )
@@ -115,10 +107,8 @@ void VideoController::Seek( uint64_t time )
 	{
 		m_audioSink->Pause();
 	}
-	else
-	{
-		m_mediaTime.Pause();
-	}
+	m_mediaTime.Pause();
+
 	m_seekOffset = time;
 	m_parser->Seek( time );
 	m_state = INITIAL_BUFFERING;
@@ -187,18 +177,14 @@ void VideoController::Update()
 		{
 			m_audioSink->Open( m_parser->GetAudioMetadata(), m_audioDecoder->GetDecodedQueue() );
 		}
-		else
-		{
-			m_mediaTime.Start();
-		}
+		m_mediaTime.Start();
+
 		if( m_audioSink )
 		{
 			m_audioSink->Resume();
 		}
-		else
-		{
-			m_mediaTime.Resume();
-		}
+		m_mediaTime.Resume();
+
 		Update();
 		break;
 	case BUFFERING:
@@ -222,10 +208,8 @@ void VideoController::Update()
 		{
 			m_audioSink->Resume();
 		}
-		else
-		{
-			m_mediaTime.Resume();
-		}
+		m_mediaTime.Resume();
+
 		CCP_LOG( "VideoController: resuming playback after buffering" );
 	case PLAYING:
 		if( m_paused )
@@ -250,10 +234,8 @@ void VideoController::Update()
 			{
 				m_audioSink->Pause();
 			}
-			else
-			{
-				m_mediaTime.Pause();
-			}
+			m_mediaTime.Pause();
+
 			m_bufferingTimer.Start();
 		}
 	}

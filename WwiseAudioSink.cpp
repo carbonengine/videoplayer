@@ -18,7 +18,7 @@ WwiseAudioSink::WwiseAudioSink() :
 	m_stopRequested( false ),
 	m_pauseCounter( 0 ),
 	m_samplesSubmitted( 0 ),
-	m_volume( 0.7 ),
+	m_volume( 1 ),
 	m_playing( false )
 {
 }

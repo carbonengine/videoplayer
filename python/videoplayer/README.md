@@ -41,7 +41,7 @@ This method of testing will give you the most insight into the functionalities t
 
 ```uicore.cmd.OpenVideoPlayerWindow(videoPath="<res-path-to-video>")```
 
-Where you would replace ```<res-path-to-video>``` with a path to a video using the ```res:/``` prefix. If you need a default video to use you can use ```res:/video/destiny_intro.webm```.
+Where you would replace ```<res-path-to-video>``` with a path to a video using the ```res:/``` prefix. If you need a default video to use you can use ```res:/video/intro/intro.webm```.
 
 #### Down sides
 If you make a change you will need to kill and restart the client.

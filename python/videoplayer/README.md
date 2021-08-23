@@ -11,18 +11,14 @@ There are currently three ways to test changes you make to the videoplayer.
 This is the fastest method to iterate on video player changes because it does not require you restarting the client all the time. player.py in this directory is a command line interface that allows you pick a video and watch it play. 
 
 #### Prerequisites
-In order to be able to use player.py, you will need to do a few things.
-1. Create a python 2 virtual environment.
-2. Activate that virtual environment and pip install ```carbon\tools\launchUtil\requirements.txt```.
+In order to be able to use player.py, you will need to update the client by running
+```python ../../updatebinaries.py client```
 
 #### Usage
-In a cmd window with the previously mentioned virtual environment activated, simply do
-```python player.py -h```
+Run the player in a stackless interpreter environment with
+```../../eve/client/pythonInterpreter.bat player.py -h```
 
 and you should see the options available to you. The only required argument is ```--audio``` which tells it which audio sink to use.
-
-#### Important things to keep in mind
-player.py uses .pyd files. This means when you're working on the Videoplayer **you have to build Release_27** to see any of your changes.
 
 
 #### Down sides

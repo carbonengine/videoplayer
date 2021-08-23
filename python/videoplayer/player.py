@@ -6,6 +6,10 @@ import argparse
 import os
 import sys
 import time
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'carbon', 'tools', 'lib', 'bin', 'x64')))
+
 import wx
 
 def get_path(wildcard):
@@ -21,18 +25,13 @@ def get_path(wildcard):
 
 wxapp = wx.App()
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-import binbootstrapper
-binbootstrapper.update_binaries(__file__, binbootstrapper.DLL_VIDEOPLAYER, binbootstrapper.DLL_AUDIO, *binbootstrapper.DLLS_GRAPHICS)
-
 import audio2
 import blue
 import eveaudio
 import trinity
 import uthread2
 import videoplayer
-from binbootstrapper.trinityapp import TrinityApp
+from trinity.trinityapp import TrinityApp
 from eveaudio.audiomanager import CreateAudioSettings, AudioManager 
 
 WWISE_ARG = "wwise"
@@ -124,9 +123,6 @@ def init_wx(video):
 
 def _on_video_info_ready(_, width, height):
     texture.__init__(width, height, 1, trinity.PIXEL_FORMAT.B8G8R8A8_UNORM)
-    trinity.app.width = width
-    trinity.app.height = height
-    trinity.app.MoveWindow(trinity.app.left, trinity.app.top, trinity.app.width, trinity.app.height)
 
 args = parser.parse_args()
 if args.videopath:
@@ -139,6 +135,12 @@ else:
     path = get_path('*.webm')
 if not path:
     sys.exit(1)
+    state = trinity.Tr2MainWindowState()
+    state.windowMode = trinity.Tr2WindowMode.WINDOWED
+    state.width = width
+    state.height = height
+    trinity.mainWindow.SetWindowState(state)
+
 
 video = None 
 # If I place the creation of the video player inside a function it doesn't play the video.

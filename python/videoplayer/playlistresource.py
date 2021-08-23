@@ -129,7 +129,7 @@ class _VideoPlaylistController(object):
 
     def _on_video_info_ready(self, _, width, height):
         if self.weak_texture.object:
-            self.weak_texture.object.__init__(width, height, 1, trinity.PIXEL_FORMAT.B8G8R8A8_UNORM)
+            self.weak_texture.object.CreateEmptyTexture(width, height, 1, trinity.PIXEL_FORMAT.B8G8R8A8_UNORM)
 
     def _destroy(self):
         if self.video:

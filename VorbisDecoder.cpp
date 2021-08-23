@@ -5,7 +5,7 @@
 // Copyright:	CCP 2015
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "VorbisDecoder.h"
 #include "nestegg/nestegg.h"
 #include "WebMParser.h"

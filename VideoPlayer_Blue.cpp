@@ -8,7 +8,6 @@
 #include "StdAfx.h"
 #include "VideoPlayer.h"
 #include "IAudioSinkExposed.h"
-#include "BlueExposure/include/InterfaceDefinitions.cxx"
 
 BLUE_STANDARD_MODULE_INIT( _videoplayer );
 

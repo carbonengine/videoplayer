@@ -5,7 +5,7 @@
 // Copyright:	CCP 2015
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "VpxDecoder.h"
 #include "vp8dx.h"
 

@@ -5,7 +5,7 @@
 // Copyright:	CCP 2015
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "VideoController.h"
 
 CCP_STATS_DECLARE( videoplayerInitialBufferingTime, "VideoPlayer/initialBuffering", false, CST_COUNTER_HIGH, "total initial buffering time in MS" );
@@ -25,7 +25,6 @@ VideoController::VideoController( ICcpStream* stream, IAudioSink* audioSink, uns
 	:m_state( UNINITIALIZED ),
 	m_paused( false ),
 	m_audioSink( audioSink ),
-	m_looped( looped ),
 	m_seekOffset( 0 )
 {
 	if( m_audioSink )

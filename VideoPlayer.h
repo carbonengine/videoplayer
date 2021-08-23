@@ -45,9 +45,9 @@ public:
 	VideoPlayerResult Validate();
 	void ClearTextures();
 
-	virtual bool OnModified( Be::Var* value );
+	bool OnModified( Be::Var* value ) override;
 
-	virtual void OnTick( Be::Time realTime, Be::Time simTime, void* cookie );
+	void OnTick( Be::Time realTime, Be::Time simTime, void* cookie ) override;
 
 private:
 	void SetBgraTexture( ITriTextureRes* texture );

@@ -97,8 +97,6 @@ private:
 	uint64_t m_seekOffset;
 	// if the playback is paused
 	bool m_paused;
-	// if the playback is looped
-	bool m_looped;
 };
 
 #endif

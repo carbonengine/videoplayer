@@ -5,7 +5,7 @@
 // Copyright:	CCP 2015
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "WebMParser.h"
 #include "nestegg/nestegg.h"
 
@@ -79,21 +79,31 @@ void PopulateAudioMetadata( nestegg* nestEgg, unsigned trackIndex, AudioMetadata
 	nestegg_track_audio_params( nestEgg, trackIndex, &params );
 	metadata.channels = params.channels;
 	metadata.bps = params.depth;
-	metadata.rate = uint32_t( params.rate );
+
+	if ( params.rate == 0 )
+	{
+		CCP_LOGERR("The audio sample rate provided by the webm parser is 0. Sample rate will be set to "
+				   "48000 instead which may cause audio irregularities.");
+		metadata.rate = 48000;
+	}
+	else
+	{
+		metadata.rate = uint32_t( params.rate );
+	}
 
 	unsigned nheaders = 0;
 	auto r = nestegg_track_codec_data_count( nestEgg, trackIndex, &nheaders );
-	if( r >= 0 && nheaders <= 3 ) 
+	if( r >= 0 && nheaders <= 3 )
 	{
 		for( unsigned header = 0; header < nheaders; ++header )
 		{
 			uint8_t* data;
 			size_t length = 0;
-			nestegg_track_codec_data( 
-				nestEgg, 
-				trackIndex, 
-				header, 
-				&data, 
+			nestegg_track_codec_data(
+				nestEgg,
+				trackIndex,
+				header,
+				&data,
 				&metadata.codecInitializationData[header].length );
 			metadata.codecInitializationData[header].data.reset( CCP_NEW( "PopulateAudioMetadata/data" ) uint8_t[metadata.codecInitializationData[header].length] );
 			memcpy( metadata.codecInitializationData[header].data.get(), data, metadata.codecInitializationData[header].length );
@@ -196,7 +206,7 @@ WebMParser::WebMParser( ICcpStream* videoStream, StreamType outputStreams, unsig
 {
 	if( m_outputStreams & STREAM_VIDEO )
 	{
-		m_videoQueue.reset( CCP_NEW( "WebMParser.m_videoQueue" ) EncodedVideoFrameQueue( 
+		m_videoQueue.reset( CCP_NEW( "WebMParser.m_videoQueue" ) EncodedVideoFrameQueue(
 			MaxCountFullPolicy( m_outputStreams & STREAM_AUDIO ? std::numeric_limits<size_t>::max() : VIDEO_QUEUE_LENGTH ) ) );
 	}
 	if( m_outputStreams & STREAM_AUDIO )
@@ -463,7 +473,7 @@ void WebMParser::ReadThread()
 				decodeToTime = 0xffffffffffffffff;
 			}
 		}
-		if( nestegg_track_type( m_nestEgg, track ) == NESTEGG_TRACK_VIDEO ) 
+		if( nestegg_track_type( m_nestEgg, track ) == NESTEGG_TRACK_VIDEO )
 		{
 			if( track == m_videoTrack && m_videoQueue )
 			{
@@ -513,7 +523,7 @@ void WebMParser::ReadThread()
 			unsigned int track = 0;
 			nestegg_packet_track( packet, &track );
 
-			if( nestegg_track_type( m_nestEgg, track ) == NESTEGG_TRACK_VIDEO ) 
+			if( nestegg_track_type( m_nestEgg, track ) == NESTEGG_TRACK_VIDEO )
 			{
 				if( track == m_videoTrack && m_videoQueue )
 				{

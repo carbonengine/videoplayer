@@ -44,12 +44,13 @@ private:
 	CcpThread m_thread;
 };
 
-template <typename Callable>
+template <typename Callable, typename Unblock>
 class ThreadBlocksHelper
 {
 public:
-	ThreadBlocksHelper( Callable& callable )
+	ThreadBlocksHelper( Callable& callable, Unblock& unblock )
 		:m_callable( callable ),
+        m_unblock( unblock ),
 		m_semaphore( 0, 1 )
 	{
 		m_blocked = 1;
@@ -60,9 +61,9 @@ public:
 	{
         if( m_blocked )
         {
-            CcpKillThread( m_thread.native_handle() );
+            m_unblock();
         }
-        m_thread.detach();
+        m_thread.join();
 	}
 
 	bool Wait( uint32_t timeoutMs )
@@ -77,15 +78,16 @@ private:
 		m_blocked = 0;
 	}
 	Callable& m_callable;
+    Unblock& m_unblock;
 	CcpSemaphore m_semaphore;
 	CcpThread m_thread;
 	CcpAtomic<uint32_t> m_blocked;
 };
 
-template <typename Callable>
-bool ThreadBlocks( Callable callable, uint32_t timeoutInMs = 500 )
+template <typename Callable, typename Unblock>
+bool ThreadBlocks( Callable callable, Unblock unblock, uint32_t timeoutInMs = 500 )
 {
-	ThreadBlocksHelper<Callable> helper( callable );
+	ThreadBlocksHelper<Callable, Unblock> helper( callable, unblock );
 	return helper.Wait( timeoutInMs );
 }
 
@@ -187,17 +189,27 @@ TEST( FrameQueue, PushBlocksWhenCapacityIsReached )
 
 	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 1 ) );
 	queue.Push( item1 );
-	EXPECT_TRUE( ThreadBlocks( [&]() {
-		queue.Push( item2 );
-	} ) );
+	EXPECT_TRUE( ThreadBlocks(
+        [&]() {
+            queue.Push( item2 );
+        },
+        [&]() {
+            queue.Pop();
+        }
+      ) );
 }
 
 TEST( FrameQueue, PopBlocksWhenQueueIsEmpty )
 {
 	FrameQueue<int, MaxCountFullPolicy> queue( MaxCountFullPolicy( 1 ) );
-	EXPECT_TRUE( ThreadBlocks( [&]() {
-		queue.Pop();
-	} ) );
+	EXPECT_TRUE( ThreadBlocks(
+        [&]() {
+            queue.Pop();
+        },
+        [&]() {
+            queue.Push( CCP_NEW( "test value" ) int( 1 ) );
+        }
+        ) );
 }
 
 TEST( FrameQueue, PopUnblocksWhenQueueBecomesNonEmpty )
@@ -266,9 +278,13 @@ TEST( FrameQueue, PoppingFromEmptyCompleteQueueReturnsNull )
 	queue.SetComplete();
 	int temp;
 	int* result = &temp;
-	EXPECT_FALSE( ThreadBlocks( [&]() {
-		result = queue.Pop().get();
-	} ) );
+	EXPECT_FALSE( ThreadBlocks(
+        [&]() {
+            result = queue.Pop().get();
+	    },
+        [&]() {
+        }
+        ) );
 	EXPECT_EQ( nullptr, result );
 }
 
@@ -278,9 +294,13 @@ TEST( FrameQueue, PushingIntoFullCompleteQueueIsIgnored )
 	queue.Push( CCP_NEW( "test value" ) int( 1 )  );
 	queue.SetComplete();
 	auto newValue = CCP_NEW( "test value" ) int( 1 );
-	EXPECT_FALSE( ThreadBlocks( [&]() {
-		queue.Push( newValue );
-	} ) );
+	EXPECT_FALSE( ThreadBlocks(
+        [&]() {
+            queue.Push( newValue );
+	    },
+        [&]() {
+        }
+        ) );
 	EXPECT_EQ( 1, queue.Size() );
 }
 

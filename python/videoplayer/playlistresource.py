@@ -8,6 +8,7 @@ import blue
 import trinity
 import videoplayer
 import uthread2
+import evegraphics.settings as gfxsettings
 
 _error_handlers = set()
 _state_change_handlers = set()
@@ -19,6 +20,10 @@ def _is_low_quality():
 
 
 class _VideoPlaylistController(object):
+    __notifyevents__ = [
+        'OnGraphicSettingsChanged'
+    ]
+
     def __init__(self):
         self.video = None
         self.weak_texture = None
@@ -28,6 +33,7 @@ class _VideoPlaylistController(object):
         self.low_quality_texture_path = None
         self.destroyed = False
         self.current_path = None
+        sm.RegisterForNotifyEvent(self, "OnGraphicSettingsChanged")
 
     def init(self, width, height, playlist, low_quality_texture_path=None, **kwargs):
         self.destroyed = False
@@ -141,6 +147,11 @@ class _VideoPlaylistController(object):
         self.destroyed = True
         if self.weak_texture is not None:
             self.weak_texture.callback = None
+
+    def OnGraphicSettingsChanged(self, changes):
+        changed = gfxsettings.GFX_TEXTURE_QUALITY in changes or gfxsettings.GFX_SHADER_QUALITY in changes
+        if changed:
+            uthread2.start_tasklet(self.play_next)
 
 
 class _VideoPlaylistControllerWithSound(_VideoPlaylistController):
@@ -331,3 +342,4 @@ def shuffled_videos(*res_path):
             yield paths[index]
             index = (index + 1) % len(paths)
     return inner
+

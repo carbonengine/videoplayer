@@ -52,6 +52,8 @@ target_precompile_headers(VideoPlayer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/StdAfx
 target_include_directories(VideoPlayer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(VideoPlayer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
+target_compile_options(VideoPlayer PUBLIC "/fp:fast")
+
 if(APPLE)
     set_target_properties(
         VideoPlayer

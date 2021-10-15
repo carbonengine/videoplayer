@@ -54,6 +54,8 @@ target_include_directories(VideoPlayer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 target_compile_options(VideoPlayer PUBLIC "${MATH_OPTIMIZE_FLAG}")
 
+add_trinity_dev_debug_flags(VideoPlayer)
+
 if(APPLE)
     set_target_properties(
         VideoPlayer

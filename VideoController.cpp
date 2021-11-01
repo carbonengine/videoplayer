@@ -155,8 +155,12 @@ void VideoController::Update()
 		if( m_parser->GetAudioQueue() )
 		{
 			m_audioDecoder.reset( CreateAudioDecoder( m_parser->GetAudioMetadata(), *m_parser->GetAudioQueue() ) );
+			if( !m_audioDecoder )
+			{
+				CCP_LOGWARN( "Video file contains an unsupported audio codec" );
+			}
 		}
-		else
+		if( !m_audioDecoder )
 		{
 			m_audioSink = nullptr;
 		}

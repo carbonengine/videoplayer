@@ -33,7 +33,11 @@ class _VideoPlaylistController(object):
         self.low_quality_texture_path = None
         self.destroyed = False
         self.current_path = None
-        sm.RegisterForNotifyEvent(self, "OnGraphicSettingsChanged")
+
+        try:
+            sm.RegisterForNotifyEvent(self, "OnGraphicSettingsChanged")
+        except NameError:
+            pass  # sm doesn't exist in evemark
 
     def init(self, width, height, playlist, low_quality_texture_path=None, **kwargs):
         self.destroyed = False

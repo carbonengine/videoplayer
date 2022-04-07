@@ -52,9 +52,11 @@ private:
 	bool m_done;
 	bool m_playing;
 	bool m_stopRequested;
+	uint64_t m_samplesPlayed;
 	uint64_t m_samplesSubmitted;
 	int m_pauseCounter;
 	float m_volume;
+	Timer m_timer;
 
 	IAudioInputMgrPtr m_audioInputMgr;
 };

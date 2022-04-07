@@ -18,6 +18,7 @@ WwiseAudioSink::WwiseAudioSink() :
 	m_stopRequested( false ),
 	m_pauseCounter( 0 ),
 	m_samplesSubmitted( 0 ),
+	m_samplesPlayed( 0 ),
 	m_volume( 1 ),
 	m_playing( false )
 {
@@ -47,6 +48,7 @@ int WwiseAudioSink::FillBuffer( IAudioInputMgr::BufferData& bufferData )
 	}
 	else
 	{
+		m_timer.Start();
 		int samplesProcessed = 0;
 		bool fillBuffer = true;
 		int16_t* wwiseBuffer = bufferData.data;
@@ -69,6 +71,7 @@ int WwiseAudioSink::FillBuffer( IAudioInputMgr::BufferData& bufferData )
 			{
 				auto packet = m_frameQueue->Pop();
 				m_samplesSubmitted = packet->timeStamp * m_audioMetadata->rate / NSEC_TO_SEC;
+				m_samplesPlayed = m_samplesSubmitted;
 
 				return 0;
 			}
@@ -89,6 +92,7 @@ int WwiseAudioSink::FillBuffer( IAudioInputMgr::BufferData& bufferData )
 			}
 		}
 
+		m_samplesPlayed = m_samplesSubmitted;
 		m_samplesSubmitted += samplesProcessed / bufferData.numChannels;
 		return samplesProcessed / bufferData.numChannels;
 	}
@@ -133,7 +137,9 @@ uint64_t WwiseAudioSink::GetTime()
 {
 	if( m_audioMetadata != nullptr )
 	{
-		return m_samplesSubmitted * NSEC_TO_SEC / m_audioMetadata->rate;
+		// The number of samples played needs to be smoothed to avoid micro jitters, hence the use of m_timer.GetTime().
+		// However, it should never be smoothed more than the number of samples submitted to Wwise.
+		return std::min( ( m_timer.GetTime() + ( m_samplesPlayed * NSEC_TO_SEC ) / m_audioMetadata->rate ), ( ( m_samplesSubmitted * NSEC_TO_SEC ) / m_audioMetadata->rate ) );
 	}
 
 	return 0;

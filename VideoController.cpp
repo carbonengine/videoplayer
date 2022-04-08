@@ -221,7 +221,15 @@ void VideoController::Update()
 		}
 		if( m_videoDecoder && m_audioDecoder )
 		{
-			m_videoDecoder->SetDropFrameTime( GetMediaTime() - DROP_FRAME_THRESHOLD );
+			auto mt = GetMediaTime();
+			if( mt > DROP_FRAME_THRESHOLD )
+			{
+				m_videoDecoder->SetDropFrameTime( mt - DROP_FRAME_THRESHOLD );
+			}
+			else
+			{
+				m_videoDecoder->SetDropFrameTime( 0 );
+			}
 		}
 		RemoveExpiredFrames();
 		if( IsDone() )

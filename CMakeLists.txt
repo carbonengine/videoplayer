@@ -95,7 +95,7 @@ target_include_directories(VideoPlayerTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/.
 target_compile_definitions(VideoPlayerTest PRIVATE BLUEBUILD)
 
 if(APPLE)
-    target_link_libraries(VideoPlayerTest PRIVATE "-framework CoreFoundation")
+    target_link_libraries(VideoPlayerTest PRIVATE "-framework CoreFoundation -framework Cocoa")
 elseif(WIN32)
     target_link_libraries(VideoPlayerTest PRIVATE Winmm)
 endif()

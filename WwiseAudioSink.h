@@ -11,7 +11,7 @@
 #ifndef WwiseAudioSink_H
 #define WwiseAudioSink_H
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "IAudioSinkExposed.h"
 #include "audio2/IAudioInputMgr.h"
 #include "Timer.h"

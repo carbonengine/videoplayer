@@ -1,6 +1,6 @@
 #define NOMINMAX
 
-#include "BlueExposure/include/BlueExposure.h"
+#include <BlueExposure.h>
 #include "blue/Include/Blue.h"
 #include "blue/Include/IBlueOS.h"
 #include "blue/Include/IBluePersist.h"

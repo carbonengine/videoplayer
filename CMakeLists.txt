@@ -80,7 +80,7 @@ add_executable(VideoPlayerTest
     test/TestWebMParser.cpp
     test/main.cpp
 )
-target_link_libraries(VideoPlayerTest PRIVATE VORBIS VPX NestEgg GTest::GTest GTest::Main BlueExposure)
+target_link_libraries(VideoPlayerTest PRIVATE VORBIS VPX NestEgg GTest::GTest GTest::Main Blue)
 
 get_target_property(_SOURCES VideoPlayerTest SOURCES)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -92,7 +92,6 @@ target_precompile_headers(VideoPlayerTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/St
 target_compile_definitions(VideoPlayerTest PRIVATE WITH_TESTS)
 target_include_directories(VideoPlayerTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(VideoPlayerTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
-target_compile_definitions(VideoPlayerTest PRIVATE BLUEBUILD)
 
 if(APPLE)
     target_link_libraries(VideoPlayerTest PRIVATE "-framework CoreFoundation -framework Cocoa")

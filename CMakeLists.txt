@@ -102,6 +102,32 @@ set_target_properties(VideoPlayer PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
 get_target_property(_SOURCES VideoPlayer SOURCES)
 
+# Provide an install target if this is the top level project only
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    # Install rule to ensure that our runtime and linker files are in the expected, platform-specific folders
+    install(
+        TARGETS VideoPlayer
+        EXPORT VideoPlayerTargets
+        CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES}
+        LIBRARY DESTINATION lib/${CCP_PLATFORM}/${CCP_ARCHITECTURE}/${CCP_TOOLSET}/
+        ARCHIVE DESTINATION lib/${CCP_PLATFORM}/${CCP_ARCHITECTURE}/${CCP_TOOLSET}/
+        RUNTIME DESTINATION bin/${CCP_PLATFORM}/${CCP_ARCHITECTURE}/${CCP_TOOLSET}/
+    )
+
+    configure_ccp_vendor_config_file(
+        TARGET VideoPlayer
+        DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/VideoPlayerConfig.cmake"
+        DEPENDENCIES ""
+    )
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/VideoPlayerConfig.cmake DESTINATION .)
+
+     # Install python package
+     install(DIRECTORY python/ DESTINATION python
+     FILES_MATCHING
+     PATTERN "*.py"
+)
+endif()
+
 
 ccp_add_executable(VideoPlayerTest
     ${_SOURCES}

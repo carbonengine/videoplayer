@@ -1,10 +1,10 @@
 #define NOMINMAX
 
 #include <BlueExposure.h>
-#include "blue/Include/Blue.h"
-#include "blue/Include/IBlueOS.h"
-#include "blue/Include/IBluePersist.h"
-#include "blue/Include/BlueStatistics.h"
+#include <Blue.h>
+#include <IBlueOS.h>
+#include <IBluePersist.h>
+#include <BlueStatistics.h>
 
 #ifdef _PY_PORT_CTYPE_UTF8_ISSUE
 #undef isalnum

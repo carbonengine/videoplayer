@@ -10,7 +10,7 @@
 #define VideoPlayer_H
 
 #include "VideoController.h"
-#include "trinity/Include/ITriTextureRes.h"
+#include <ITriTextureRes.h>
 #include "VideoPlayerResult.h"
 
 BLUE_DECLARE_INTERFACE( IAudioSinkExposed );

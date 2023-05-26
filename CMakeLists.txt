@@ -1,10 +1,28 @@
+cmake_minimum_required(VERSION 3.16)
 project(VideoPlayer VERSION 1.0.0)
+
+if(NOT DEFINED ENV{CCP_EVE_PERFORCE_BRANCH_PATH})
+    message(FATAL_ERROR "Missing required environment variable CCP_EVE_PERFORCE_BRANCH_PATH")
+elseif(NOT IS_ABSOLUTE $ENV{CCP_EVE_PERFORCE_BRANCH_PATH})
+    message(FATAL_ERROR "CCP_EVE_PERFORCE_BRANCH_PATH needs to be an absolute path")
+elseif(NOT EXISTS $ENV{CCP_EVE_PERFORCE_BRANCH_PATH})
+    message(FATAL_ERROR "CCP_EVE_PERFORCE_BRANCH_PATH is pointing at a non-existing location $ENV{CCP_EVE_PERFORCE_BRANCH_PATH}")
+elseif(NOT IS_DIRECTORY $ENV{CCP_EVE_PERFORCE_BRANCH_PATH})
+    message(FATAL_ERROR "CCP_EVE_PERFORCE_BRANCH_PATH needs to be a directory")
+else()
+    message(STATUS "Using CCP_EVE_PERFORCE_BRANCH_PATH located at $ENV{CCP_EVE_PERFORCE_BRANCH_PATH}")
+endif()
+
+file(TO_CMAKE_PATH "$ENV{CCP_EVE_PERFORCE_BRANCH_PATH}" BRANCH_ROOT_DIR)
+list(INSERT CMAKE_MODULE_PATH 0 ${BRANCH_ROOT_DIR}/cmake)
+include(CcpGlobalSettings)
+include(CcpPackageConfigHelpers)
 
 find_package(vorbis REQUIRED)
 find_package(vpx REQUIRED)
 find_package(nestegg REQUIRED)
 
-add_library(VideoPlayer SHARED
+ccp_add_library(VideoPlayer SHARED
     FrameQueue.h
     IAudioDecoder.h
     IAudioSink.h
@@ -42,7 +60,23 @@ add_library(VideoPlayer SHARED
     WwiseAudioSink.cpp
     WwiseAudioSink_Blue.cpp
 )
-target_link_libraries(VideoPlayer PRIVATE Blue VORBIS VPX NestEgg)
+
+find_package(PNG REQUIRED NO_CMAKE_PATH)
+find_package(Blue REQUIRED NO_CMAKE_PATH)
+find_package(CarbonAudio REQUIRED NO_CMAKE_PATH)
+target_link_libraries(VideoPlayer PRIVATE Blue VORBIS VPX NestEgg CarbonAudio)
+
+if(WIN32)
+    find_package(Trinity_stub REQUIRED NO_CMAKE_PATH)
+elseif(APPLE)
+    find_package(Trinity_metal REQUIRED NO_CMAKE_PATH)
+else()
+    message(FATAL_ERROR "Unsupported platform!")
+endif()
+
+target_include_directories(VideoPlayer PUBLIC "$<$<BOOL:${WIN32}>:$<TARGET_PROPERTY:trinity_stub,INTERFACE_INCLUDE_DIRECTORIES>>")
+target_include_directories(VideoPlayer PUBLIC "$<$<BOOL:${APPLE}>:$<TARGET_PROPERTY:trinity_metal,INTERFACE_INCLUDE_DIRECTORIES>>")
+
 
 if(WIN32)
     target_link_libraries(VideoPlayer PRIVATE Winmm)
@@ -50,7 +84,6 @@ endif()
 
 target_precompile_headers(VideoPlayer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/StdAfx.h)
 target_include_directories(VideoPlayer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_include_directories(VideoPlayer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 target_compile_options(VideoPlayer PUBLIC "${MATH_OPTIMIZE_FLAG}")
 
@@ -69,17 +102,28 @@ set_target_properties(VideoPlayer PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
 get_target_property(_SOURCES VideoPlayer SOURCES)
 
-add_executable(VideoPlayerTest
+
+ccp_add_executable(VideoPlayerTest
     ${_SOURCES}
-    test/TestUtilities.h
-    test/TestFrameQueue.cpp
-    test/TestUtilities.cpp
-    test/TestVideoPlayerController.cpp
-    test/TestVorbisDecoder.cpp
-    test/TestVpxDecoder.cpp
-    test/TestWebMParser.cpp
-    test/main.cpp
+    tests/TestUtilities.h
+    tests/TestFrameQueue.cpp
+    tests/TestUtilities.cpp
+    tests/TestVideoPlayerController.cpp
+    tests/TestVorbisDecoder.cpp
+    tests/TestVpxDecoder.cpp
+    tests/TestWebMParser.cpp
+    tests/main.cpp
 )
+
+target_include_directories(VideoPlayerTest PUBLIC "$<$<BOOL:${WIN32}>:$<TARGET_PROPERTY:trinity_stub,INTERFACE_INCLUDE_DIRECTORIES>>")
+target_include_directories(VideoPlayerTest PUBLIC "$<$<BOOL:${APPLE}>:$<TARGET_PROPERTY:trinity_metal,INTERFACE_INCLUDE_DIRECTORIES>>")
+
+find_package(GTest REQUIRED)
+
+target_include_directories(VideoPlayerTest PUBLIC "$<TARGET_PROPERTY:Blue,INTERFACE_INCLUDE_DIRECTORIES>")
+target_include_directories(VideoPlayerTest PUBLIC "$<TARGET_PROPERTY:CarbonAudio,INTERFACE_INCLUDE_DIRECTORIES>")
+
+
 target_link_libraries(VideoPlayerTest PRIVATE VORBIS VPX NestEgg GTest::GTest GTest::Main BlueExposure)
 
 get_target_property(_SOURCES VideoPlayerTest SOURCES)
@@ -91,7 +135,6 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}"
 target_precompile_headers(VideoPlayerTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/StdAfx.h)
 target_compile_definitions(VideoPlayerTest PRIVATE WITH_TESTS)
 target_include_directories(VideoPlayerTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_include_directories(VideoPlayerTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
 target_compile_definitions(VideoPlayerTest PRIVATE BLUEBUILD)
 
 if(APPLE)

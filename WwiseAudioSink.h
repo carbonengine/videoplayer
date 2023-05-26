@@ -13,7 +13,7 @@
 
 #include "StdAfx.h"
 #include "IAudioSinkExposed.h"
-#include "audio2/IAudioInputMgr.h"
+#include <IAudioInputMgr.h>
 #include "Timer.h"
 
 BLUE_CLASS( WwiseAudioSink ) :

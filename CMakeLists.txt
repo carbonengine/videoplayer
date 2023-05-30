@@ -74,8 +74,8 @@ else()
     message(FATAL_ERROR "Unsupported platform!")
 endif()
 
-target_include_directories(VideoPlayer PUBLIC "$<$<BOOL:${WIN32}>:$<TARGET_PROPERTY:trinity_stub,INTERFACE_INCLUDE_DIRECTORIES>>")
-target_include_directories(VideoPlayer PUBLIC "$<$<BOOL:${APPLE}>:$<TARGET_PROPERTY:trinity_metal,INTERFACE_INCLUDE_DIRECTORIES>>")
+target_include_directories(VideoPlayer PUBLIC "$<$<BOOL:$<TARGET_EXISTS:trinity_stub>>:$<TARGET_PROPERTY:trinity_stub,INTERFACE_INCLUDE_DIRECTORIES>>")
+target_include_directories(VideoPlayer PUBLIC "$<$<BOOL:$<TARGET_EXISTS:trinity_metal>>:$<TARGET_PROPERTY:trinity_metal,INTERFACE_INCLUDE_DIRECTORIES>>")
 
 
 if(WIN32)
@@ -141,8 +141,8 @@ ccp_add_executable(VideoPlayerTest
     tests/main.cpp
 )
 
-target_include_directories(VideoPlayerTest PUBLIC "$<$<BOOL:${WIN32}>:$<TARGET_PROPERTY:trinity_stub,INTERFACE_INCLUDE_DIRECTORIES>>")
-target_include_directories(VideoPlayerTest PUBLIC "$<$<BOOL:${APPLE}>:$<TARGET_PROPERTY:trinity_metal,INTERFACE_INCLUDE_DIRECTORIES>>")
+target_include_directories(VideoPlayerTest PUBLIC "$<$<BOOL:$<TARGET_EXISTS:trinity_stub>>:$<TARGET_PROPERTY:trinity_stub,INTERFACE_INCLUDE_DIRECTORIES>>")
+target_include_directories(VideoPlayerTest PUBLIC "$<$<BOOL:$<TARGET_EXISTS:trinity_metal>>:$<TARGET_PROPERTY:trinity_metal,INTERFACE_INCLUDE_DIRECTORIES>>")
 
 find_package(GTest REQUIRED)
 

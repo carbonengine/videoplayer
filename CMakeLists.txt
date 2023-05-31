@@ -68,14 +68,13 @@ target_link_libraries(VideoPlayer PRIVATE Blue VORBIS VPX NestEgg CarbonAudio)
 
 if(WIN32)
     find_package(Trinity_stub REQUIRED NO_CMAKE_PATH)
+    target_include_directories(VideoPlayer PRIVATE "$<TARGET_PROPERTY:trinity_stub,INTERFACE_INCLUDE_DIRECTORIES>")
 elseif(APPLE)
     find_package(Trinity_metal REQUIRED NO_CMAKE_PATH)
+    target_include_directories(VideoPlayer PRIVATE "$<TARGET_PROPERTY:trinity_metal,INTERFACE_INCLUDE_DIRECTORIES>")
 else()
     message(FATAL_ERROR "Unsupported platform!")
 endif()
-
-target_include_directories(VideoPlayer PUBLIC "$<$<BOOL:$<TARGET_EXISTS:trinity_stub>>:$<TARGET_PROPERTY:trinity_stub,INTERFACE_INCLUDE_DIRECTORIES>>")
-target_include_directories(VideoPlayer PUBLIC "$<$<BOOL:$<TARGET_EXISTS:trinity_metal>>:$<TARGET_PROPERTY:trinity_metal,INTERFACE_INCLUDE_DIRECTORIES>>")
 
 
 if(WIN32)
@@ -141,8 +140,13 @@ ccp_add_executable(VideoPlayerTest
     tests/main.cpp
 )
 
-target_include_directories(VideoPlayerTest PUBLIC "$<$<BOOL:$<TARGET_EXISTS:trinity_stub>>:$<TARGET_PROPERTY:trinity_stub,INTERFACE_INCLUDE_DIRECTORIES>>")
-target_include_directories(VideoPlayerTest PUBLIC "$<$<BOOL:$<TARGET_EXISTS:trinity_metal>>:$<TARGET_PROPERTY:trinity_metal,INTERFACE_INCLUDE_DIRECTORIES>>")
+if(WIN32)
+    target_include_directories(VideoPlayerTest PRIVATE "$<TARGET_PROPERTY:trinity_stub,INTERFACE_INCLUDE_DIRECTORIES>")
+elseif(APPLE)
+    target_include_directories(VideoPlayerTest PRIVATE "$<TARGET_PROPERTY:trinity_metal,INTERFACE_INCLUDE_DIRECTORIES>")
+else()
+    message(FATAL_ERROR "Unsupported platform!")
+endif()
 
 find_package(GTest REQUIRED)
 

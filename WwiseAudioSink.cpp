@@ -76,18 +76,25 @@ int WwiseAudioSink::FillBuffer( IAudioInputMgr::BufferData& bufferData )
 				return 0;
 			}
 
-			int samplesToProcess = samplesProcessed + packetPeek->samples * packetPeek->channels;
-			if( packetPeek->samples && samplesToProcess <= bufferData.numSamples )
+			int samplesToProcess = packetPeek->samples * packetPeek->channels;
+			if( samplesProcessed + samplesToProcess <= bufferData.numSamples )
 			{
 				auto packet = m_frameQueue->Pop();
-				auto sampleCount = packet->samples * packet->channels;
-				// A sample is 16 bytes
-				memcpy( wwiseBuffer, packet->data, sampleCount * m_audioMetadata->bps / 8 );
-				wwiseBuffer += sampleCount; // Move pointer forward so we don't keep putting samples in head of the buffer.
-				samplesProcessed += sampleCount;
+				memcpy( wwiseBuffer, packetPeek->data, samplesToProcess * m_audioMetadata->bps / 8 ); // A sample is 16 bytes
+				wwiseBuffer += samplesToProcess * m_audioMetadata->bps / 16; // Move pointer forward so we don't keep putting samples in head of the buffer.
+				samplesProcessed += samplesToProcess;
 			}
 			else
 			{
+				samplesToProcess = bufferData.numSamples - samplesProcessed; // Make sure we don't go above the number of samples Wwises buffer can handle.
+				memcpy( wwiseBuffer, packetPeek->data, samplesToProcess * m_audioMetadata->bps / 8 );
+				wwiseBuffer += samplesToProcess * m_audioMetadata->bps / 16; 
+				// Move pointer in the packet since we have processed a portion of its samples now. 
+				// We don't pop this packet from the frame queue yet because we have only processed a portion of it.
+				packetPeek->samples -= samplesToProcess / packetPeek->channels;
+				packetPeek->data += samplesToProcess * m_audioMetadata->bps / 16;
+
+				samplesProcessed += samplesToProcess;
 				fillBuffer = false;
 			}
 		}

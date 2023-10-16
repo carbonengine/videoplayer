@@ -80,19 +80,19 @@ int WwiseAudioSink::FillBuffer( IAudioInputMgr::BufferData& bufferData )
 			if( samplesProcessed + samplesToProcess <= bufferData.numSamples )
 			{
 				auto packet = m_frameQueue->Pop();
-				memcpy( wwiseBuffer, packetPeek->data, samplesToProcess * m_audioMetadata->bps / 8 ); // A sample is 16 bytes
-				wwiseBuffer += samplesToProcess * m_audioMetadata->bps / 16; // Move pointer forward so we don't keep putting samples in head of the buffer.
+				memcpy( wwiseBuffer, packetPeek->data, samplesToProcess * 2 ); // A sample is 16 bytes
+				wwiseBuffer += samplesToProcess; // Move pointer forward so we don't keep putting samples in head of the buffer.
 				samplesProcessed += samplesToProcess;
 			}
 			else
 			{
 				samplesToProcess = bufferData.numSamples - samplesProcessed; // Make sure we don't go above the number of samples Wwises buffer can handle.
-				memcpy( wwiseBuffer, packetPeek->data, samplesToProcess * m_audioMetadata->bps / 8 );
-				wwiseBuffer += samplesToProcess * m_audioMetadata->bps / 16; 
+				memcpy( wwiseBuffer, packetPeek->data, samplesToProcess * 2 );
+				wwiseBuffer += samplesToProcess; 
 				// Move pointer in the packet since we have processed a portion of its samples now. 
 				// We don't pop this packet from the frame queue yet because we have only processed a portion of it.
 				packetPeek->samples -= samplesToProcess / packetPeek->channels;
-				packetPeek->data += samplesToProcess * m_audioMetadata->bps / 16;
+				packetPeek->data += samplesToProcess;
 
 				samplesProcessed += samplesToProcess;
 				fillBuffer = false;
@@ -107,11 +107,17 @@ int WwiseAudioSink::FillBuffer( IAudioInputMgr::BufferData& bufferData )
 
 void WwiseAudioSink::Open( const AudioMetadata& audioMetadata, PcmFrameQueue& frameQueue )
 {
+	if (audioMetadata.codec != AudioMetadata::Codec::VORBIS)
+	{
+		CCP_LOGERR( "An audio codec other than Vorbis is present in the requested video. Only videos with Vorbis are supported when streaming audio to Wwise!" );
+		return;
+	}
 	m_audioMetadata = &audioMetadata;
 	m_frameQueue = &frameQueue;
 	if( !m_playing )
 	{
-		m_audioInputMgr->StartInput( audioMetadata.channels, audioMetadata.bps, audioMetadata.rate );
+		// bps (bits per sample) is hardcoded to 16 because the video player's Vorbis decoder always converts the audio to 16 bps.
+		m_audioInputMgr->StartInput( audioMetadata.channels, 16, audioMetadata.rate );  
 		m_audioInputMgr->SetVolume( m_volume );
 		m_playing = true;
 	}

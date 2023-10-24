@@ -96,7 +96,7 @@ class _VideoPlaylistController(object):
         if self.destroyed:
             return
         try:
-            item = self.playlist.next()
+            item = next(self.playlist)
         except StopIteration:
             self.current_path = None
             for each in _play_list_finished_handlers:
@@ -163,7 +163,7 @@ class _VideoPlaylistControllerWithSound(_VideoPlaylistController):
         if self.destroyed:
             return
         try:
-            item = self.playlist.next()
+            item = next(self.playlist)
         except StopIteration:
             self.current_path = None
             for each in _play_list_finished_handlers:

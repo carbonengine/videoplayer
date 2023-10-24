@@ -1,6 +1,6 @@
 import json
 import os
-import urllib2
+from urllib.request import urlopen
 
 import uthread2
 from eveprefs import prefs
@@ -34,7 +34,7 @@ class VideoIndex(object):
     def _load_index(self):
         try:
             if self._url.lower().startswith('http'):
-                opener = urllib2.urlopen
+                opener = urlopen
             else:
                 opener = open
             stream = opener(self._url)

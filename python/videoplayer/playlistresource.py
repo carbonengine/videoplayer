@@ -217,7 +217,7 @@ def _url_to_dict(param_string):
     expr = re.compile(r'\?((\w+)=([^&]*))(&?(\w+)=([^&]*))*')
     match = expr.match(param_string)
     if match:
-        for i in xrange(1, len(match.groups()), 3):
+        for i in range(1, len(match.groups()), 3):
             if match.group(i) is not None:
                 params[match.group(i + 1)] = str(_unquote(match.group(i + 2)))
     return params
@@ -346,4 +346,3 @@ def shuffled_videos(*res_path):
             yield paths[index]
             index = (index + 1) % len(paths)
     return inner
-

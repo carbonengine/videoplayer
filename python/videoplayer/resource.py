@@ -1,6 +1,6 @@
 import logging
 import re
-import urllib
+import urllib.parse
 
 import blue
 import trinity
@@ -92,9 +92,9 @@ def _url_to_dict(param_string):
     expr = re.compile(r'\?((\w+)=([^&]*))(&?(\w+)=([^&]*))*')
     match = expr.match(param_string)
     if match:
-        for i in xrange(1, len(match.groups()), 3):
+        for i in range(1, len(match.groups()), 3):
             if match.group(i) is not None:
-                params[match.group(i + 1)] = str(urllib.unquote(match.group(i + 2)))
+                params[match.group(i + 1)] = str(urllib.parse.unquote(match.group(i + 2)))
     return params
 
 
@@ -125,5 +125,3 @@ def register_state_change_handler(state_change_handler):
 
 def unregister_state_change_handler(state_change_handler):
     _state_change_handlers.remove(state_change_handler)
-
-

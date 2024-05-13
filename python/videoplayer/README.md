@@ -15,7 +15,7 @@ In order to be able to use player.py, you will need to update the client by runn
 ```python ../../updatebinaries.py client```
 
 #### Usage
-Run the player in a stackless interpreter environment with
+Run the player in an interpreter with
 ```../../eve/client/pythonInterpreter.bat player.py -h```
 
 and you should see the options available to you. The only required argument is ```--audio``` which tells it which audio sink to use.

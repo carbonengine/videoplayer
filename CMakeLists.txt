@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 <<<<<<< HEAD
+<<<<<<< HEAD
 project(VideoPlayer VERSION 1.0.0)
+=======
+project(project_name VERSION 1.0.0)
+>>>>>>> template/carbon-videoplayer-updates
 =======
 project(project_name VERSION 1.0.0)
 >>>>>>> template/carbon-videoplayer-updates
@@ -19,6 +23,7 @@ endif()
 
 file(TO_CMAKE_PATH "$ENV{CCP_EVE_PERFORCE_BRANCH_PATH}" BRANCH_ROOT_DIR)
 list(INSERT CMAKE_MODULE_PATH 0 ${BRANCH_ROOT_DIR}/cmake)
+<<<<<<< HEAD
 <<<<<<< HEAD
 include(CcpGlobalSettings)
 include(CcpPackageConfigHelpers)
@@ -163,6 +168,8 @@ target_link_libraries(VideoPlayerTest PRIVATE VORBIS VPX NestEgg GTest::GTest GT
 
 get_target_property(_SOURCES VideoPlayerTest SOURCES)
 =======
+=======
+>>>>>>> template/carbon-videoplayer-updates
 
 include(CcpGlobalSettings)
 include(CcpPackageConfigHelpers)
@@ -170,12 +177,16 @@ include(CcpPackageConfigHelpers)
 ccp_add_library(project_name SHARED)
 
 get_target_property(_SOURCES project_name SOURCES)
+<<<<<<< HEAD
+>>>>>>> template/carbon-videoplayer-updates
+=======
 >>>>>>> template/carbon-videoplayer-updates
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}"
         PREFIX "Sources"
         FILES ${_SOURCES}
 )
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 target_precompile_headers(VideoPlayerTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/StdAfx.h)
 target_compile_definitions(VideoPlayerTest PRIVATE WITH_TESTS)
@@ -190,6 +201,8 @@ endif()
 
 set_target_properties(VideoPlayerTest PROPERTIES FOLDER "Tests")
 =======
+=======
+>>>>>>> template/carbon-videoplayer-updates
 set_target_properties(project_name PROPERTIES OUTPUT_NAME "_project_name")
 
 # Provide an install target if this is the top level project only
@@ -285,4 +298,7 @@ if(CMAKE_PROJECT_NAME STREQUAL project_name)
             PATTERN "package.yaml"
     )
 endif()
+<<<<<<< HEAD
+>>>>>>> template/carbon-videoplayer-updates
+=======
 >>>>>>> template/carbon-videoplayer-updates

@@ -10,6 +10,9 @@ except ImportError:
 
 videoplayer = blue.LoadExtension("_videoplayer")
 for each in dir(videoplayer):
+    if each.startswith("_"):
+        # Ignore private and magic methods/attributes.
+        continue
     globals()[each] = getattr(videoplayer, each)
 
 del blue

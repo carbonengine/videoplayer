@@ -90,7 +90,7 @@ class Controls(wx.Frame):
     def on_slider(self, evt):
         self._update_slider = True
         if self.video.duration:
-            self.video.seek(long(float(self.slider.GetValue()) / 100.0 * self.video.duration))
+            self.video.seek(float(self.slider.GetValue()) / 100.0 * self.video.duration)
 
     def update_time(self):
         while True:

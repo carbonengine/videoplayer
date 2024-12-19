@@ -1,6 +1,6 @@
 import json
 import os
-import urllib2
+from urllib.request import urlopen
 
 import uthread2
 from eveprefs import prefs
@@ -18,15 +18,15 @@ class VideoIndex(object):
             self._language_id = language_id
         if self._language_id == 'ZH':
             self._language_id = 'CN'
-        self._url = unicode(url)
+        self._url = url
         if self._url.lower().startswith(u'http'):
             self._base_url = u'/'.join(self._url.split(u'/')[0:-1])
             if not self._base_url.endswith(u'/'):
                 self._base_url += u'/'
         else:
-            self._base_url = unicode(os.path.dirname(self._url))
+            self._base_url = os.path.dirname(self._url)
             if not self._base_url.endswith(os.path.sep):
-                self._base_url += unicode(os.path.sep)
+                self._base_url += os.path.sep
         self._data = None
         self._videos = {}
         uthread2.start_tasklet(self._load_index)
@@ -34,7 +34,7 @@ class VideoIndex(object):
     def _load_index(self):
         try:
             if self._url.lower().startswith('http'):
-                opener = urllib2.urlopen
+                opener = urlopen
             else:
                 opener = open
             stream = opener(self._url)
@@ -73,7 +73,7 @@ class VideoIndex(object):
     def _build_url(self, url):
         if not url:
             return None
-        return self._base_url + unicode(url)
+        return self._base_url + url
 
     def _get_video_item(self, video):
         return {'id': video.get('id'),

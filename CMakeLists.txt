@@ -1,26 +1,32 @@
 cmake_minimum_required(VERSION 3.16)
 project(VideoPlayer VERSION 1.0.0)
 
-if(NOT DEFINED ENV{CCP_EVE_PERFORCE_BRANCH_PATH})
-    message(FATAL_ERROR "Missing required environment variable CCP_EVE_PERFORCE_BRANCH_PATH")
-elseif(NOT IS_ABSOLUTE $ENV{CCP_EVE_PERFORCE_BRANCH_PATH})
-    message(FATAL_ERROR "CCP_EVE_PERFORCE_BRANCH_PATH needs to be an absolute path")
-elseif(NOT EXISTS $ENV{CCP_EVE_PERFORCE_BRANCH_PATH})
-    message(FATAL_ERROR "CCP_EVE_PERFORCE_BRANCH_PATH is pointing at a non-existing location $ENV{CCP_EVE_PERFORCE_BRANCH_PATH}")
-elseif(NOT IS_DIRECTORY $ENV{CCP_EVE_PERFORCE_BRANCH_PATH})
-    message(FATAL_ERROR "CCP_EVE_PERFORCE_BRANCH_PATH needs to be a directory")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(CcpBuildConfigurations)
+include(CcpTargetConfigurations)
+include(CcpPackageConfigHelpers)
+include(CcpMonolithVendorConfig)
+
+find_package(Vorbis CONFIG REQUIRED)
+find_package(libvpx REQUIRED)
+find_package(libnestegg CONFIG REQUIRED)
+
+find_package(carbon-blue REQUIRED CONFIG COMPONENTS Blue)
+find_package(carbon-bluexposure REQUIRED CONFIG COMPONENTS BlueExposure)
+find_package(carbon-trinityaudioapi REQUIRED CONFIG COMPONENTS CcpTrinityAudioAPI)
+find_package(carbon-audio REQUIRED CONFIG COMPONENTS CarbonAudio)
+
+if(WIN32)
+    find_package(carbon-trinity REQUIRED CONFIG COMPONENTS Trinity_stub)
+    target_include_directories(VideoPlayer PRIVATE "$<TARGET_PROPERTY:trinity_stub,INTERFACE_INCLUDE_DIRECTORIES>")
+elseif(APPLE)
+    find_package(carbon-trinity REQUIRED CONFIG COMPONENTS Trinity_metal)
+    target_include_directories(VideoPlayer PRIVATE "$<TARGET_PROPERTY:trinity_metal,INTERFACE_INCLUDE_DIRECTORIES>")
 else()
-    message(STATUS "Using CCP_EVE_PERFORCE_BRANCH_PATH located at $ENV{CCP_EVE_PERFORCE_BRANCH_PATH}")
+    message(FATAL_ERROR "Unsupported platform!")
 endif()
 
-file(TO_CMAKE_PATH "$ENV{CCP_EVE_PERFORCE_BRANCH_PATH}" BRANCH_ROOT_DIR)
-list(INSERT CMAKE_MODULE_PATH 0 ${BRANCH_ROOT_DIR}/cmake)
-include(CcpGlobalSettings)
-include(CcpPackageConfigHelpers)
-
-find_package(vorbis REQUIRED)
-find_package(vpx REQUIRED)
-find_package(nestegg REQUIRED)
+find_package(GTest REQUIRED)
 
 ccp_add_library(VideoPlayer SHARED
     FrameQueue.h
@@ -61,36 +67,8 @@ ccp_add_library(VideoPlayer SHARED
     WwiseAudioSink_Blue.cpp
 )
 
-find_package(PNG REQUIRED NO_CMAKE_PATH)
-find_package(Blue REQUIRED NO_CMAKE_PATH)
-find_package(CarbonTrinityAudioAPI REQUIRED NO_CMAKE_PATH)
-if(WIN32)
-    # Hack to allow building Audio with v143 toolset. This will ensure that when we link against dependencies, we will link against the v141 version. This is necessary because our build configuration assumes that all components are built using the same version. However, things built against a newer 14X toolset should be able to link against things that were built using an older 14X toolset.
-    set(_OLD_CCP_VENDOR_LIB_PATH ${CCP_VENDOR_LIB_PATH})
-    set(_OLD_CCP_VENDOR_BIN_PATH ${CCP_VENDOR_BIN_PATH})
-    set(CCP_VENDOR_LIB_PATH "lib/${CCP_PLATFORM}/${CCP_ARCHITECTURE}/v143/")
-    set(CCP_VENDOR_BIN_PATH "bin/${CCP_PLATFORM}/${CCP_ARCHITECTURE}/v143/")
-endif()
-find_package(CarbonAudio REQUIRED NO_CMAKE_PATH)
-if(WIN32)
-    # Restore sanity after toolset hacking. After this we can use find_package
-    # to find any v143 dependencies.
-    set(CCP_VENDOR_LIB_PATH ${_OLD_CCP_VENDOR_LIB_PATH})
-    set(CCP_VENDOR_BIN_PATH ${_OLD_CCP_VENDOR_BIN_PATH})
-endif()
-target_include_directories(VideoPlayer PUBLIC "$<TARGET_PROPERTY:CarbonTrinityAudioAPI,INTERFACE_INCLUDE_DIRECTORIES>")
-target_link_libraries(VideoPlayer PRIVATE Blue VORBIS VPX NestEgg)
-
-if(WIN32)
-    find_package(Trinity_stub REQUIRED NO_CMAKE_PATH)
-    target_include_directories(VideoPlayer PRIVATE "$<TARGET_PROPERTY:trinity_stub,INTERFACE_INCLUDE_DIRECTORIES>")
-elseif(APPLE)
-    find_package(Trinity_metal REQUIRED NO_CMAKE_PATH)
-    target_include_directories(VideoPlayer PRIVATE "$<TARGET_PROPERTY:trinity_metal,INTERFACE_INCLUDE_DIRECTORIES>")
-else()
-    message(FATAL_ERROR "Unsupported platform!")
-endif()
-
+target_include_directories(VideoPlayer PUBLIC "$<TARGET_PROPERTY:CcpTrinityAudioAPI,INTERFACE_INCLUDE_DIRECTORIES>")
+target_link_libraries(VideoPlayer PRIVATE Blue Vorbis::vorbis WebM::vpx libnestegg::nestegg)
 
 if(WIN32)
     target_link_libraries(VideoPlayer PRIVATE Winmm)
@@ -118,28 +96,48 @@ get_target_property(_SOURCES VideoPlayer SOURCES)
 
 # Provide an install target if this is the top level project only
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    # Install rule to ensure that our runtime and linker files are in the expected, platform-specific folders
-    install(
-        TARGETS VideoPlayer
-        EXPORT VideoPlayerTargets
-        CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES}
-        LIBRARY DESTINATION lib/${CCP_PLATFORM}/${CCP_ARCHITECTURE}/${CCP_TOOLSET}/
-        ARCHIVE DESTINATION lib/${CCP_PLATFORM}/${CCP_ARCHITECTURE}/${CCP_TOOLSET}/
-        RUNTIME DESTINATION bin/${CCP_PLATFORM}/${CCP_ARCHITECTURE}/${CCP_TOOLSET}/
-    )
+    option(INSTALL_TO_MONOLITH "Install this package to a perforce branch vendor folder - provided for backwards compatability" OFF)
 
-    configure_ccp_vendor_config_file(
-        TARGET VideoPlayer
-        DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/VideoPlayerConfig.cmake"
-        DEPENDENCIES ""
-    )
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/VideoPlayerConfig.cmake DESTINATION .)
+    if(INSTALL_TO_MONOLITH)
+        # Install rule to ensure that our runtime and linker files are in the expected, platform-specific folders
+        install(
+            TARGETS VideoPlayer
+            EXPORT VideoPlayerTargets
+            CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES}
+            LIBRARY DESTINATION lib/${CCP_PLATFORM}/${CCP_ARCHITECTURE}/${CCP_TOOLSET}/
+            ARCHIVE DESTINATION lib/${CCP_PLATFORM}/${CCP_ARCHITECTURE}/${CCP_TOOLSET}/
+            RUNTIME DESTINATION bin/${CCP_PLATFORM}/${CCP_ARCHITECTURE}/${CCP_TOOLSET}/
+        )
+
+        configure_ccp_vendor_config_file(
+            TARGET VideoPlayer
+            DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/VideoPlayerConfig.cmake"
+            DEPENDENCIES ""
+        )
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/VideoPlayerConfig.cmake DESTINATION .)
+
+    else()
+        install(
+            TARGETS VideoPlayer
+            EXPORT VideoPlayerTargets
+            CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES}
+            LIBRARY DESTINATION lib/
+            ARCHIVE DESTINATION lib/
+            RUNTIME DESTINATION bin/
+        )
+
+        install(
+            EXPORT VideoPlayerTargets
+            DESTINATION share/carbon-videoplayer
+            FILE carbon-videoplayerConfig.cmake
+        )
+    endif()
 
      # Install python package
      install(DIRECTORY python/ DESTINATION python
-     FILES_MATCHING
-     PATTERN "*.py"
-)
+        FILES_MATCHING
+        PATTERN "*.py"
+     )
 endif()
 
 
@@ -177,12 +175,10 @@ else()
     message(FATAL_ERROR "Unsupported platform!")
 endif()
 
-find_package(GTest REQUIRED)
-
 target_include_directories(VideoPlayerTest PUBLIC "$<TARGET_PROPERTY:Blue,INTERFACE_INCLUDE_DIRECTORIES>")
 
 
-target_link_libraries(VideoPlayerTest PRIVATE VORBIS VPX NestEgg GTest::GTest GTest::Main BlueExposure)
+target_link_libraries(VideoPlayerTest PRIVATE Vorbis::vorbis WebM::vpx libnestegg::nestegg GTest::GTest GTest::Main BlueExposure)
 
 get_target_property(_SOURCES VideoPlayerTest SOURCES)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}"

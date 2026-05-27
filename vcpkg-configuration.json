@@ -7,26 +7,29 @@
   "registries": [
     {
       "kind": "git",
+      "baseline": "0aedf11e66b0931e0c17f50ce8effb20999f7700",
       "repository": "git@github.com:ccpgames/carbon-vcpkg-registry.git",
-      "baseline": "bf6e077d3d724a859c85ac6cbfdec9b48e40cf6a",
-      "packages": ["carbon-pdmprotowrapper",
-                   "carbon-pdm",
-                   "carbon-blueexposure",
-                   "carbon-blue",
-                   "carbon-exefile",
-                   "carbon-io",
-                   "carbon-math",
-                   "carbon-trinityaudioapi",
-                   "fxc",
-                   "granny",
-                   "carbon-parser",
-                   "carbon-imageio"
+      "packages": [
+        "carbon-pdmprotowrapper",
+        "carbon-pdm",
+        "carbon-blueexposure",
+        "carbon-blue",
+        "carbon-exefile",
+        "carbon-io",
+        "carbon-math",
+        "carbon-trinityaudioapi",
+        "carbon-audio",
+        "wwise",
+        "fxc",
+        "granny",
+        "carbon-parser",
+        "carbon-imageio"
       ]
     },
     {
       "kind": "git",
+      "baseline": "d908cb145aafd509b479d5a7f8a8cfa1222db85c",
       "repository": "git@github.com:carbonengine/vcpkg-registry.git",
-      "baseline": "87fbb75936f134fecccd01718e13216a9058713d",
       "packages": [
         "python3",
         "carbon-core",

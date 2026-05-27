@@ -11,10 +11,10 @@ find_package(Vorbis CONFIG REQUIRED)
 find_package(libvpx REQUIRED)
 find_package(libnestegg CONFIG REQUIRED)
 
-find_package(carbon-blue REQUIRED CONFIG COMPONENTS Blue)
-find_package(carbon-bluexposure REQUIRED CONFIG COMPONENTS BlueExposure)
-find_package(carbon-trinityaudioapi REQUIRED CONFIG COMPONENTS CcpTrinityAudioAPI)
-find_package(carbon-audio REQUIRED CONFIG COMPONENTS CarbonAudio)
+find_package(carbon-blue CONFIG REQUIRED)
+find_package(carbon-blueexposure CONFIG REQUIRED)
+find_package(carbon-trinityaudioapi CONFIG REQUIRED)
+find_package(carbon-audio CONFIG REQUIRED)
 
 if(WIN32)
     find_package(carbon-trinity REQUIRED CONFIG COMPONENTS Trinity_stub)
@@ -68,7 +68,7 @@ ccp_add_library(VideoPlayer SHARED
 )
 
 target_include_directories(VideoPlayer PUBLIC "$<TARGET_PROPERTY:CcpTrinityAudioAPI,INTERFACE_INCLUDE_DIRECTORIES>")
-target_link_libraries(VideoPlayer PRIVATE Blue Vorbis::vorbis WebM::vpx libnestegg::nestegg)
+target_link_libraries(VideoPlayer PRIVATE Blue Vorbis::vorbis WebM::vpx nestegg)
 
 if(WIN32)
     target_link_libraries(VideoPlayer PRIVATE Winmm)
@@ -178,7 +178,7 @@ endif()
 target_include_directories(VideoPlayerTest PUBLIC "$<TARGET_PROPERTY:Blue,INTERFACE_INCLUDE_DIRECTORIES>")
 
 
-target_link_libraries(VideoPlayerTest PRIVATE Vorbis::vorbis WebM::vpx libnestegg::nestegg GTest::GTest GTest::Main BlueExposure)
+target_link_libraries(VideoPlayerTest PRIVATE Vorbis::vorbis WebM::vpx nestegg GTest::GTest GTest::Main BlueExposure)
 
 get_target_property(_SOURCES VideoPlayerTest SOURCES)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}"

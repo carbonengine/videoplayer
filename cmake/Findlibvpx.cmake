@@ -16,6 +16,7 @@ if(libvpx_FOUND AND NOT TARGET WebM::vpx)
     add_library(WebM::vpx UNKNOWN IMPORTED)
     set_target_properties(WebM::vpx PROPERTIES
       IMPORTED_LOCATION "${VPX_LIBRARY}"
-      INTERFACE_INCLUDE_DIRECTORIES "${VPX_INCLUDE_DIR}"
+      
+      INTERFACE_INCLUDE_DIRECTORIES "${VPX_INCLUDE_DIR};${VPX_INCLUDE_DIR}/vpx"
     )
 endif()

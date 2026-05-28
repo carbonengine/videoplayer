@@ -20,11 +20,7 @@
       "name": "carbon-trinity",
       "version>=": "1.0.0"
     },
-    {
-      "name": "carbon-audio",
-      "version>=": "8.0.0"
-    },
-    {
+{
       "name": "carbon-trinityaudioapi",
       "version>=": "2.0.2#1"
     },
@@ -37,10 +33,6 @@
     {
       "name": "protobuf",
       "version": "3.6.0.1"
-    },
-    {
-      "name": "carbon-pdmprotowrapper",
-      "version": "2.0.4"
     },
     {
       "name": "openssl",

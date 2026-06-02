@@ -14,12 +14,9 @@
         "carbon-pdm",
         "carbon-blueexposure",
         "carbon-blue",
-        "carbon-exefile",
         "carbon-io",
         "carbon-math",
         "carbon-trinityaudioapi",
-        "wwise",
-        "fxc",
         "granny",
         "carbon-parser",
         "carbon-imageio"
@@ -36,16 +33,11 @@
         "tracy",
         "greenlet",
         "ccp-debug-info",
-        "crashpad",
         "zlib",
         "re2c",
-        "amd-fidelityfx",
         "amd-fidelityfx-cacao",
         "amd-fidelityfx-cas",
-        "amd-fidelityfx-fsr",
         "intel-xess",
-        "nvidia-aftermath",
-        "nvidia-streamline",
         "openvdb"
       ]
     }

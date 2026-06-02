@@ -1,1 +1,14 @@
+# Visual Studio
+.vs/*
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+# CMake
+out*
+build/
 /cmake-build/
+.cmake-build-*/
+CMakeUserPresets.json
+# Python
+*.pyc

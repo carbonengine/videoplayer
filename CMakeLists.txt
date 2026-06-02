@@ -117,7 +117,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
         configure_ccp_vendor_config_file(
             TARGET VideoPlayer
             DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/VideoPlayerConfig.cmake"
-            DEPENDENCIES ""
+            DEPENDENCIES "Blue;CcpTrinityAudioAPI"
         )
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/VideoPlayerConfig.cmake DESTINATION .)
 

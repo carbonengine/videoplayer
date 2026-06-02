@@ -20,7 +20,7 @@
       "name": "carbon-trinity",
       "version>=": "1.0.0"
     },
-{
+    {
       "name": "carbon-trinityaudioapi",
       "version>=": "2.0.2#1"
     },

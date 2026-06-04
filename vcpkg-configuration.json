@@ -38,7 +38,8 @@
         "amd-fidelityfx-cacao",
         "amd-fidelityfx-cas",
         "intel-xess",
-        "openvdb"
+        "openvdb",
+        "libnestegg"
       ]
     }
   ]

@@ -8,24 +8,13 @@ include(CcpPackageConfigHelpers)
 include(CcpMonolithVendorConfig)
 
 find_package(Vorbis CONFIG REQUIRED)
-find_package(libvpx REQUIRED)
+find_package(unofficial-libvpx CONFIG REQUIRED)
 find_package(libnestegg CONFIG REQUIRED)
-
+find_package(PNG CONFIG REQUIRED)
 find_package(carbon-blue CONFIG REQUIRED)
 find_package(carbon-blueexposure CONFIG REQUIRED)
 find_package(carbon-trinityaudioapi CONFIG REQUIRED)
-
-
-find_package(PNG REQUIRED)
-
-if(WIN32)
-    find_package(carbon-trinity REQUIRED CONFIG COMPONENTS Trinity_stub)
-elseif(APPLE)
-    find_package(carbon-trinity REQUIRED CONFIG COMPONENTS Trinity_metal)
-else()
-    message(FATAL_ERROR "Unsupported platform!")
-endif()
-
+find_package(carbon-trinity CONFIG REQUIRED)
 find_package(GTest REQUIRED)
 
 ccp_add_library(VideoPlayer SHARED
@@ -69,11 +58,12 @@ ccp_add_library(VideoPlayer SHARED
 
 target_include_directories(VideoPlayer PUBLIC "$<TARGET_PROPERTY:CcpTrinityAudioAPI,INTERFACE_INCLUDE_DIRECTORIES>")
 if(WIN32)
-    target_include_directories(VideoPlayer PRIVATE "$<TARGET_PROPERTY:CcpTrinity_stub,INTERFACE_INCLUDE_DIRECTORIES>")
+    target_include_directories(VideoPlayer PRIVATE "$<TARGET_PROPERTY:trinity_stub,INTERFACE_INCLUDE_DIRECTORIES>")
 elseif(APPLE)
-    target_include_directories(VideoPlayer PRIVATE "$<TARGET_PROPERTY:CcpTrinity_metal,INTERFACE_INCLUDE_DIRECTORIES>")
+    target_include_directories(VideoPlayer PRIVATE "$<TARGET_PROPERTY:trinity_metal,INTERFACE_INCLUDE_DIRECTORIES>")
 endif()
-target_link_libraries(VideoPlayer PRIVATE Blue Vorbis::vorbis WebM::vpx nestegg)
+
+target_link_libraries(VideoPlayer PRIVATE Blue Vorbis::vorbis unofficial::libvpx::libvpx nestegg)
 
 if(WIN32)
     target_link_libraries(VideoPlayer PRIVATE Winmm)
@@ -173,9 +163,9 @@ else()
 endif()
 
 if(WIN32)
-    target_include_directories(VideoPlayerTest PRIVATE "$<TARGET_PROPERTY:CcpTrinity_stub,INTERFACE_INCLUDE_DIRECTORIES>")
+    target_include_directories(VideoPlayerTest PRIVATE "$<TARGET_PROPERTY:trinity_stub,INTERFACE_INCLUDE_DIRECTORIES>")
 elseif(APPLE)
-    target_include_directories(VideoPlayerTest PRIVATE "$<TARGET_PROPERTY:CcpTrinity_metal,INTERFACE_INCLUDE_DIRECTORIES>")
+    target_include_directories(VideoPlayerTest PRIVATE "$<TARGET_PROPERTY:trinity_metal,INTERFACE_INCLUDE_DIRECTORIES>")
 else()
     message(FATAL_ERROR "Unsupported platform!")
 endif()
@@ -183,7 +173,7 @@ endif()
 target_include_directories(VideoPlayerTest PUBLIC "$<TARGET_PROPERTY:Blue,INTERFACE_INCLUDE_DIRECTORIES>")
 
 
-target_link_libraries(VideoPlayerTest PRIVATE Vorbis::vorbis WebM::vpx nestegg GTest::GTest GTest::Main BlueExposure)
+target_link_libraries(VideoPlayerTest PRIVATE Vorbis::vorbis unofficial::libvpx::libvpx nestegg GTest::GTest GTest::Main BlueExposure)
 
 get_target_property(_SOURCES VideoPlayerTest SOURCES)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}"

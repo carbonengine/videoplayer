@@ -7,41 +7,47 @@
   "registries": [
     {
       "kind": "git",
-      "baseline": "0aedf11e66b0931e0c17f50ce8effb20999f7700",
+      "baseline": "7108ed8138e18486e927440d8c9cae90f6683f12",
       "repository": "git@github.com:ccpgames/carbon-vcpkg-registry.git",
-      "packages": [
-        "carbon-pdmprotowrapper",
-        "carbon-pdm",
-        "carbon-blueexposure",
-        "carbon-blue",
-        "carbon-io",
-        "carbon-math",
-        "carbon-trinityaudioapi",
-        "carbon-trinity",
-        "granny",
-        "carbon-parser",
-        "carbon-imageio"
+      "packages": ["carbon-pdmprotowrapper",
+                   "carbon-pdm",
+                   "carbon-blueexposure",
+                   "carbon-blue",
+                   "carbon-exefile",
+                   "carbon-exefile-interpreter",
+                   "carbon-io",
+                   "carbon-trinityaudioapi",
+                   "fxc",
+                   "granny",
+                   "carbon-parser",
+                   "carbon-mesh",
+                   "carbon-trinity"
       ]
     },
     {
       "kind": "git",
-      "baseline": "d908cb145aafd509b479d5a7f8a8cfa1222db85c",
+      "baseline": "f1205e4f8a548af05ab03e547dccfbaf37a1ba7c",
       "repository": "git@github.com:carbonengine/vcpkg-registry.git",
-      "packages": [
-        "python3",
-        "carbon-core",
-        "carbon-scheduler",
-        "tracy",
-        "greenlet",
-        "ccp-debug-info",
-        "zlib",
-        "re2c",
-        "amd-fidelityfx-cacao",
-        "amd-fidelityfx-cas",
-        "intel-xess",
-        "openvdb",
-        "libnestegg"
-      ]
+      "packages": ["python3", 
+                   "carbon-core", 
+                   "carbon-scheduler",
+                   "tracy",
+                   "greenlet",
+                   "ccp-debug-info",
+                   "crashpad",
+                   "zlib",
+                   "re2c",
+                   "amd-fidelityfx",
+                   "amd-fidelityfx-cacao",
+                   "amd-fidelityfx-cas",
+                   "amd-fidelityfx-fsr",
+                   "intel-xess",
+                   "nvidia-aftermath",
+                   "nvidia-streamline",
+                   "openvdb",
+                   "libnestegg",
+                   "carbon-math",
+                   "carbon-imageio"]
     }
   ]
 }

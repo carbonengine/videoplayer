@@ -148,19 +148,11 @@ ccp_add_executable(VideoPlayerTest
     tests/main.cpp
 )
 
-if(CMAKE_IMPORT_LIBRARY_SUFFIX)
-    add_custom_command(TARGET VideoPlayerTest POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:VideoPlayerTest> $<TARGET_FILE_DIR:VideoPlayerTest>
-            COMMAND_EXPAND_LISTS
-            VERBATIM
-    )
-else()
-    add_custom_command(TARGET VideoPlayerTest POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_LINKER_FILE:Python> $<TARGET_FILE_DIR:VideoPlayerTest>
-            COMMAND_EXPAND_LISTS
-            VERBATIM
-    )
-endif()
+add_custom_command(TARGET VideoPlayerTest POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:VideoPlayerTest> $<TARGET_FILE_DIR:VideoPlayerTest>
+        COMMAND_EXPAND_LISTS
+        VERBATIM
+)
 
 if(WIN32)
     target_include_directories(VideoPlayerTest PRIVATE "$<TARGET_PROPERTY:trinity_stub,INTERFACE_INCLUDE_DIRECTORIES>")

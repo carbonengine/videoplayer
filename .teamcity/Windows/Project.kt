@@ -49,7 +49,7 @@ class CarbonBuildWindows(buildName: String, configType: String, preset: String) 
         select("env.VISUAL_STUDIO_PLATFORM_TOOLSET", "v141", label = "Visual Studio Platform Toolset", description = "Specify the toolset for the build. e.g. v141 or v143.",
                 options = listOf("v141 (2017)" to "v141", "v143 (2022)" to "v143"))
         param("VS_DEV_BAT_SWITCHES", "-arch=x64")
-        param("env.VSDEV_BAT_PATH", "%%ProgramFiles(x86)%%\Microsoft Visual Studio\2017\BuildTools\Common7\Tools\vsdevcmd.bat")
+        param("env.VSDEV_BAT_PATH", "%%ProgramFiles(x86)%%/Microsoft Visual Studio/2017/BuildTools/Common7/Tools/vsdevcmd.bat")
         param("env.CMAKE_BUILD_TARGETS", "all")
         param("env.CMAKE_INSTALL_PREFIX", ".build-artifact")
         param("env.CMAKE_CONFIG_TYPE", configType)

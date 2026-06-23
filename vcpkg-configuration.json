@@ -26,7 +26,7 @@
     },
     {
       "kind": "git",
-      "baseline": "f1205e4f8a548af05ab03e547dccfbaf37a1ba7c",
+      "baseline": "2027e0c9d34193f468438589c4e6bb25996e823d",
       "repository": "git@github.com:carbonengine/vcpkg-registry.git",
       "packages": ["python3", 
                    "carbon-core", 

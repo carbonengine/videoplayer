@@ -10,7 +10,7 @@
     },
     {
       "name": "libnestegg",
-      "version>=": "2018-08-09"
+      "version>=": "2018-08-09#1"
     },
     {
       "name": "carbon-blue",

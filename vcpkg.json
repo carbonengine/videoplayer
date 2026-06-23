@@ -6,7 +6,7 @@
     },
     {
       "name": "libvpx",
-      "version>=": "1.16.0#2"
+      "version>=": "1.16.1"
     },
     {
       "name": "libnestegg",

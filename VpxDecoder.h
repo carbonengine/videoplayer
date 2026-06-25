@@ -11,7 +11,7 @@
 
 #include "FrameQueue.h"
 #include "Metadata.h"
-#include "vpx_decoder.h"
+#include <vpx/vpx_decoder.h>
 #include "IVideoDecoder.h"
 
 // --------------------------------------------------------------------------------------

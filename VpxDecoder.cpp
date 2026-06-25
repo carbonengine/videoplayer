@@ -7,7 +7,7 @@
 
 #include "StdAfx.h"
 #include "VpxDecoder.h"
-#include "vp8dx.h"
+#include <vpx/vp8dx.h>
 
 namespace
 {

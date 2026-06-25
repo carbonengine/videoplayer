@@ -6,7 +6,7 @@
     },
     {
       "name": "libvpx",
-      "version>=": "1.13.1#3"
+      "version>=": "1.16.0"
     },
     {
       "name": "libnestegg",
@@ -56,10 +56,6 @@
     {
       "name": "libsquish",
       "version": "1.15#14"
-    },
-    {
-      "name": "libvpx",
-      "version": "1.13.1#3"
     }
   ]
 }

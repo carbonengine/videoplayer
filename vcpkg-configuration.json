@@ -26,7 +26,7 @@
     },
     {
       "kind": "git",
-      "baseline": "2027e0c9d34193f468438589c4e6bb25996e823d",
+      "baseline": "ffb0e70cb67e67f7e74eb5d4e79c2df0e38c0b8e",
       "repository": "git@github.com:carbonengine/vcpkg-registry.git",
       "packages": ["python3", 
                    "carbon-core", 
@@ -47,7 +47,9 @@
                    "openvdb",
                    "libnestegg",
                    "carbon-math",
-                   "carbon-imageio"]
+                   "carbon-imageio",
+                   "libvpx",
+                   "nasm"]
     }
   ]
 }

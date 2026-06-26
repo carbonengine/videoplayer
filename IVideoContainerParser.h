@@ -1,3 +1,5 @@
+// Copyright © 2015 CCP ehf.
+
 #pragma once
 #ifndef IVideoContainerParser_H
 #define IVideoContainerParser_H

@@ -1,3 +1,5 @@
+// Copyright © 2015 CCP ehf.
+
 #define NOMINMAX
 
 #include <BlueExposure.h>

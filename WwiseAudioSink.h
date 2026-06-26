@@ -1,8 +1,4 @@
-////////////////////////////////////////////////////////////////////////////////
-//
-// Creator:		Eric Nielsen
-// Created:		August 2020
-// Copyright:	CCP 2020
+// Copyright © 2020 CCP ehf.
 // Description: An audio sink for the videoplayer that pipes its audio buffer into Wwises
 //				Audio Input plugin (See AudioInputMgr in audio2 for more details on how the Audio
 //				Input plugin works).

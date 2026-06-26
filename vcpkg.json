@@ -14,22 +14,22 @@
     },
     {
       "name": "carbon-blue",
-      "version>=": "5.0.0"
+      "version>=": "5.1.2"
     },
     {
       "name": "carbon-trinity",
-      "version>=": "3.10.1",
+      "version>=": "3.10.3",
       "platform": "windows & x64"
     },
     {
       "name": "carbon-trinity",
-      "version>=": "3.10.1",
+      "version>=": "3.10.3",
       "platform": "osx",
       "features":["metal" ]
     },
     {
       "name": "carbon-trinityaudioapi",
-      "version>=": "2.0.2#1"
+      "version>=": "2.0.3"
     },
     {
       "name": "gtest",

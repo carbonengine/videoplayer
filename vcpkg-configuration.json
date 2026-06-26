@@ -7,34 +7,16 @@
   "registries": [
     {
       "kind": "git",
-      "baseline": "7108ed8138e18486e927440d8c9cae90f6683f12",
-      "repository": "git@github.com:ccpgames/carbon-vcpkg-registry.git",
-      "packages": ["carbon-pdmprotowrapper",
-                   "carbon-pdm",
-                   "carbon-blueexposure",
-                   "carbon-blue",
-                   "carbon-exefile",
-                   "carbon-exefile-interpreter",
-                   "carbon-io",
-                   "carbon-trinityaudioapi",
-                   "fxc",
-                   "granny",
-                   "carbon-parser",
-                   "carbon-mesh",
-                   "carbon-trinity"
-      ]
-    },
-    {
-      "kind": "git",
       "baseline": "ffb0e70cb67e67f7e74eb5d4e79c2df0e38c0b8e",
       "repository": "git@github.com:carbonengine/vcpkg-registry.git",
       "packages": ["python3", 
-                   "carbon-core", 
-                   "carbon-scheduler",
+                   "carbon-*",
                    "tracy",
                    "greenlet",
                    "ccp-debug-info",
                    "crashpad",
+				   "fxc",
+				   "granny",
                    "zlib",
                    "re2c",
                    "amd-fidelityfx",
@@ -46,8 +28,6 @@
                    "nvidia-streamline",
                    "openvdb",
                    "libnestegg",
-                   "carbon-math",
-                   "carbon-imageio",
                    "libvpx",
                    "nasm"]
     }

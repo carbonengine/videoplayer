@@ -1,3 +1,5 @@
+# Copyright © 2015 CCP ehf.
+
 import json
 import os
 from urllib.request import urlopen

@@ -1,3 +1,5 @@
+# Copyright © 2016 CCP ehf.
+
 import logging
 import random
 import re

@@ -1,3 +1,5 @@
+# Copyright © 2016 CCP ehf.
+
 """
 Test player application that uses videoplayer to play webm videos
 """

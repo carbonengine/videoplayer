@@ -1,3 +1,5 @@
+// Copyright © 2015 CCP ehf.
+
 #include "StdAfx.h"
 #ifdef WITH_TESTS
 #include "WebMParser.h"

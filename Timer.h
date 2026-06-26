@@ -1,3 +1,5 @@
+// Copyright © 2015 CCP ehf.
+
 #pragma once
 #ifndef Timer_H
 #define Timer_H

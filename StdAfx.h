@@ -2,6 +2,7 @@
 
 #define NOMINMAX
 
+#include <string>
 #include <BlueExposure.h>
 #include <Blue.h>
 #include <IBlueOS.h>

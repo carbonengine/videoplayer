@@ -49,7 +49,6 @@ class CarbonBuildWindows(buildName: String, configType: String, preset: String, 
         param("github_checkout_folder", "github")
         param("env.CTEST_JUNIT_OUTPUT_FILE", "ctest_results.xml")
         param("VS_DEV_BAT_SWITCHES", vsDevBatSwitches)
-        param("env.VSDEV_BAT_PATH", "%%ProgramFiles(x86)%%/Microsoft Visual Studio/2017/BuildTools/Common7/Tools/vsdevcmd.bat")
         param("env.CMAKE_BUILD_TARGETS", "all")
         param("env.CMAKE_INSTALL_PREFIX", ".build-artifact")
         param("env.CMAKE_CONFIG_TYPE", configType)
@@ -210,7 +209,13 @@ class CarbonBuildWindows(buildName: String, configType: String, preset: String, 
                 authType = token {
                     token = "%GITHUB_CARBON_PAT%"
                 }
-                filterAuthorRole = PullRequests.GitHubRoleFilter.MEMBER
+                // Constrain PR triggers to compatible refs so as to avoid erroneous triggers
+                filterTargetBranch = """
+                    +:refs/heads/main
+                    +:refs/heads/release/*.x
+                    -:refs/heads/release/1.x
+                """.trimIndent()
+                filterAuthorRole = PullRequests.GitHubRoleFilter.EVERYBODY
             }
         }
         commitStatusPublisher {

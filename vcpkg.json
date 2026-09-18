@@ -18,12 +18,12 @@
     },
     {
       "name": "carbon-trinity",
-      "version>=": "6.1.0",
+      "version>=": "7.0.0",
       "platform": "windows & x64"
     },
     {
       "name": "carbon-trinity",
-      "version>=": "6.1.0",
+      "version>=": "7.0.0",
       "platform": "osx",
       "features":["metal" ]
     },

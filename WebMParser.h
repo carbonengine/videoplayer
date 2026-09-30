@@ -59,6 +59,7 @@ public:
 	const VideoMetadata& GetVideoMetadata() const;
 	const AudioMetadata& GetAudioMetadata() const;
 	void CompleteQueues();
+	void DropAudio();
 	uint64_t GetDuration() const;
 	uint64_t GetDownloadedMediaTime() const;
 

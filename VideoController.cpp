@@ -152,10 +152,10 @@ void VideoController::Update()
 			m_audioDecoder.reset( CreateAudioDecoder( m_parser->GetAudioMetadata(), *m_parser->GetAudioQueue() ) );
 			if( !m_audioDecoder )
 			{
-				CCP_LOGWARN( "Video file contains an unsupported audio codec" );
+				DropAudio( "Video file contains an unsupported audio codec, playing video without audio" );
 			}
 		}
-		if( !m_audioDecoder )
+		else
 		{
 			m_audioSink = nullptr;
 		}
@@ -171,9 +171,9 @@ void VideoController::Update()
 		}
 		CCP_STATS_ADD( videoplayerInitialBufferingTime, int32_t( m_bufferingTimer.GetTime() / 1000000 ) );
 		m_state = PLAYING;
-		if( m_audioSink )
+		if( m_audioSink && !m_audioSink->Open( m_parser->GetAudioMetadata(), m_audioDecoder->GetDecodedQueue() ) )
 		{
-			m_audioSink->Open( m_parser->GetAudioMetadata(), m_audioDecoder->GetDecodedQueue() );
+			DropAudio( "Audio sink failed to open, playing video without audio" );
 		}
 		m_mediaTime.Start();
 
@@ -291,6 +291,16 @@ bool VideoController::NeedsBuffering() const
 {
 	return ( m_videoDecoder && !m_videoDecoder->GetDecodedQueue().IsComplete() && m_videoDecoder->GetDecodedQueue().Size() == 0 ) ||
 		( m_audioDecoder && !m_audioDecoder->GetDecodedQueue().IsComplete() && m_audioDecoder->GetDecodedQueue().Size() < 10 );
+}
+
+// Switches the controller to video-only playback: the parser stops producing audio,
+// the audio decoder is torn down and the sink is dropped. 
+void VideoController::DropAudio( const char* reason )
+{
+	CCP_LOGWARN( reason );
+	m_parser->DropAudio();
+	m_audioDecoder.reset();
+	m_audioSink = nullptr;
 }
 
 bool VideoController::IsDone() const

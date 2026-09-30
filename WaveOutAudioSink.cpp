@@ -25,14 +25,20 @@ WaveOutAudioSink::~WaveOutAudioSink()
 	Close();
 }
 
-void WaveOutAudioSink::Open( const AudioMetadata& audioMetadata, PcmFrameQueue& frameQueue )
+bool WaveOutAudioSink::Open( const AudioMetadata& audioMetadata, PcmFrameQueue& frameQueue )
 {
 	m_audioMetadata = &audioMetadata;
 	m_frameQueue = &frameQueue;
 	if( !m_submitThread )
 	{
 		m_submitThread = CreateThread( nullptr, 0, &SubmitThreadHelper, this, 0, nullptr );
+		if( !m_submitThread )
+		{
+			Close();
+			return false;
+		}
 	}
+	return true;
 }
 
 void WaveOutAudioSink::Close()

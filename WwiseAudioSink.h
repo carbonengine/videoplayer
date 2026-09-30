@@ -23,7 +23,7 @@ public:
 	EXPOSE_TO_BLUE();
 
 	// IAudioSinkExposed
-	virtual void Open( const AudioMetadata& audioMetadata, PcmFrameQueue& frameQueue ) override;
+	virtual bool Open( const AudioMetadata& audioMetadata, PcmFrameQueue& frameQueue ) override;
 	virtual void Close() override;
 	virtual void Pause() override;
 	virtual void Resume() override;

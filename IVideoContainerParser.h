@@ -20,6 +20,9 @@ struct IVideoContainerParser
 	virtual const VideoMetadata& GetVideoMetadata() const = 0;
 	virtual const AudioMetadata& GetAudioMetadata() const = 0;
 	virtual void CompleteQueues() = 0;
+	// Stops producing audio frames as if the container had no audio track. Used when
+	// audio cannot be decoded or played
+	virtual void DropAudio() = 0;
 	virtual uint64_t GetDuration() const = 0;
 	virtual uint64_t GetDownloadedMediaTime() const = 0;
 

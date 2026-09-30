@@ -75,6 +75,7 @@ public:
 private:
 	bool NeedsBuffering() const;
 	void RemoveExpiredFrames();
+	void DropAudio( const char* reason );
 	bool IsDone() const;
 
 	// current state

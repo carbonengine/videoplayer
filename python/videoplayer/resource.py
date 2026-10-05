@@ -45,11 +45,9 @@ class _VideoController(object):
         if self._deleted:
             return
         if video_local:
-            if blue.remoteFileCache.FileExists(video_local) and not blue.paths.FileExistsLocally(video_local):
-                blue.paths.GetFileContentsWithYield(video_local)
-                if self._deleted:
-                    return
-            stream = blue.paths.open(video_local, 'rb')
+            stream = blue.paths.GetFileContentsWithYield(video_local)
+            if self._deleted:
+                return
         elif video_remote:
             stream = blue.BlueNetworkStream(video_remote)
         else:

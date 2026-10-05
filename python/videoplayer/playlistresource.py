@@ -108,11 +108,9 @@ class _VideoPlaylistController(object):
         if item.lower().startswith('http'):
             stream = blue.BlueNetworkStream(item)
         else:
-            if blue.remoteFileCache.FileExists(item) and not blue.paths.FileExistsLocally(item):
-                blue.paths.GetFileContentsWithYield(item)
+            stream = blue.paths.GetFileContentsWithYield(item)
             if self.destroyed:
                 return
-            stream = blue.paths.open(item, 'rb')
 
         self.video = videoplayer.VideoPlayer(stream, None)
         self.video.bgra_texture = self.weak_texture.object
@@ -175,11 +173,9 @@ class _VideoPlaylistControllerWithSound(_VideoPlaylistController):
         if item.lower().startswith('http'):
             stream = blue.BlueNetworkStream(item)
         else:
-            if blue.remoteFileCache.FileExists(item) and not blue.paths.FileExistsLocally(item):
-                blue.paths.GetFileContentsWithYield(item)
+            stream = blue.paths.GetFileContentsWithYield(item)
             if self.destroyed:
                 return
-            stream = blue.paths.open(item, 'rb')
 
         inputMgr = audio2.AudioInputMgr()
         sink = videoplayer.WwiseAudioSink(inputMgr)

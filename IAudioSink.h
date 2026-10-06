@@ -14,13 +14,15 @@
 //   to syncronize video to audio.
 //   Pause and Resume methods are used for pausing the playback. They must be implemented
 //   in a reference-counting manner.
+//   Open returns false if the sink is unable to play the audio. A failed Open must leave
+//   the sink closed. 
 // See also:
 //   WaveOutAudioSink
 // --------------------------------------------------------------------------------------
 struct IAudioSink
 {
 	virtual ~IAudioSink() = 0;
-	virtual void Open( const AudioMetadata& audioMetadata, PcmFrameQueue& frameQueue ) = 0;
+	virtual bool Open( const AudioMetadata& audioMetadata, PcmFrameQueue& frameQueue ) = 0;
 	virtual void Close() = 0;
 	virtual void Pause() = 0;
 	virtual void Resume() = 0;

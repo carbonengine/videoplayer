@@ -256,6 +256,20 @@ void WebMParser::CompleteQueues()
 	}
 }
 
+void WebMParser::DropAudio()
+{
+	if( m_audioTrack == -1 || !m_audioQueue )
+	{
+		return;
+	}
+	m_audioQueue->SetComplete();
+	m_audioTrack = -1;
+	if( m_videoQueue )
+	{
+		m_videoQueue->GetFullPolicy().SetMaxCount( VIDEO_QUEUE_LENGTH );
+	}
+}
+
 uint64_t WebMParser::GetDuration() const
 {
 	return m_duration;

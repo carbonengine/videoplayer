@@ -100,29 +100,43 @@ int WwiseAudioSink::FillBuffer( IAudioInputMgr::BufferData& bufferData )
 	}
 }
 
-void WwiseAudioSink::Open( const AudioMetadata& audioMetadata, PcmFrameQueue& frameQueue )
+bool WwiseAudioSink::Open( const AudioMetadata& audioMetadata, PcmFrameQueue& frameQueue )
 {
 	if (audioMetadata.codec != AudioMetadata::Codec::VORBIS)
 	{
 		CCP_LOGERR( "An audio codec other than Vorbis is present in the requested video. Only videos with Vorbis are supported when streaming audio to Wwise!" );
-		return;
+		return false;
+	}
+	if( !m_audioInputMgr )
+	{
+		CCP_LOGERR( "WwiseAudioSink has no audio input manager" );
+		return false;
 	}
 	m_audioMetadata = &audioMetadata;
 	m_frameQueue = &frameQueue;
 	if( !m_playing )
 	{
 		// bps (bits per sample) is hardcoded to 16 because the video player's Vorbis decoder always converts the audio to 16 bps.
-		m_audioInputMgr->StartInput( audioMetadata.channels, 16, audioMetadata.rate );  
+		if( !m_audioInputMgr->StartInput( audioMetadata.channels, 16, audioMetadata.rate ) )
+		{
+			CCP_LOGERR( "Failed to start Wwise audio input, falling back to no audio output" );
+			Close();
+			return false;
+		}
 		m_audioInputMgr->SetVolume( m_volume );
 		m_playing = true;
 	}
+	return true;
 }
 
 void WwiseAudioSink::Close()
 {
 	m_stopRequested = true;
 
-	m_audioInputMgr->StopInput();
+	if( m_audioInputMgr )
+	{
+		m_audioInputMgr->StopInput();
+	}
 
 	m_audioMetadata = nullptr;
 	m_frameQueue = nullptr;

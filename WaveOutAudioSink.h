@@ -24,7 +24,7 @@ public:
 
 	EXPOSE_TO_BLUE();
 
-	virtual void Open( const AudioMetadata& audioMetadata, PcmFrameQueue& frameQueue );
+	virtual bool Open( const AudioMetadata& audioMetadata, PcmFrameQueue& frameQueue );
 	virtual void Close();
 	virtual void Pause();
 	virtual void Resume();

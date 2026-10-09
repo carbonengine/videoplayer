@@ -106,15 +106,22 @@ class _VideoPlaylistController(object):
             self._destroy()
             return
         if item.lower().startswith('http'):
-            stream = blue.BlueNetworkStream(item)
+            self._start_video(blue.BlueNetworkStream(item), item)
         else:
-            if blue.remoteFileCache.FileExists(item) and not blue.paths.FileExistsLocally(item):
-                blue.paths.GetFileContentsWithYield(item)
-            if self.destroyed:
-                return
-            stream = blue.paths.open(item, 'rb')
+            uthread2.start_tasklet(self._read_and_start_video, item)
 
-        self.video = videoplayer.VideoPlayer(stream, None)
+    def _read_and_start_video(self, item):
+        # reads the file on a background thread while this tasklet yields
+        stream = blue.paths.GetFileContentsWithYield(item)
+        if self.destroyed:
+            return
+        self._start_video(stream, item)
+
+    def _create_player(self, stream):
+        return videoplayer.VideoPlayer(stream, None)
+
+    def _start_video(self, stream, item):
+        self.video = self._create_player(stream)
         self.video.bgra_texture = self.weak_texture.object
         self.video.on_state_change = self._on_state_change
         self.video.on_create_textures = self._on_video_info_ready
@@ -161,35 +168,9 @@ class _VideoPlaylistController(object):
 
 
 class _VideoPlaylistControllerWithSound(_VideoPlaylistController):
-    def play_next(self):
-        if self.destroyed:
-            return
-        try:
-            item = next(self.playlist)
-        except StopIteration:
-            self.current_path = None
-            for each in _play_list_finished_handlers:
-                each(self.constructor_params, self.weak_texture.object)
-            self._destroy()
-            return
-        if item.lower().startswith('http'):
-            stream = blue.BlueNetworkStream(item)
-        else:
-            if blue.remoteFileCache.FileExists(item) and not blue.paths.FileExistsLocally(item):
-                blue.paths.GetFileContentsWithYield(item)
-            if self.destroyed:
-                return
-            stream = blue.paths.open(item, 'rb')
-
-        inputMgr = audio2.AudioInputMgr()
-        sink = videoplayer.WwiseAudioSink(inputMgr)
-        self.video = videoplayer.VideoPlayer(stream, sink, 0, True)
-
-        self.video.bgra_texture = self.weak_texture.object
-        self.video.on_state_change = self._on_state_change
-        self.video.on_create_textures = self._on_video_info_ready
-        self.video.on_error = self._on_error
-        self.current_path = item
+    def _create_player(self, stream):
+        sink = videoplayer.WwiseAudioSink(audio2.AudioInputMgr())
+        return videoplayer.VideoPlayer(stream, sink, 0, True)
 
 
 _hexdig = '0123456789ABCDEFabcdef'
